@@ -1,0 +1,52 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-account-table
+      author: areeba
+
+      changes:
+        - createTable:
+            tableName: account
+            columns:
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_account
+                    nullable: false
+
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_account_email
+
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: address
+                  type: VARCHAR(500)
+
+              - column:
+                  name: role
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
