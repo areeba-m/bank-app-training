@@ -1,4 +1,4 @@
-import {BrowserRouter, Routes, Route} from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import {Navbar} from './components/Navbar';
 import {LandingPage} from './pages/LandingPage';
 import {LoginPage} from './pages/LoginPage';
@@ -7,6 +7,9 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import AuthenticatedLayout from './layout/AuthenticatedSidbarLayout.jsx';
 import { ProfilePage } from './pages/user/ProfilePage';
 import { TransactionsPage } from './pages/user/TransactionsPage';
+import { AdminDashboard } from './pages/admin/AdminDashboard';
+import { AccountDetailView } from './pages/admin/AccountDetailView';
+
 
 export function AppRoutes() {
     return (
@@ -41,6 +44,26 @@ export function AppRoutes() {
                         <ProtectedRoute>
                             <AuthenticatedLayout>
                                 <TransactionsPage />
+                            </AuthenticatedLayout>
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/dashboard"
+                    element={
+                        <ProtectedRoute requiredRole="ADMIN">
+                            <AuthenticatedLayout>
+                                <AdminDashboard />
+                            </AuthenticatedLayout>
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/account/:id"
+                    element={
+                        <ProtectedRoute requiredRole="ADMIN">
+                            <AuthenticatedLayout>
+                                <AccountDetailView />
                             </AuthenticatedLayout>
                         </ProtectedRoute>
                     }

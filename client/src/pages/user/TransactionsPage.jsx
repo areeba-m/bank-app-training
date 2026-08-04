@@ -16,6 +16,7 @@ export const TransactionsPage = () => {
 
     const loadTransactions = useCallback(async () => {
         if (!user) return;
+
         try {
             await dispatch(fetchTransactions(user.id)).unwrap();
         } catch (err) {
@@ -23,17 +24,10 @@ export const TransactionsPage = () => {
         }
     }, [user, dispatch]);
 
-    useEffect(() => {
-        const fetchTransactions = async () => {
-            try {
-                await loadTransactions();
-            } catch (error) {
-                console.error("Failed to load transactions:", error);
-            }
-        };
 
-        void fetchTransactions();
-    }, []);
+    useEffect(() => {
+        void loadTransactions();
+    }, [loadTransactions]);
     const handleExecute = async (accId, txnData) => {
         await dispatch(executeTransaction({ accountId: accId, transactionData: txnData })).unwrap();
     };

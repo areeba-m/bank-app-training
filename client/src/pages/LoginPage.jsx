@@ -15,14 +15,27 @@ export const LoginPage = () => {
     const [localError, setLocalError] = useState('');
 
     useEffect(() => {
-        if (location.state?.prefill === 'admin') {
-            setEmail('admin@aurabank.com');
-            setPassword('admin123');
-        } else if (location.state?.prefill === 'user1') {
-            setEmail('eleanor.vance@example.com');
-            setPassword('user123');
-        }
-    }, [location.state]);
+        const prefill = location.state?.prefill;
+
+        if (!prefill) return;
+
+        const timer = setTimeout(() => {
+
+            if (prefill === 'admin') {
+                setEmail('admin@aurabank.com');
+                setPassword('admin123');
+            }
+
+            if (prefill === 'user1') {
+                setEmail('eleanor.vance@example.com');
+                setPassword('user123');
+            }
+
+        }, 0);
+
+        return () => clearTimeout(timer);
+
+    }, [location.state?.prefill]);
 
     useEffect(() => {
         if (isAuthenticated && user) {

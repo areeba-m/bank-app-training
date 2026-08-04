@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import PropTypes from "prop-types";
 
 export const ProtectedRoute = ({ children, requiredRole }) => {
     const { user, isAuthenticated } = useSelector((state) => state.auth);
@@ -15,4 +16,8 @@ export const ProtectedRoute = ({ children, requiredRole }) => {
     }
 
     return children;
+};
+ProtectedRoute.propTypes = {
+    children: PropTypes.node.isRequired,
+    requiredRole: PropTypes.string
 };

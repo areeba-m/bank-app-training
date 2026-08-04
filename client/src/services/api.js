@@ -50,7 +50,7 @@ export const bankApi = {
             const res = await fetch(`${API_CONFIG.BASE_URL}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, password })
+                body: JSON.stringify({ email, password })
             });
             if (!res.ok) throw new Error('Authentication failed');
             return await res.json();

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, ArrowDownRight, ArrowUpRight, DollarSign, FileText, CheckCircle } from 'lucide-react';
+import PropTypes from "prop-types";
 
 export const TransactionModal = ({ isOpen, onClose, onExecuteTransaction, accountId, currentBalance }) => {
     const [type, setType] = useState('DEPOSIT'); // DEPOSIT (CR) or WITHDRAW (DB)
@@ -149,4 +150,11 @@ export const TransactionModal = ({ isOpen, onClose, onExecuteTransaction, accoun
             </div>
         </div>
     );
+};
+TransactionModal.propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
+    onExecuteTransaction: PropTypes.func.isRequired,
+    accountId: PropTypes.string,
+    currentBalance: PropTypes.number,
 };

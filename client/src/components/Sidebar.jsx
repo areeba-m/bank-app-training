@@ -1,7 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { LayoutDashboard, Receipt, User, Database, RefreshCw } from 'lucide-react';
-import { bankApi } from '../services/api';
 
 export const Sidebar = () => {
     const { user } = useSelector((state) => state.auth);
