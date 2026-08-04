@@ -5,6 +5,8 @@ import {LoginPage} from './pages/LoginPage';
 import { UserDashboard } from './pages/user/UserDashboard';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import AuthenticatedLayout from './layout/AuthenticatedSidbarLayout.jsx';
+import { ProfilePage } from './pages/user/ProfilePage';
+import { TransactionsPage } from './pages/user/TransactionsPage';
 
 export function AppRoutes() {
     return (
@@ -19,6 +21,26 @@ export function AppRoutes() {
                         <ProtectedRoute>
                             <AuthenticatedLayout>
                                 <UserDashboard />
+                            </AuthenticatedLayout>
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/user/profile"
+                    element={
+                        <ProtectedRoute>
+                            <AuthenticatedLayout>
+                                <ProfilePage />
+                            </AuthenticatedLayout>
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="user/transactions"
+                    element={
+                        <ProtectedRoute>
+                            <AuthenticatedLayout>
+                                <TransactionsPage />
                             </AuthenticatedLayout>
                         </ProtectedRoute>
                     }
