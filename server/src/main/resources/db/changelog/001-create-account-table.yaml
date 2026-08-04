@@ -10,9 +10,16 @@ databaseChangeLog:
               - column:
                   name: user_id
                   type: BIGINT
+                  autoIncrement: true
                   constraints:
                     primaryKey: true
                     primaryKeyName: pk_account
+                    nullable: false
+
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+                  constraints:
                     nullable: false
 
               - column:
@@ -32,6 +39,8 @@ databaseChangeLog:
               - column:
                   name: address
                   type: VARCHAR(500)
+                  constraints:
+                    nullable: false
 
               - column:
                   name: role
