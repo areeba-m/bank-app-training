@@ -6,9 +6,9 @@ const initialUser = savedUser ? JSON.parse(savedUser) : null;
 
 export const loginUser = createAsyncThunk(
     'auth/loginUser',
-    async ({ id, password }, { rejectWithValue }) => {
+    async ({ email, password }, { rejectWithValue }) => {
         try {
-            const user = await bankApi.login(id, password);
+            const user = await bankApi.login(email, password);
             localStorage.setItem('bank_current_user', JSON.stringify(user));
             return user;
         } catch (err) {

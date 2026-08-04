@@ -2,6 +2,9 @@ import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import {Navbar} from './components/Navbar';
 import {LandingPage} from './pages/LandingPage';
 import {LoginPage} from './pages/LoginPage';
+import { UserDashboard } from './pages/user/UserDashboard';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import AuthenticatedLayout from './layout/AuthenticatedSidbarLayout.jsx';
 
 export function AppRoutes() {
     return (
@@ -10,6 +13,16 @@ export function AppRoutes() {
             <Routes>
                 <Route path="/" element={<LandingPage/>}/>
                 <Route path="/login" element={<LoginPage/>}/>
+                <Route
+                    path="/user/dashboard"
+                    element={
+                        <ProtectedRoute>
+                            <AuthenticatedLayout>
+                                <UserDashboard />
+                            </AuthenticatedLayout>
+                        </ProtectedRoute>
+                    }
+                />
             </Routes>
         </div>
     );

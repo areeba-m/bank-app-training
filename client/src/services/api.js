@@ -38,12 +38,12 @@ const getStoredTransactions = () => {
 const setStoredTransactions = (txns) => localStorage.setItem('bank_transactions', JSON.stringify(txns));
 
 export const bankApi = {
-    login: async (id, password) => {
+    login: async (email, password) => {
         if (API_CONFIG.USE_MOCK_API) {
             const accounts = getStoredAccounts();
-            const user = accounts.find(a => a.id.toLowerCase() === id.toLowerCase() && a.password === password);
+            const user = accounts.find(a => a.email === email && a.password === password);
             if (!user) {
-                throw new Error('Invalid account ID or password.');
+                throw new Error('Invalid account email or password.');
             }
             return user;
         } else {
