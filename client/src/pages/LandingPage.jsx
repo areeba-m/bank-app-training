@@ -21,7 +21,7 @@ export const LandingPage = () => {
                             </h1>
 
                             <p className="text-base text-slate-600 max-w-xl leading-relaxed">
-                                Streamlined account management, real-time balance statements with DB/CR indicators, and integrated Spring REST API architecture.
+                                Manage accounts, track transactions, and monitor balances with a secure and intuitive banking platform.
                             </p>
                             <div className="pt-2 flex flex-wrap items-center gap-3">
                                 <Link
@@ -31,14 +31,6 @@ export const LandingPage = () => {
                                     Access Banking Portal
                                     <ArrowRight className="w-4 h-4" />
                                 </Link>
-
-                                <a
-                                    // href="#credentials"
-                                    className="px-5 py-3 bg-white text-burgundy-900 font-bold rounded-xl border border-burgundy-200 hover:bg-burgundy-50 shadow-xs transition-all duration-150 flex items-center gap-2 text-xs"
-                                >
-                                    Demo Credentials
-                                    <ChevronRight className="w-4 h-4 text-burgundy-600" />
-                                </a>
                             </div>
 
                         </div>
@@ -73,75 +65,62 @@ export const LandingPage = () => {
                     </div>
                 </div>
             </section>
-            <section id="credentials" className="py-12 bg-white border-t border-burgundy-100/80">
+            <section className="py-12 bg-white border-t border-burgundy-100/80">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
                     <div className="text-center max-w-xl mx-auto mb-8">
                         <h2 className="text-xl font-extrabold text-burgundy-900 tracking-tight">
-                            Role Credentials
+                            Banking Made Simple & Secure
                         </h2>
                         <p className="text-xs text-slate-500 mt-1">
-                            Select a role to test authentication and protected navigation routes.
+                            Powerful features designed to provide a seamless digital banking experience.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-3xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+
                         <div className="p-5 bg-sand-50/70 rounded-2xl border border-burgundy-200/80 shadow-xs space-y-3">
-                            <div className="flex items-center gap-2.5">
-                                <div className="p-2 bg-burgundy-700 text-white rounded-lg shadow-burgundy-glow">
-                                    <Lock className="w-4 h-4" />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-slate-900 text-sm">ADMIN Flow</h3>
-                                    <p className="text-[11px] text-burgundy-700">Account Management</p>
-                                </div>
+                            <div className="p-2 bg-burgundy-700 text-white rounded-lg w-fit">
+                                <ShieldCheck className="w-5 h-5" />
                             </div>
-                            <div className="bg-white p-3 rounded-xl border border-burgundy-100 font-mono text-xs space-y-1">
-                                <div className="flex justify-between">
-                                    <span className="text-slate-400">ID:</span>
-                                    <span className="font-bold text-burgundy-900">admin</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-slate-400">Password:</span>
-                                    <span className="font-bold text-burgundy-900">admin123</span>
-                                </div>
-                            </div>
-                            <Link
-                                to="/login"
-                                state={{ prefill: 'admin' }}
-                                className="w-full py-2 bg-burgundy-700 hover:bg-burgundy-800 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1 transition-colors"
-                            >
-                                Log In as Admin
-                                <ArrowRight className="w-3.5 h-3.5" />
-                            </Link>
+
+                            <h3 className="font-bold text-slate-900 text-sm">
+                                Secure Banking
+                            </h3>
+
+                            <p className="text-xs text-slate-500 leading-relaxed">
+                                Protected authentication and role-based access control ensure your financial data stays secure.
+                            </p>
                         </div>
-                        <div className="p-5 bg-sand-50/70 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-                            <div className="flex items-center gap-2.5">
-                                <div className="p-2 bg-slate-800 text-white rounded-lg">
-                                    <Users className="w-4 h-4" />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-slate-900 text-sm">USER Flow</h3>
-                                    <p className="text-[11px] text-slate-500">Account Holder</p>
-                                </div>
+
+
+                        <div className="p-5 bg-sand-50/70 rounded-2xl border border-burgundy-200/80 shadow-xs space-y-3">
+                            <div className="p-2 bg-burgundy-700 text-white rounded-lg w-fit">
+                                <CreditCard className="w-5 h-5" />
                             </div>
-                            <div className="bg-white p-3 rounded-xl border border-slate-200 font-mono text-xs space-y-1">
-                                <div className="flex justify-between">
-                                    <span className="text-slate-400">ID:</span>
-                                    <span className="font-bold text-slate-900">user1</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-slate-400">Password:</span>
-                                    <span className="font-bold text-slate-900">user123</span>
-                                </div>
+
+                            <h3 className="font-bold text-slate-900 text-sm">
+                                Smart Transactions
+                            </h3>
+
+                            <p className="text-xs text-slate-500 leading-relaxed">
+                                Create, track, and manage transactions with real-time balance updates and DB/CR indicators.
+                            </p>
+                        </div>
+
+
+                        <div className="p-5 bg-sand-50/70 rounded-2xl border border-burgundy-200/80 shadow-xs space-y-3">
+                            <div className="p-2 bg-burgundy-700 text-white rounded-lg w-fit">
+                                <Sparkles className="w-5 h-5" />
                             </div>
-                            <Link
-                                to="/login"
-                                state={{ prefill: 'user1' }}
-                                className="w-full py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1 transition-colors"
-                            >
-                                Log In as User
-                                <ArrowRight className="w-3.5 h-3.5" />
-                            </Link>
+
+                            <h3 className="font-bold text-slate-900 text-sm">
+                                Modern Experience
+                            </h3>
+
+                            <p className="text-xs text-slate-500 leading-relaxed">
+                                Enjoy a responsive banking interface built with modern technologies and intuitive workflows.
+                            </p>
                         </div>
 
                     </div>

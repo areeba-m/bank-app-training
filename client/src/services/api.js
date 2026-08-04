@@ -78,6 +78,25 @@ export const bankApi = {
             return await res.json();
         }
     },
+    getAccountByEmail: async (email) => {
+
+        const accounts = JSON.parse(
+            localStorage.getItem('bank_accounts')
+        );
+
+        const account = accounts.find(
+            acc => acc.email === email
+        );
+
+
+        if (!account) {
+            throw new Error('Account not found');
+        }
+
+
+        return account;
+
+    },
 
     createAccount: async (accountData) => {
         if (API_CONFIG.USE_MOCK_API) {
