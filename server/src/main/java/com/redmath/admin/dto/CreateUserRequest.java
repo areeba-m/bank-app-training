@@ -4,7 +4,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.Setter;
 
+@Setter
 public class CreateUserRequest {
 
     @Getter
@@ -17,10 +19,12 @@ public class CreateUserRequest {
     @Size(max = 150)
     private String email;
 
+    @Getter
     @NotBlank(message = "Password is required")
     @Size(min = 6, max = 100)
     private String password;
 
+    @Getter
     @NotBlank(message = "Address is required")
     @Size(max = 250)
     private String address;
@@ -28,31 +32,8 @@ public class CreateUserRequest {
     public CreateUserRequest() {
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getEmail() {
         return email.toLowerCase();
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
 }

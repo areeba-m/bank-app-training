@@ -12,6 +12,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 
@@ -58,20 +61,29 @@ class AdminControllerTest {
     @Test
     void getAllAccountsShouldReturnList() {
 
+        // Given
         List<UserResponse> users = List.of(
                 new UserResponse(1L, "Alice", "alice@example.com", "Lahore", Role.USER),
                 new UserResponse(2L, "Bob", "bob@example.com", "Karachi", Role.ADMIN)
         );
 
-        when(adminService.getAllUsers()).thenReturn(users);
+        Page<UserResponse> userPage =
+                new PageImpl<>(users, PageRequest.of(0, 10), users.size());
 
-        ResponseEntity<List<UserResponse>> response =
-                adminController.getAllAccounts();
+        when(adminService.getAllUsers(0, 10)).thenReturn(userPage);
 
+        // When
+        ResponseEntity<Page<UserResponse>> response =
+                adminController.getAllAccounts(0, 10);
+
+        // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(2, response.getBody().size());
+        assertNotNull(response.getBody());
+        assertEquals(2, response.getBody().getContent().size());
+        assertEquals(2, response.getBody().getTotalElements());
+        assertEquals(1, response.getBody().getTotalPages());
 
-        verify(adminService).getAllUsers();
+        verify(adminService).getAllUsers(0, 10);
     }
 
     @Test

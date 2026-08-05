@@ -17,7 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class AdminService {
@@ -54,12 +56,12 @@ public class AdminService {
         return userMapper.toResponse(savedUser);
     }
 
-    public List<UserResponse> getAllUsers() {
+    public Page<UserResponse> getAllUsers(int page, int size) {
 
-        return userRepository.findAll()
-                .stream()
-                .map(userMapper::toResponse)
-                .toList();
+        Pageable pageable = PageRequest.of(page, size);
+
+        return userRepository.findAll(pageable)
+                .map(userMapper::toResponse);
     }
 
     public UserResponse getUserById(Long id) {

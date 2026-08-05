@@ -5,6 +5,7 @@ import com.redmath.admin.dto.UpdateUserRequest;
 import com.redmath.admin.dto.UserResponse;
 import com.redmath.admin.service.AdminService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,8 +31,11 @@ public class AdminController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponse>> getAllAccounts() {
-        return ResponseEntity.ok(adminService.getAllUsers());
+    public ResponseEntity<Page<UserResponse>> getAllAccounts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return ResponseEntity.ok(adminService.getAllUsers(page, size));
     }
 
     @GetMapping("/{id}")

@@ -1,7 +1,9 @@
 package com.redmath.admin.dto;
 
 import com.redmath.account.Role;
+import lombok.Getter;
 
+@Getter
 public class UserResponse {
 
     private Long id;
@@ -24,26 +26,6 @@ public class UserResponse {
         this.email = email;
         this.address = address;
         this.role = role;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public Role getRole() {
-        return role;
     }
 
 }
