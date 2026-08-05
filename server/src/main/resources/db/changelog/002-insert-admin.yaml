@@ -17,7 +17,7 @@ databaseChangeLog:
 
               - column:
                   name: password
-                  value: admin
+                  value: "{bcrypt}$2a$10$QXStmcrxF70VGcS5WZh7POk3bWIJM2zl1XGflYXNMJhk.Ez4jAWri" # admin
 
               - column:
                   name: address

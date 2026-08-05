@@ -7,8 +7,7 @@ import lombok.Setter;
 import java.time.Instant;
 
 @Entity
-@Getter
-@Setter
+@Getter @Setter
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
