@@ -26,6 +26,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 class AdminServiceTest {
@@ -106,7 +110,8 @@ class AdminServiceTest {
     // --- getAllUsers ---
 
     @Test
-    void getAllUsersShouldReturnAllUsersAsResponseList() {
+    void getAllUsersShouldReturnAllUsersAsResponsePage() {
+
         // Given
         Account user1 = new Account();
         user1.setUserId(1L);
@@ -116,31 +121,49 @@ class AdminServiceTest {
         user2.setUserId(2L);
         user2.setEmail("bob@example.com");
 
-        when(userRepository.findAll()).thenReturn(List.of(user1, user2));
+        Page<Account> accountPage = new PageImpl<>(
+                List.of(user1, user2),
+                PageRequest.of(0, 10),
+                2
+        );
+
+        when(userRepository.findAll(any(Pageable.class))).thenReturn(accountPage);
+
         when(userMapper.toResponse(user1)).thenReturn(
                 new UserResponse(1L, "Alice", "alice@example.com", "Addr1", Role.USER));
+
         when(userMapper.toResponse(user2)).thenReturn(
                 new UserResponse(2L, "Bob", "bob@example.com", "Addr2", Role.USER));
 
         // When
-        List<UserResponse> result = adminService.getAllUsers();
+        Page<UserResponse> result = adminService.getAllUsers(0, 10);
 
         // Then
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).getName()).isEqualTo("Alice");
-        assertThat(result.get(1).getName()).isEqualTo("Bob");
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent().get(0).getName()).isEqualTo("Alice");
+        assertThat(result.getContent().get(1).getName()).isEqualTo("Bob");
+        assertThat(result.getTotalElements()).isEqualTo(2);
+
+        verify(userRepository).findAll(any(Pageable.class));
     }
 
+
     @Test
-    void getAllUsersShouldReturnEmptyListWhenNoUsers() {
+    void getAllUsersShouldReturnEmptyPageWhenNoUsers() {
+
         // Given
-        when(userRepository.findAll()).thenReturn(List.of());
+        Page<Account> emptyPage = new PageImpl<>(List.of(), PageRequest.of(0, 10), 0);
+
+        when(userRepository.findAll(PageRequest.of(0, 10))).thenReturn(emptyPage);
 
         // When
-        List<UserResponse> result = adminService.getAllUsers();
+        Page<UserResponse> result = adminService.getAllUsers(0, 10);
 
         // Then
         assertThat(result).isEmpty();
+        assertThat(result.getTotalElements()).isZero();
+
+        verify(userRepository).findAll(PageRequest.of(0, 10));
     }
 
     // --- getUserById ---
