@@ -9,8 +9,14 @@ import com.redmath.admin.dto.CreateUserRequest;
 import com.redmath.admin.dto.UpdateUserRequest;
 import com.redmath.admin.dto.UserResponse;
 import com.redmath.admin.mapper.UserMapper;
+import com.redmath.user.entity.Indicator;
+import com.redmath.user.entity.balanceEntity;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -25,13 +31,23 @@ public class AdminService {
         this.userMapper = userMapper;
     }
 
-    public UserResponse createUser(CreateUserRequest request) {
+    @Transactional
+    public UserResponse createUser(@NonNull CreateUserRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new UserAlreadyExistsException("User with email '" + request.getEmail() + "' already exists.");
+            throw new UserAlreadyExistsException(
+                    "User with email '" + request.getEmail() + "' already exists.");
         }
 
         Account user = userMapper.toEntity(request);
+
+        balanceEntity balance = new balanceEntity();
+        balance.setAmount(BigDecimal.ZERO);
+        balance.setDate(Instant.now());
+        balance.setIndicator(Indicator.CR);
+
+        balance.setAccount(user);
+        user.setBalance(balance);
 
         Account savedUser = userRepository.save(user);
 
@@ -55,7 +71,7 @@ public class AdminService {
         return userMapper.toResponse(user);
     }
 
-    public UserResponse updateUser(Long id, UpdateUserRequest request) {
+    public UserResponse updateUser(Long id, @NonNull UpdateUserRequest request) {
 
         Account user = userRepository.findById(id)
                 .orElseThrow(() ->
