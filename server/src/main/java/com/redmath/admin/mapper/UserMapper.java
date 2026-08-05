@@ -1,16 +1,20 @@
 package com.redmath.admin.mapper;
 
-
 import com.redmath.account.Account;
 import com.redmath.account.Role;
 import com.redmath.admin.dto.CreateUserRequest;
 import com.redmath.admin.dto.UserResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 
 @Component
+@RequiredArgsConstructor
 public class UserMapper {
+
+    private final PasswordEncoder passwordEncoder;
 
     public Account toEntity(CreateUserRequest request) {
 
@@ -18,7 +22,7 @@ public class UserMapper {
 
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setAddress(request.getAddress());
         user.setRole(Role.USER);
         user.setCreatedAt(Instant.now());
