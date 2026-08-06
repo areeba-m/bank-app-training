@@ -1,15 +1,15 @@
 package com.redmath.admin;
 
-import com.redmath.account.Account;
-import com.redmath.account.AccountRepository;
-import com.redmath.account.Role;
-import com.redmath.account.exception.UserAlreadyExistsException;
+import com.redmath.account.dto.AccountResponse;
+import com.redmath.account.entity.Account;
+import com.redmath.account.entity.Role;
 import com.redmath.account.exception.UserNotFoundException;
+import com.redmath.account.mapper.AccountMapper;
+import com.redmath.account.repository.AccountRepository;
 import com.redmath.admin.dto.CreateUserRequest;
 import com.redmath.admin.dto.UpdateUserRequest;
-import com.redmath.admin.dto.UserResponse;
-import com.redmath.admin.mapper.UserMapper;
 import com.redmath.admin.service.AdminService;
+import com.redmath.authentication.exception.EmailAlreadyExistsException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +36,7 @@ class AdminServiceTest {
     private AccountRepository userRepository;
 
     @Mock
-    private UserMapper userMapper;
+    private AccountMapper accountMapper;
 
     @InjectMocks
     private AdminService adminService;
@@ -44,7 +44,7 @@ class AdminServiceTest {
     private CreateUserRequest validCreateRequest;
     private UpdateUserRequest validUpdateRequest;
     private Account existingUser;
-    private UserResponse userResponse;
+    private AccountResponse accountResponse;
 
     @BeforeEach
     void setUp() {
@@ -68,7 +68,7 @@ class AdminServiceTest {
         existingUser.setAddress("123 Maple Street");
         existingUser.setRole(Role.USER);
 
-        userResponse = new UserResponse(
+        accountResponse = new AccountResponse(
                 1L,
                 "Alice Johnson",
                 "alice@example.com",
@@ -83,12 +83,12 @@ class AdminServiceTest {
     void createUserShouldCreateUserWhenEmailDoesNotExist() {
         // Given
         when(userRepository.existsByEmail("alice@example.com")).thenReturn(false);
-        when(userMapper.toEntity(validCreateRequest)).thenReturn(existingUser);
+        when(accountMapper.toEntity(validCreateRequest)).thenReturn(existingUser);
         when(userRepository.save(existingUser)).thenReturn(existingUser);
-        when(userMapper.toResponse(existingUser)).thenReturn(userResponse);
+        when(accountMapper.toResponse(existingUser)).thenReturn(accountResponse);
 
         // When
-        UserResponse result = adminService.createUser(validCreateRequest);
+        AccountResponse result = adminService.createUser(validCreateRequest);
 
         // Then
         assertThat(result).isNotNull();
@@ -106,8 +106,8 @@ class AdminServiceTest {
 
         // When / Then
         assertThatThrownBy(() -> adminService.createUser(validCreateRequest))
-                .isInstanceOf(UserAlreadyExistsException.class)
-                .hasMessage("User with email 'alice@example.com' already exists.");
+                .isInstanceOf(EmailAlreadyExistsException.class)
+                .hasMessage("Unable to register with the provided details");
 
         verify(userRepository, never()).save(any());
     }
@@ -134,14 +134,14 @@ class AdminServiceTest {
 
         when(userRepository.findAll(any(Pageable.class))).thenReturn(accountPage);
 
-        when(userMapper.toResponse(user1)).thenReturn(
-                new UserResponse(1L, "Alice", "alice@example.com", "Addr1", Role.USER));
+        when(accountMapper.toResponse(user1)).thenReturn(
+                new AccountResponse(1L, "Alice", "alice@example.com", "Addr1", Role.USER));
 
-        when(userMapper.toResponse(user2)).thenReturn(
-                new UserResponse(2L, "Bob", "bob@example.com", "Addr2", Role.USER));
+        when(accountMapper.toResponse(user2)).thenReturn(
+                new AccountResponse(2L, "Bob", "bob@example.com", "Addr2", Role.USER));
 
         // When
-        Page<UserResponse> result = adminService.getAllUsers(0, 10);
+        Page<AccountResponse> result = adminService.getAllUsers(0, 10);
 
         // Then
         assertThat(result.getContent()).hasSize(2);
@@ -161,7 +161,7 @@ class AdminServiceTest {
         when(userRepository.findAll(PageRequest.of(0, 10))).thenReturn(emptyPage);
 
         // When
-        Page<UserResponse> result = adminService.getAllUsers(0, 10);
+        Page<AccountResponse> result = adminService.getAllUsers(0, 10);
 
         // Then
         assertThat(result).isEmpty();
@@ -176,10 +176,10 @@ class AdminServiceTest {
     void getUserByIdShouldReturnUserResponseWhenFound() {
         // Given
         when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
-        when(userMapper.toResponse(existingUser)).thenReturn(userResponse);
+        when(accountMapper.toResponse(existingUser)).thenReturn(accountResponse);
 
         // When
-        UserResponse result = adminService.getUserById(1L);
+        AccountResponse result = adminService.getUserById(1L);
 
         // Then
         assertThat(result).isNotNull();
@@ -197,7 +197,7 @@ class AdminServiceTest {
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessage("User with id 99 not found.");
 
-        verify(userMapper, never()).toResponse(any());
+        verify(accountMapper, never()).toResponse(any());
     }
 
     // --- updateUser ---
@@ -207,10 +207,10 @@ class AdminServiceTest {
         // Given
         when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
         when(userRepository.save(existingUser)).thenReturn(existingUser);
-        when(userMapper.toResponse(existingUser)).thenReturn(userResponse);
+        when(accountMapper.toResponse(existingUser)).thenReturn(accountResponse);
 
         // When
-        UserResponse result = adminService.updateUser(1L, validUpdateRequest);
+        AccountResponse result = adminService.updateUser(1L, validUpdateRequest);
 
         // Then
         assertThat(result).isNotNull();
@@ -230,10 +230,10 @@ class AdminServiceTest {
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
         when(userRepository.save(existingUser)).thenReturn(existingUser);
-        when(userMapper.toResponse(existingUser)).thenReturn(userResponse);
+        when(accountMapper.toResponse(existingUser)).thenReturn(accountResponse);
 
         // When
-        UserResponse result = adminService.updateUser(1L, request);
+        AccountResponse result = adminService.updateUser(1L, request);
 
         // Then
         assertThat(result).isNotNull();

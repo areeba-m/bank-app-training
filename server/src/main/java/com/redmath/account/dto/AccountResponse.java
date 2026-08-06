@@ -1,8 +1,8 @@
-package com.redmath.admin.dto;
+package com.redmath.account.dto;
 
-import com.redmath.account.Role;
+import com.redmath.account.entity.Role;
 
-public record UserResponse(
+public record AccountResponse(
         Long id,
         String name,
         String email,

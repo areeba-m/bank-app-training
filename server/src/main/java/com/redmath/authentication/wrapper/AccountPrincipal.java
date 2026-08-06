@@ -1,6 +1,6 @@
 package com.redmath.authentication.wrapper;
 
-import com.redmath.account.Account;
+import com.redmath.account.entity.Account;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -1,12 +1,12 @@
 package com.redmath.transactions.service;
 
-import com.redmath.account.Account;
-import com.redmath.account.AccountRepository;
-import com.redmath.balance.Balance;
+import com.redmath.account.entity.Account;
+import com.redmath.account.repository.AccountRepository;
+import com.redmath.balance.entity.Balance;
 import com.redmath.balance.exception.BalanceNotFoundException;
 import com.redmath.balance.repository.BalanceRepository;
-import com.redmath.transactions.Indicator;
-import com.redmath.transactions.Transaction;
+import com.redmath.transactions.entity.Indicator;
+import com.redmath.transactions.entity.Transaction;
 import com.redmath.transactions.dto.CreateTransactionRequest;
 import com.redmath.transactions.dto.TransactionResponse;
 import com.redmath.transactions.exception.AccountNotFoundException;

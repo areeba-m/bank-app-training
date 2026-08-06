@@ -1,6 +1,6 @@
-package com.redmath.account;
+package com.redmath.account.entity;
 
-import com.redmath.balance.Balance;
+import com.redmath.balance.entity.Balance;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

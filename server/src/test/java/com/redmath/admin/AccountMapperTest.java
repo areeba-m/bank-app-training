@@ -1,10 +1,10 @@
 package com.redmath.admin;
 
-import com.redmath.account.Account;
-import com.redmath.account.Role;
+import com.redmath.account.entity.Account;
+import com.redmath.account.entity.Role;
 import com.redmath.admin.dto.CreateUserRequest;
-import com.redmath.admin.dto.UserResponse;
-import com.redmath.admin.mapper.UserMapper;
+import com.redmath.account.dto.AccountResponse;
+import com.redmath.account.mapper.AccountMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,13 +13,13 @@ import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class UserMapperTest {
+class AccountMapperTest {
 
-    private UserMapper userMapper;
+    private AccountMapper accountMapper;
 
     @BeforeEach
     void setUp() {
-        userMapper = new UserMapper(new BCryptPasswordEncoder());
+        accountMapper = new AccountMapper(new BCryptPasswordEncoder());
     }
 
     private CreateUserRequest validRequest() {
@@ -37,7 +37,7 @@ class UserMapperTest {
         CreateUserRequest request = validRequest();
 
         // When
-        Account account = userMapper.toEntity(request);
+        Account account = accountMapper.toEntity(request);
 
         // Then
         assertThat(account.getName()).isEqualTo("Alice Johnson");
@@ -56,7 +56,7 @@ class UserMapperTest {
     void toEntityShouldSetRoleToUser() {
         CreateUserRequest request = validRequest();
 
-        Account account = userMapper.toEntity(request);
+        Account account = accountMapper.toEntity(request);
 
         assertThat(account.getRole()).isEqualTo(Role.USER);
     }
@@ -66,7 +66,7 @@ class UserMapperTest {
         CreateUserRequest request = validRequest();
         Instant before = Instant.now();
 
-        Account account = userMapper.toEntity(request);
+        Account account = accountMapper.toEntity(request);
 
         assertThat(account.getCreatedAt()).isNotNull();
         assertThat(account.getCreatedAt()).isBetween(before, Instant.now());
@@ -77,7 +77,7 @@ class UserMapperTest {
         CreateUserRequest request = validRequest();
         Instant before = Instant.now();
 
-        Account account = userMapper.toEntity(request);
+        Account account = accountMapper.toEntity(request);
 
         assertThat(account.getUpdatedAt()).isNotNull();
         assertThat(account.getUpdatedAt()).isBetween(before, Instant.now());
@@ -87,7 +87,7 @@ class UserMapperTest {
     void toEntityShouldReturnNewAccountInstance() {
         CreateUserRequest request = validRequest();
 
-        Account account = userMapper.toEntity(request);
+        Account account = accountMapper.toEntity(request);
 
         assertThat(account).isNotNull();
         assertThat(account.getUserId()).isNull();
@@ -104,7 +104,7 @@ class UserMapperTest {
         account.setRole(Role.USER);
 
         // When
-        UserResponse response = userMapper.toResponse(account);
+        AccountResponse response = accountMapper.toResponse(account);
 
         // Then
         assertThat(response.id()).isEqualTo(1L);

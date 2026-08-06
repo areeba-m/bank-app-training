@@ -1,4 +1,4 @@
-package com.redmath.account;
+package com.redmath.account.entity;
 
 public enum Role {
     ADMIN,

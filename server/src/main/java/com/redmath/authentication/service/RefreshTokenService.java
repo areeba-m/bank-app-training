@@ -1,6 +1,6 @@
 package com.redmath.authentication.service;
 
-import com.redmath.account.Account;
+import com.redmath.account.entity.Account;
 import com.redmath.authentication.entity.RefreshToken;
 import com.redmath.authentication.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;

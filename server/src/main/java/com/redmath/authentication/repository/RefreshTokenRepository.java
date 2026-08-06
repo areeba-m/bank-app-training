@@ -1,6 +1,6 @@
 package com.redmath.authentication.repository;
 
-import com.redmath.account.Account;
+import com.redmath.account.entity.Account;
 import com.redmath.authentication.entity.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

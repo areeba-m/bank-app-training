@@ -1,8 +1,8 @@
 package com.redmath.balance.service;
 
-import com.redmath.account.Account;
-import com.redmath.account.AccountRepository;
-import com.redmath.balance.Balance;
+import com.redmath.account.entity.Account;
+import com.redmath.account.repository.AccountRepository;
+import com.redmath.balance.entity.Balance;
 import com.redmath.balance.dto.BalanceResponse;
 import com.redmath.balance.exception.BalanceNotFoundException;
 import lombok.RequiredArgsConstructor;

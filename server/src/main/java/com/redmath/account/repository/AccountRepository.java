@@ -1,5 +1,6 @@
-package com.redmath.account;
+package com.redmath.account.repository;
 
+import com.redmath.account.entity.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

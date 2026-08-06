@@ -1,13 +1,13 @@
 package com.redmath.user;
 
 
-import com.redmath.account.Account;
-import com.redmath.account.AccountRepository;
-import com.redmath.account.Role;
-import com.redmath.balance.Balance;
+import com.redmath.account.entity.Account;
+import com.redmath.account.repository.AccountRepository;
+import com.redmath.account.entity.Role;
+import com.redmath.balance.entity.Balance;
 import com.redmath.balance.exception.BalanceNotFoundException;
 import com.redmath.balance.repository.BalanceRepository;
-import com.redmath.transactions.Indicator;
+import com.redmath.transactions.entity.Indicator;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

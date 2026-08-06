@@ -1,6 +1,6 @@
 package com.redmath.transactions.mapper;
 
-import com.redmath.transactions.Transaction;
+import com.redmath.transactions.entity.Transaction;
 import com.redmath.transactions.dto.CreateTransactionRequest;
 import com.redmath.transactions.dto.TransactionResponse;
 import org.jspecify.annotations.NonNull;

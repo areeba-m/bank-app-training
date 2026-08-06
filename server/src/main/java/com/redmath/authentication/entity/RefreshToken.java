@@ -1,6 +1,6 @@
 package com.redmath.authentication.entity;
 
-import com.redmath.account.Account;
+import com.redmath.account.entity.Account;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

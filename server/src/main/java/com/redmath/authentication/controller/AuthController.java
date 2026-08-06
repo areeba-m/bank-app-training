@@ -1,6 +1,6 @@
 package com.redmath.authentication.controller;
 
-import com.redmath.account.AccountResponse;
+import com.redmath.account.dto.AccountResponse;
 import com.redmath.authentication.dto.AuthResponse;
 import com.redmath.authentication.dto.LoginAndRefreshResult;
 import com.redmath.authentication.dto.LoginRequest;

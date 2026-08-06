@@ -1,8 +1,8 @@
 package com.redmath.authentication;
 
-import com.redmath.account.Account;
-import com.redmath.account.AccountRepository;
-import com.redmath.account.Role;
+import com.redmath.account.entity.Account;
+import com.redmath.account.repository.AccountRepository;
+import com.redmath.account.entity.Role;
 import com.redmath.authentication.dto.LoginRequest;
 import com.redmath.authentication.dto.RegisterRequest;
 import com.redmath.authentication.entity.RefreshToken;
@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -79,10 +80,11 @@ class AuthIntegrationTest {
         mockMvc.perform(post(BASE + "/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.email").value(EMAIL))
-                .andExpect(jsonPath("$.role").value("USER"))
-                .andExpect(jsonPath("$.userId").exists());
+                .andExpect(jsonPath("$.role").value(Role.USER.name()))
+                .andExpect(jsonPath("$.id").exists());
 
         assertThat(accountRepository.existsByEmail(EMAIL)).isTrue();
     }

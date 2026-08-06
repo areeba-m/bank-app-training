@@ -1,46 +1,45 @@
 package com.redmath.admin.service;
 
-import com.redmath.account.Account;
-import com.redmath.account.AccountRepository;
-import com.redmath.account.exception.UserAlreadyExistsException;
+import com.redmath.account.dto.AccountResponse;
+import com.redmath.account.entity.Account;
 import com.redmath.account.exception.UserNotFoundException;
+import com.redmath.account.mapper.AccountMapper;
+import com.redmath.account.repository.AccountRepository;
 import com.redmath.admin.dto.CreateUserRequest;
 import com.redmath.admin.dto.UpdateUserRequest;
-import com.redmath.admin.dto.UserResponse;
-import com.redmath.admin.mapper.UserMapper;
-import com.redmath.transactions.Indicator;
-import com.redmath.balance.Balance;
+import com.redmath.authentication.exception.EmailAlreadyExistsException;
+import com.redmath.balance.entity.Balance;
+import com.redmath.transactions.entity.Indicator;
 import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 @Service
 public class AdminService {
 
     private final AccountRepository userRepository;
-    private final UserMapper userMapper;
+    private final AccountMapper accountMapper;
 
     public AdminService(AccountRepository userRepository,
-                        UserMapper userMapper) {
+                        AccountMapper accountMapper) {
         this.userRepository = userRepository;
-        this.userMapper = userMapper;
+        this.accountMapper = accountMapper;
     }
 
     @Transactional
-    public UserResponse createUser(@NonNull CreateUserRequest request) {
+    public AccountResponse createUser(@NonNull CreateUserRequest request) {
 
         if (userRepository.existsByEmail(request.email())) {
-            throw new UserAlreadyExistsException(
-                    "User with email '" + request.email() + "' already exists.");
+            throw new EmailAlreadyExistsException("Unable to register with the provided details");
         }
 
-        Account user = userMapper.toEntity(request);
+        Account user = accountMapper.toEntity(request);
 
         Balance balance = new Balance();
         balance.setAmount(BigDecimal.ZERO);
@@ -52,28 +51,28 @@ public class AdminService {
 
         Account savedUser = userRepository.save(user);
 
-        return userMapper.toResponse(savedUser);
+        return accountMapper.toResponse(savedUser);
     }
 
-    public Page<UserResponse> getAllUsers(int page, int size) {
+    public Page<AccountResponse> getAllUsers(int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size);
 
         return userRepository.findAll(pageable)
-                .map(userMapper::toResponse);
+                .map(accountMapper::toResponse);
     }
 
-    public UserResponse getUserById(Long id)
+    public AccountResponse getUserById(Long id)
     {
 
         Account user = userRepository.findById(id)
                 .orElseThrow(() ->
                         new UserNotFoundException("User with id " + id + " not found."));
 
-        return userMapper.toResponse(user);
+        return accountMapper.toResponse(user);
     }
 
-    public UserResponse updateUser(Long id, @NonNull UpdateUserRequest request) {
+    public AccountResponse updateUser(Long id, @NonNull UpdateUserRequest request) {
 
         Account user = userRepository.findById(id)
                 .orElseThrow(() ->
@@ -89,7 +88,7 @@ public class AdminService {
 
         Account updatedUser = userRepository.save(user);
 
-        return userMapper.toResponse(updatedUser);
+        return accountMapper.toResponse(updatedUser);
     }
 
     public void deleteUser(Long id) {

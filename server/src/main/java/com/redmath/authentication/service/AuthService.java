@@ -1,9 +1,9 @@
 package com.redmath.authentication.service;
 
-import com.redmath.account.Account;
-import com.redmath.account.AccountRepository;
-import com.redmath.account.AccountResponse;
-import com.redmath.account.Role;
+import com.redmath.account.dto.AccountResponse;
+import com.redmath.account.entity.Account;
+import com.redmath.account.entity.Role;
+import com.redmath.account.repository.AccountRepository;
 import com.redmath.authentication.dto.LoginAndRefreshResult;
 import com.redmath.authentication.dto.LoginRequest;
 import com.redmath.authentication.dto.RegisterRequest;
@@ -48,7 +48,7 @@ public class AuthService {
         Account saved = accountRepository.save(account);
 
         return new AccountResponse(
-                saved.getUserId(), saved.getName(), saved.getEmail(), saved.getAddress(), saved.getRole().name());
+                saved.getUserId(), saved.getName(), saved.getEmail(), saved.getAddress(), saved.getRole());
     }
 
     @Transactional

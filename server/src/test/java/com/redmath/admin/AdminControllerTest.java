@@ -1,9 +1,10 @@
 package com.redmath.admin;
 
-import com.redmath.account.Role;
+import com.redmath.account.entity.Role;
+import com.redmath.admin.controller.AdminController;
 import com.redmath.admin.dto.CreateUserRequest;
 import com.redmath.admin.dto.UpdateUserRequest;
-import com.redmath.admin.dto.UserResponse;
+import com.redmath.account.dto.AccountResponse;
 import com.redmath.admin.service.AdminService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +41,7 @@ class AdminControllerTest {
                 "Lahore"
         );
 
-        UserResponse response = new UserResponse(
+        AccountResponse response = new AccountResponse(
                 1L,
                 "Alice",
                 "alice@example.com",
@@ -50,7 +51,7 @@ class AdminControllerTest {
 
         when(adminService.createUser(request)).thenReturn(response);
 
-        ResponseEntity<UserResponse> result =
+        ResponseEntity<AccountResponse> result =
                 adminController.createAccount(request);
 
         assertEquals(HttpStatus.CREATED, result.getStatusCode());
@@ -63,17 +64,17 @@ class AdminControllerTest {
     @Test
     void getAllAccountsShouldReturnList() {
 
-        List<UserResponse> users = List.of(
-                new UserResponse(1L, "Alice", "alice@example.com", "Lahore", Role.USER),
-                new UserResponse(2L, "Bob", "bob@example.com", "Karachi", Role.ADMIN)
+        List<AccountResponse> users = List.of(
+                new AccountResponse(1L, "Alice", "alice@example.com", "Lahore", Role.USER),
+                new AccountResponse(2L, "Bob", "bob@example.com", "Karachi", Role.ADMIN)
         );
 
-        Page<UserResponse> userPage =
+        Page<AccountResponse> userPage =
                 new PageImpl<>(users, PageRequest.of(0, 10), users.size());
 
         when(adminService.getAllUsers(0, 10)).thenReturn(userPage);
 
-        ResponseEntity<Page<UserResponse>> response =
+        ResponseEntity<Page<AccountResponse>> response =
                 adminController.getAllAccounts(0, 10);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -88,7 +89,7 @@ class AdminControllerTest {
     @Test
     void getAccountByIdShouldReturnUser() {
 
-        UserResponse user = new UserResponse(
+        AccountResponse user = new AccountResponse(
                 1L,
                 "Alice",
                 "alice@example.com",
@@ -98,7 +99,7 @@ class AdminControllerTest {
 
         when(adminService.getUserById(1L)).thenReturn(user);
 
-        ResponseEntity<UserResponse> response =
+        ResponseEntity<AccountResponse> response =
                 adminController.getAccountById(1L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -116,7 +117,7 @@ class AdminControllerTest {
                 "Islamabad"
         );
 
-        UserResponse updated = new UserResponse(
+        AccountResponse updated = new AccountResponse(
                 1L,
                 "Alice Updated",
                 "alice@example.com",
@@ -126,7 +127,7 @@ class AdminControllerTest {
 
         when(adminService.updateUser(1L, request)).thenReturn(updated);
 
-        ResponseEntity<UserResponse> response =
+        ResponseEntity<AccountResponse> response =
                 adminController.updateAccount(1L, request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());

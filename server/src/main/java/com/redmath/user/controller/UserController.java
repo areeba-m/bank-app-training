@@ -1,7 +1,6 @@
 package com.redmath.user.controller;
 
-import com.redmath.account.Account;
-import com.redmath.admin.dto.UserResponse;
+import com.redmath.account.dto.AccountResponse;
 import com.redmath.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
@@ -18,7 +17,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public UserResponse getMyProfile(@NonNull Authentication authentication)
+    public AccountResponse getMyProfile(@NonNull Authentication authentication)
     {
         String email = authentication.getName();
         return userService.getCurrentUser(email);

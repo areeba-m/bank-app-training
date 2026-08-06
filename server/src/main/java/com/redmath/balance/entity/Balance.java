@@ -1,7 +1,7 @@
-package com.redmath.balance;
+package com.redmath.balance.entity;
 
-import com.redmath.account.Account;
-import com.redmath.transactions.Indicator;
+import com.redmath.account.entity.Account;
+import com.redmath.transactions.entity.Indicator;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

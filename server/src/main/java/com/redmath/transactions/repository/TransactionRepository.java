@@ -1,6 +1,6 @@
 package com.redmath.transactions.repository;
 
-import com.redmath.transactions.Transaction;
+import com.redmath.transactions.entity.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 

@@ -1,7 +1,7 @@
 package com.redmath.authentication.service;
 
-import com.redmath.account.Account;
-import com.redmath.account.AccountRepository;
+import com.redmath.account.entity.Account;
+import com.redmath.account.repository.AccountRepository;
 import com.redmath.authentication.wrapper.AccountPrincipal;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.userdetails.UserDetails;

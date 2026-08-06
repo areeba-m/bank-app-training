@@ -1,6 +1,6 @@
 package com.redmath.balance.repository;
 
-import com.redmath.balance.Balance;
+import com.redmath.balance.entity.Balance;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

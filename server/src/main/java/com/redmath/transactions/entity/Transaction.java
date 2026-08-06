@@ -1,6 +1,6 @@
-package com.redmath.transactions;
+package com.redmath.transactions.entity;
 
-import com.redmath.account.Account;
+import com.redmath.account.entity.Account;
 import jakarta.persistence.*;
 import lombok.*;
 

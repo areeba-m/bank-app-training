@@ -2,9 +2,9 @@ package com.redmath.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redmath.ServerApplication;
-import com.redmath.account.Account;
-import com.redmath.account.AccountRepository;
-import com.redmath.account.Role;
+import com.redmath.account.entity.Account;
+import com.redmath.account.repository.AccountRepository;
+import com.redmath.account.entity.Role;
 import com.redmath.admin.dto.CreateUserRequest;
 import com.redmath.admin.dto.UpdateUserRequest;
 import org.junit.jupiter.api.BeforeEach;

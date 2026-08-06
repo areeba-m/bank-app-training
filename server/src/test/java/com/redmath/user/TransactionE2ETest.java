@@ -1,13 +1,13 @@
 package com.redmath.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.redmath.account.Account;
-import com.redmath.account.AccountRepository;
-import com.redmath.account.Role;
-import com.redmath.balance.Balance;
+import com.redmath.account.entity.Account;
+import com.redmath.account.entity.Role;
+import com.redmath.account.repository.AccountRepository;
+import com.redmath.balance.entity.Balance;
 import com.redmath.balance.repository.BalanceRepository;
-import com.redmath.transactions.Indicator;
 import com.redmath.transactions.dto.CreateTransactionRequest;
+import com.redmath.transactions.entity.Indicator;
 import com.redmath.transactions.exception.InsufficientBalanceException;
 import com.redmath.transactions.repository.TransactionRepository;
 import org.jspecify.annotations.NonNull;
@@ -15,22 +15,26 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
