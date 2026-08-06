@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +54,7 @@ public class AuthService {
     @Transactional
     public LoginAndRefreshResult login(LoginRequest request) {
         Authentication authentication = authenticate(request);
-        Account user = ((AccountPrincipal) authentication.getPrincipal()).account();
+        Account user = ((AccountPrincipal) Objects.requireNonNull(authentication.getPrincipal())).account();
         RefreshToken refreshToken = refreshTokenService.issueRefreshToken(user);
         return buildLoginResult(authentication, refreshToken.getToken(), user);
     }
