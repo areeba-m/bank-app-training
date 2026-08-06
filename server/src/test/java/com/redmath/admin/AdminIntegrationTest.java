@@ -1,0 +1,132 @@
+package com.redmath.admin;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.redmath.ServerApplication;
+import com.redmath.account.Account;
+import com.redmath.account.AccountRepository;
+import com.redmath.account.Role;
+import com.redmath.admin.dto.CreateUserRequest;
+import com.redmath.admin.dto.UpdateUserRequest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@SpringBootTest(classes = ServerApplication.class)
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+class AdminIntegrationTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @BeforeEach
+    void setUp() {
+        accountRepository.deleteAll();
+    }
+
+    @Test
+    void adminCrudFlowShouldWork() throws Exception {
+
+        // ---------- CREATE ----------
+
+        CreateUserRequest createRequest = new CreateUserRequest(
+                "Alice",
+                "alice@example.com",
+                "password123",
+                "Lahore"
+        );
+
+        mockMvc.perform(post("/api/v1/admin/accounts")
+                        .with(user("admin").roles("ADMIN"))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createRequest)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Alice"))
+                .andExpect(jsonPath("$.email").value("alice@example.com"))
+                .andExpect(jsonPath("$.address").value("Lahore"))
+                .andExpect(jsonPath("$.role").value("USER"));
+
+        Account saved =
+                accountRepository.findByEmail("alice@example.com").orElseThrow();
+
+        assertEquals("Alice", saved.getName());
+        assertEquals(Role.USER, saved.getRole());
+
+        assertTrue(passwordEncoder.matches(
+                "password123",
+                saved.getPassword()
+        ));
+
+        // ---------- GET BY ID ----------
+
+        mockMvc.perform(get("/api/v1/admin/accounts/{id}", saved.getUserId())
+                        .with(user("admin").roles("ADMIN")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(saved.getUserId()))
+                .andExpect(jsonPath("$.name").value("Alice"));
+
+        // ---------- UPDATE ----------
+
+        UpdateUserRequest updateRequest = new UpdateUserRequest(
+                "Alice Updated",
+                "Islamabad"
+        );
+
+        mockMvc.perform(put("/api/v1/admin/accounts/{id}", saved.getUserId())
+                        .with(user("admin").roles("ADMIN"))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Alice Updated"))
+                .andExpect(jsonPath("$.address").value("Islamabad"));
+
+        Account updated =
+                accountRepository.findById(saved.getUserId()).orElseThrow();
+
+        assertEquals("Alice Updated", updated.getName());
+        assertEquals("Islamabad", updated.getAddress());
+
+        // ---------- GET ALL ----------
+
+        mockMvc.perform(get("/api/v1/admin/accounts")
+                        .with(user("admin").roles("ADMIN")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)));
+
+        // ---------- DELETE ----------
+
+        mockMvc.perform(delete("/api/v1/admin/accounts/{id}", saved.getUserId())
+                        .with(user("admin").roles("ADMIN"))
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
+
+        assertFalse(accountRepository.existsById(saved.getUserId()));
+    }
+}
