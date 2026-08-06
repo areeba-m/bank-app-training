@@ -1,6 +1,5 @@
 package com.redmath.admin.service;
 
-
 import com.redmath.account.Account;
 import com.redmath.account.AccountRepository;
 import com.redmath.account.exception.UserAlreadyExistsException;
@@ -36,9 +35,9 @@ public class AdminService {
     @Transactional
     public UserResponse createUser(@NonNull CreateUserRequest request) {
 
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(request.email())) {
             throw new UserAlreadyExistsException(
-                    "User with email '" + request.getEmail() + "' already exists.");
+                    "User with email '" + request.email() + "' already exists.");
         }
 
         Account user = userMapper.toEntity(request);
@@ -79,12 +78,12 @@ public class AdminService {
                 .orElseThrow(() ->
                         new UserNotFoundException("User with id " + id + " not found."));
 
-        if (request.getName() != null && !request.getName().isBlank()) {
-            user.setName(request.getName());
+        if (request.name() != null && !request.name().isBlank()) {
+            user.setName(request.name());
         }
 
-        if (request.getAddress() != null && !request.getAddress().isBlank()) {
-            user.setAddress(request.getAddress());
+        if (request.address() != null && !request.address().isBlank()) {
+            user.setAddress(request.address());
         }
 
         Account updatedUser = userRepository.save(user);

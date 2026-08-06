@@ -16,6 +16,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,13 +27,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AdminServiceTest {
@@ -50,15 +48,17 @@ class AdminServiceTest {
 
     @BeforeEach
     void setUp() {
-        validCreateRequest = new CreateUserRequest();
-        validCreateRequest.setName("Alice Johnson");
-        validCreateRequest.setEmail("alice@example.com");
-        validCreateRequest.setPassword("password123");
-        validCreateRequest.setAddress("123 Maple Street");
+        validCreateRequest = new CreateUserRequest(
+                "Alice Johnson",
+                "alice@example.com",
+                "password123",
+                "123 Maple Street"
+        );
 
-        validUpdateRequest = new UpdateUserRequest();
-        validUpdateRequest.setName("Alice Updated");
-        validUpdateRequest.setAddress("456 Oak Avenue");
+        validUpdateRequest = new UpdateUserRequest(
+                "Alice Updated",
+                "456 Oak Avenue"
+        );
 
         existingUser = new Account();
         existingUser.setUserId(1L);
@@ -69,7 +69,11 @@ class AdminServiceTest {
         existingUser.setRole(Role.USER);
 
         userResponse = new UserResponse(
-                1L, "Alice Johnson", "alice@example.com", "123 Maple Street", Role.USER
+                1L,
+                "Alice Johnson",
+                "alice@example.com",
+                "123 Maple Street",
+                Role.USER
         );
     }
 
@@ -88,8 +92,9 @@ class AdminServiceTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getName()).isEqualTo("Alice Johnson");
-        assertThat(result.getEmail()).isEqualTo("alice@example.com");
+        assertThat(result.name()).isEqualTo("Alice Johnson");
+        assertThat(result.email()).isEqualTo("alice@example.com");
+
         verify(userRepository).existsByEmail("alice@example.com");
         verify(userRepository).save(existingUser);
     }
@@ -140,13 +145,12 @@ class AdminServiceTest {
 
         // Then
         assertThat(result.getContent()).hasSize(2);
-        assertThat(result.getContent().get(0).getName()).isEqualTo("Alice");
-        assertThat(result.getContent().get(1).getName()).isEqualTo("Bob");
+        assertThat(result.getContent().get(0).name()).isEqualTo("Alice");
+        assertThat(result.getContent().get(1).name()).isEqualTo("Bob");
         assertThat(result.getTotalElements()).isEqualTo(2);
 
         verify(userRepository).findAll(any(Pageable.class));
     }
-
 
     @Test
     void getAllUsersShouldReturnEmptyPageWhenNoUsers() {
@@ -179,8 +183,8 @@ class AdminServiceTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(1L);
-        assertThat(result.getEmail()).isEqualTo("alice@example.com");
+        assertThat(result.id()).isEqualTo(1L);
+        assertThat(result.email()).isEqualTo("alice@example.com");
     }
 
     @Test
@@ -212,15 +216,17 @@ class AdminServiceTest {
         assertThat(result).isNotNull();
         assertThat(existingUser.getName()).isEqualTo("Alice Updated");
         assertThat(existingUser.getAddress()).isEqualTo("456 Oak Avenue");
+
         verify(userRepository).save(existingUser);
     }
 
     @Test
     void updateUserShouldUpdateOnlyNameWhenAddressIsBlank() {
         // Given
-        UpdateUserRequest request = new UpdateUserRequest();
-        request.setName("Alice NewName");
-        request.setAddress("");
+        UpdateUserRequest request = new UpdateUserRequest(
+                "Alice NewName",
+                ""
+        );
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
         when(userRepository.save(existingUser)).thenReturn(existingUser);
