@@ -1,6 +1,5 @@
 package com.redmath.authentication;
 
-
 import com.redmath.account.Account;
 import com.redmath.account.AccountRepository;
 import com.redmath.account.Role;
