@@ -1,7 +1,7 @@
 package com.redmath.account;
 
-import com.redmath.user.entity.TransactionEntity;
-import com.redmath.user.entity.balanceEntity;
+import com.redmath.transactions.Transaction;
+import com.redmath.balance.Balance;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -9,9 +9,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Getter @Setter
 public class Account {
@@ -29,11 +26,5 @@ public class Account {
     private Instant createdAt;
     private Instant updatedAt;
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
-    private balanceEntity balance;
-    @OneToMany(
-            mappedBy = "account",
-            cascade = CascadeType.ALL
-    )
-    private List<TransactionEntity> transactions = new ArrayList<>();
-
+    private Balance balance;
 }

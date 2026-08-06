@@ -1,9 +1,6 @@
-package com.redmath.user.entity;
-
+package com.redmath.transactions;
 
 public enum Indicator {
-
     DB,
     CR
-
 }
