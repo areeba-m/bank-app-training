@@ -20,10 +20,10 @@ public class UserMapper {
 
         Account user = new Account();
 
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setAddress(request.getAddress());
+        user.setName(request.name());
+        user.setEmail(request.email());
+        user.setPassword(passwordEncoder.encode(request.password()));
+        user.setAddress(request.address());
         user.setRole(Role.USER);
         user.setCreatedAt(Instant.now());
         user.setUpdatedAt(Instant.now());

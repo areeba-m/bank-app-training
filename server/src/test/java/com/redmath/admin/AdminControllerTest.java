@@ -10,11 +10,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -33,11 +33,12 @@ class AdminControllerTest {
     @Test
     void createAccountShouldReturnCreatedResponse() {
 
-        CreateUserRequest request = new CreateUserRequest();
-        request.setName("Alice");
-        request.setEmail("alice@example.com");
-        request.setPassword("password123");
-        request.setAddress("Lahore");
+        CreateUserRequest request = new CreateUserRequest(
+                "Alice",
+                "alice@example.com",
+                "password123",
+                "Lahore"
+        );
 
         UserResponse response = new UserResponse(
                 1L,
@@ -53,7 +54,8 @@ class AdminControllerTest {
                 adminController.createAccount(request);
 
         assertEquals(HttpStatus.CREATED, result.getStatusCode());
-        assertEquals("Alice", result.getBody().getName());
+        assertNotNull(result.getBody());
+        assertEquals("Alice", result.getBody().name());
 
         verify(adminService).createUser(request);
     }
@@ -61,7 +63,6 @@ class AdminControllerTest {
     @Test
     void getAllAccountsShouldReturnList() {
 
-        // Given
         List<UserResponse> users = List.of(
                 new UserResponse(1L, "Alice", "alice@example.com", "Lahore", Role.USER),
                 new UserResponse(2L, "Bob", "bob@example.com", "Karachi", Role.ADMIN)
@@ -72,11 +73,9 @@ class AdminControllerTest {
 
         when(adminService.getAllUsers(0, 10)).thenReturn(userPage);
 
-        // When
         ResponseEntity<Page<UserResponse>> response =
                 adminController.getAllAccounts(0, 10);
 
-        // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(2, response.getBody().getContent().size());
@@ -103,7 +102,8 @@ class AdminControllerTest {
                 adminController.getAccountById(1L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Alice", response.getBody().getName());
+        assertNotNull(response.getBody());
+        assertEquals("Alice", response.getBody().name());
 
         verify(adminService).getUserById(1L);
     }
@@ -111,9 +111,10 @@ class AdminControllerTest {
     @Test
     void updateAccountShouldReturnUpdatedUser() {
 
-        UpdateUserRequest request = new UpdateUserRequest();
-        request.setName("Alice Updated");
-        request.setAddress("Islamabad");
+        UpdateUserRequest request = new UpdateUserRequest(
+                "Alice Updated",
+                "Islamabad"
+        );
 
         UserResponse updated = new UserResponse(
                 1L,
@@ -129,8 +130,9 @@ class AdminControllerTest {
                 adminController.updateAccount(1L, request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Alice Updated", response.getBody().getName());
-        assertEquals("Islamabad", response.getBody().getAddress());
+        assertNotNull(response.getBody());
+        assertEquals("Alice Updated", response.getBody().name());
+        assertEquals("Islamabad", response.getBody().address());
 
         verify(adminService).updateUser(1L, request);
     }
