@@ -1,31 +1,33 @@
-package com.redmath.user.entity;
+package com.redmath.balance;
 
 import com.redmath.account.Account;
+import com.redmath.transactions.Indicator;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 
+
 @Entity
-@Table(name = "transactions")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class TransactionEntity {
+@Table(name = "balance")
+public class Balance {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Instant date;
-    private String description;
     private BigDecimal amount;
     @Enumerated(EnumType.STRING)
     private Indicator indicator;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id")
+    @OneToOne
+    @JoinColumn(name = "user_id")
     private Account account;
-
+    @PrePersist
+    public void prePersist() {
+        this.date = Instant.now();
+    }
 }
