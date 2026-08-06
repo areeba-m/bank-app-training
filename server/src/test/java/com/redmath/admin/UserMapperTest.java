@@ -5,8 +5,9 @@ import com.redmath.account.Role;
 import com.redmath.admin.dto.CreateUserRequest;
 import com.redmath.admin.dto.UserResponse;
 import com.redmath.admin.mapper.UserMapper;
-import org.jspecify.annotations.NonNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.Instant;
 
@@ -14,15 +15,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class UserMapperTest {
 
-    private final UserMapper userMapper = new UserMapper();
+    private UserMapper userMapper;
 
-    private @NonNull CreateUserRequest validRequest() {
-        CreateUserRequest request = new CreateUserRequest();
-        request.setName("Alice Johnson");
-        request.setEmail("alice@example.com");
-        request.setPassword("password123");
-        request.setAddress("123 Maple Street");
-        return request;
+    @BeforeEach
+    void setUp() {
+        userMapper = new UserMapper(new BCryptPasswordEncoder());
+    }
+
+    private CreateUserRequest validRequest() {
+        return new CreateUserRequest(
+                "Alice Johnson",
+                "alice@example.com",
+                "password123",
+                "123 Maple Street"
+        );
     }
 
     @Test
@@ -36,59 +42,53 @@ class UserMapperTest {
         // Then
         assertThat(account.getName()).isEqualTo("Alice Johnson");
         assertThat(account.getEmail()).isEqualTo("alice@example.com");
-        assertThat(account.getPassword()).isEqualTo("password123");
         assertThat(account.getAddress()).isEqualTo("123 Maple Street");
+
+        // Verify password was encoded
+        assertThat(account.getPassword()).isNotEqualTo("password123");
+        assertThat(new BCryptPasswordEncoder().matches(
+                "password123",
+                account.getPassword()
+        )).isTrue();
     }
 
     @Test
     void toEntityShouldSetRoleToUser() {
-        // Given
         CreateUserRequest request = validRequest();
 
-        // When
         Account account = userMapper.toEntity(request);
 
-        // Then
         assertThat(account.getRole()).isEqualTo(Role.USER);
     }
 
     @Test
     void toEntityShouldSetCreatedAt() {
-        // Given
         CreateUserRequest request = validRequest();
         Instant before = Instant.now();
 
-        // When
         Account account = userMapper.toEntity(request);
 
-        // Then
         assertThat(account.getCreatedAt()).isNotNull();
         assertThat(account.getCreatedAt()).isBetween(before, Instant.now());
     }
 
     @Test
     void toEntityShouldSetUpdatedAt() {
-        // Given
         CreateUserRequest request = validRequest();
         Instant before = Instant.now();
 
-        // When
         Account account = userMapper.toEntity(request);
 
-        // Then
         assertThat(account.getUpdatedAt()).isNotNull();
         assertThat(account.getUpdatedAt()).isBetween(before, Instant.now());
     }
 
     @Test
     void toEntityShouldReturnNewAccountInstance() {
-        // Given
         CreateUserRequest request = validRequest();
 
-        // When
         Account account = userMapper.toEntity(request);
 
-        // Then
         assertThat(account).isNotNull();
         assertThat(account.getUserId()).isNull();
     }
@@ -107,10 +107,10 @@ class UserMapperTest {
         UserResponse response = userMapper.toResponse(account);
 
         // Then
-        assertThat(response.getId()).isEqualTo(1L);
-        assertThat(response.getName()).isEqualTo("Alice Johnson");
-        assertThat(response.getEmail()).isEqualTo("alice@example.com");
-        assertThat(response.getAddress()).isEqualTo("123 Maple Street");
-        assertThat(response.getRole()).isEqualTo(Role.USER);
+        assertThat(response.id()).isEqualTo(1L);
+        assertThat(response.name()).isEqualTo("Alice Johnson");
+        assertThat(response.email()).isEqualTo("alice@example.com");
+        assertThat(response.address()).isEqualTo("123 Maple Street");
+        assertThat(response.role()).isEqualTo(Role.USER);
     }
 }
