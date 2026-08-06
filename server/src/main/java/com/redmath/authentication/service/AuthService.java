@@ -46,7 +46,8 @@ public class AuthService {
 
         Account saved = accountRepository.save(account);
 
-        return new AccountResponse(saved.getUserId(), saved.getName(), saved.getEmail(), saved.getRole().name());
+        return new AccountResponse(
+                saved.getUserId(), saved.getName(), saved.getEmail(), saved.getAddress(), saved.getRole().name());
     }
 
     @Transactional

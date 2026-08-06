@@ -21,7 +21,6 @@ public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
 
-    @Transactional
     public RefreshToken issueRefreshToken(Account user) {
         RefreshToken refreshToken = refreshTokenRepository.findByUser(user)
                 .orElseGet(() -> {
@@ -36,7 +35,7 @@ public class RefreshTokenService {
         return refreshTokenRepository.save(refreshToken);
     }
 
-    @Transactional
+
     public RefreshToken verifyAndRotate(String token) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
                 .orElseThrow(() -> new BadCredentialsException("Invalid refresh token"));
@@ -52,6 +51,7 @@ public class RefreshTokenService {
     }
 
     @Scheduled(cron = "0 0 2 * * ?")
+    @Transactional
     public void cleanupExpiredTokens() {
         refreshTokenRepository.deleteAllByExpiryDateBefore(Instant.now());
     }

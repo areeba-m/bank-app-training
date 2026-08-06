@@ -3,10 +3,15 @@ package com.redmath.user.service;
 
 import com.redmath.account.Account;
 import com.redmath.account.AccountRepository;
-import com.redmath.user.dto.*;
-import com.redmath.user.entity.*;
+
+import com.redmath.user.dto.CreateTransactionRequest;
+import com.redmath.user.dto.TransactionResponse;
+import com.redmath.user.entity.Indicator;
+import com.redmath.user.entity.TransactionEntity;
+import com.redmath.user.entity.balanceEntity;
 import com.redmath.user.mapper.TransactionMapper;
-import com.redmath.user.repository.*;
+import com.redmath.user.repository.TransactionRepository;
+import com.redmath.user.repository.balanceRepository;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
@@ -36,7 +41,8 @@ public class TransactionService {
                 .orElseThrow(() -> new RuntimeException(
                                         "Account not found"
                 ));
-        balanceEntity balance = balanceRepository.findByAccountUserId(account.getUserId())
+
+        balanceEntity balance = balanceRepository.findByAccountUserId(request.getAccountId())
                 .orElseThrow(() -> new RuntimeException(
                                         "Balance not found"
                 ));
