@@ -5,6 +5,7 @@ import com.redmath.account.Role;
 import com.redmath.admin.dto.CreateUserRequest;
 import com.redmath.admin.dto.UserResponse;
 import com.redmath.admin.mapper.UserMapper;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -15,7 +16,7 @@ class UserMapperTest {
 
     private final UserMapper userMapper = new UserMapper();
 
-    private CreateUserRequest validRequest() {
+    private @NonNull CreateUserRequest validRequest() {
         CreateUserRequest request = new CreateUserRequest();
         request.setName("Alice Johnson");
         request.setEmail("alice@example.com");

@@ -9,8 +9,8 @@ import com.redmath.admin.dto.CreateUserRequest;
 import com.redmath.admin.dto.UpdateUserRequest;
 import com.redmath.admin.dto.UserResponse;
 import com.redmath.admin.mapper.UserMapper;
-import com.redmath.user.entity.Indicator;
-import com.redmath.user.entity.balanceEntity;
+import com.redmath.transactions.Indicator;
+import com.redmath.balance.Balance;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +43,7 @@ public class AdminService {
 
         Account user = userMapper.toEntity(request);
 
-        balanceEntity balance = new balanceEntity();
+        Balance balance = new Balance();
         balance.setAmount(BigDecimal.ZERO);
         balance.setDate(Instant.now());
         balance.setIndicator(Indicator.CR);
@@ -64,7 +64,8 @@ public class AdminService {
                 .map(userMapper::toResponse);
     }
 
-    public UserResponse getUserById(Long id) {
+    public UserResponse getUserById(Long id)
+    {
 
         Account user = userRepository.findById(id)
                 .orElseThrow(() ->
