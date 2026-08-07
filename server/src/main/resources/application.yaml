@@ -17,6 +17,6 @@ springdoc:
 
 logging:
   level:
-    sql: INFO
-    org.springframework.security: DEBUG
-    liquibase: INFO
+    root: INFO
+    com.redmath: INFO
+    org.springframework.security: INFO

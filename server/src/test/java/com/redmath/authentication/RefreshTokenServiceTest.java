@@ -1,5 +1,6 @@
 package com.redmath.authentication;
 
+import com.redmath.account.entity.Account;
 import com.redmath.authentication.entity.RefreshToken;
 import com.redmath.authentication.repository.RefreshTokenRepository;
 import com.redmath.authentication.service.RefreshTokenService;
@@ -30,9 +31,13 @@ class RefreshTokenServiceTest {
 
     @Test
     void verifyAndRotate_withExpiredToken_deletesTokenAndThrowsException() {
+        Account mockUser = new Account();
+        mockUser.setEmail("test@example.com");
+
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setToken("expired-token");
         refreshToken.setExpiryDate(Instant.now().minus(1, ChronoUnit.DAYS));
+        refreshToken.setUser(mockUser);
 
         when(refreshTokenRepository.findByToken("expired-token"))
                 .thenReturn(Optional.of(refreshToken));

@@ -60,7 +60,7 @@ public class AuthService {
     @Transactional
     public LoginAndRefreshResult login(LoginRequest request) {
         Authentication authentication = authenticate(request);
-        Account user = getAuthenticatedAccount(authentication);
+        Account user =  ((AccountPrincipal) Objects.requireNonNull(authentication.getPrincipal())).account();
         log.info("User '{}' authenticated successfully.", user.getEmail());
 
         RefreshToken refreshToken = refreshTokenService.issueRefreshToken(user);
@@ -84,10 +84,7 @@ public class AuthService {
         }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            Account user = getAuthenticatedAccount(authentication);
-            log.info("User '{}' logging out.", user.getEmail());
-        }
+        log.info("User '{}' logging out.", Objects.requireNonNull(authentication).getName());
 
         refreshTokenService.deleteByToken(refreshToken);
     }
@@ -104,13 +101,6 @@ public class AuthService {
                 null,
                 principal.getAuthorities()
         );
-    }
-    private Account getAuthenticatedAccount(Authentication authentication) {
-        Objects.requireNonNull(authentication, "Authentication object cannot be null");
-
-        if (authentication.getPrincipal() instanceof AccountPrincipal(Account account))
-            return account;
-        throw new IllegalStateException("Principal is not of type AccountPrincipal");
     }
 
     private LoginAndRefreshResult buildLoginResult(Authentication authentication, String refreshToken, Account account) {

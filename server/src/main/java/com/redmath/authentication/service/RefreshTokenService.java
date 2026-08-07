@@ -68,10 +68,6 @@ public class RefreshTokenService {
 
     public void deleteByToken(String token){
         Long count = refreshTokenRepository.deleteByToken(token);
-        if (count == 0) {
-            log.debug("Logout requested with a refresh token that was not found.");
-        } else {
-            log.info("Refresh token revoked successfully.");
-        }
+        log.info("Deleted {} refresh tokens", count);
     }
 }
