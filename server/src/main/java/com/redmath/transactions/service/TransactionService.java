@@ -17,6 +17,9 @@ import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -71,15 +74,16 @@ public class TransactionService
         return transactionMapper.toResponse(saved);
     }
 
-    public List<TransactionResponse> getTransactions(String email)
-    {
+    public Page<TransactionResponse> getTransactions(String email, int page, int size) {
+
         Account account = accountRepository.findByEmail(email)
-                .orElseThrow(() -> new AccountNotFoundException("Account not found"));
+                .orElseThrow(() ->
+                        new AccountNotFoundException("Account not found"));
+
+        Pageable pageable = PageRequest.of(page, size);
 
         return transactionRepository
-                .findByAccountUserId(account.getUserId())
-                .stream()
-                .map(transactionMapper::toResponse)
-                .toList();
+                .findByAccountUserId(account.getUserId(), pageable)
+                .map(transactionMapper::toResponse);
     }
 }
