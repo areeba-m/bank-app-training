@@ -1,4 +1,4 @@
-package com.redmath.user;
+package com.redmath.transaction;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redmath.account.entity.Account;
@@ -8,6 +8,7 @@ import com.redmath.balance.entity.Balance;
 import com.redmath.balance.repository.BalanceRepository;
 import com.redmath.transactions.dto.CreateTransactionRequest;
 import com.redmath.transactions.entity.Indicator;
+import com.redmath.transactions.entity.Transaction;
 import com.redmath.transactions.exception.InsufficientBalanceException;
 import com.redmath.transactions.repository.TransactionRepository;
 import org.jspecify.annotations.NonNull;
@@ -18,6 +19,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,8 +30,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -38,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class TransactionControllerIT
+class TransactionIntegrationTest
 {
     @TestConfiguration
     static class JacksonConfig
@@ -101,8 +103,6 @@ class TransactionControllerIT
         balance.setAmount(new BigDecimal("1000"));
         balance.setIndicator(Indicator.CR);
         balanceRepository.saveAndFlush(balance);
-        Balance savedBalance = balanceRepository.findByAccountUserId(account.getUserId())
-                        .orElseThrow();
     }
 
     private @NonNull RequestPostProcessor userJwt()
@@ -114,13 +114,59 @@ class TransactionControllerIT
                 );
     }
 
+
+
+
     @Test
-    void shouldCreateCreditTransaction() throws Exception
-    {
+    void shouldCreateCreditTransaction() throws Exception {
+
+        CreateTransactionRequest request = new CreateTransactionRequest(
+            "Salary",
+            new BigDecimal("500"),
+            Indicator.CR
+        );
+
+        mockMvc.perform(post("/api/v1/user/transaction")
+                    .with(userJwt())
+                    .with(csrf())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.amount").value(500))
+            .andExpect(jsonPath("$.description").value("Salary"))
+            .andExpect(jsonPath("$.indicator").value("CR"));
+
+        // Verify balance updated
+        Balance updatedBalance = balanceRepository
+            .findByAccountUserId(account.getUserId())
+            .orElseThrow();
+
+        assertEquals(0,
+            updatedBalance.getAmount().compareTo(new BigDecimal("1500")));
+
+        // Verify transaction persisted
+        Page<Transaction> transactions = transactionRepository.findByAccountUserId(
+            account.getUserId(),
+            PageRequest.of(0, 10));
+
+        assertEquals(1, transactions.getTotalElements());
+
+        Transaction transaction = transactions.getContent().getFirst();
+
+        assertEquals("Salary", transaction.getDescription());
+        assertEquals(Indicator.CR, transaction.getIndicator());
+        assertEquals(0,
+            transaction.getAmount().compareTo(new BigDecimal("500")));
+    }
+
+
+    @Test
+    void shouldCreateDebitTransaction() throws Exception {
+
         CreateTransactionRequest request = new CreateTransactionRequest();
-        request.setAmount(new BigDecimal("500"));
-        request.setIndicator(Indicator.CR);
-        request.setDescription("Salary");
+        request.setAmount(new BigDecimal("300"));
+        request.setIndicator(Indicator.DB);
+        request.setDescription("Shopping");
 
         mockMvc.perform(post("/api/v1/user/transaction")
                         .with(userJwt())
@@ -128,34 +174,30 @@ class TransactionControllerIT
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.amount").value(500));
+                .andExpect(jsonPath("$.amount").value(300))
+                .andExpect(jsonPath("$.description").value("Shopping"))
+                .andExpect(jsonPath("$.indicator").value("DB"));
 
-        Balance updatedBalance = balanceRepository.findByAccountUserId(account.getUserId())
-                        .orElseThrow();
+        Balance updatedBalance = balanceRepository
+                .findByAccountUserId(account.getUserId())
+                .orElseThrow();
 
-        assert updatedBalance.getAmount().compareTo(new BigDecimal("1500")) == 0;
-    }
+        assertEquals(0,
+                updatedBalance.getAmount().compareTo(new BigDecimal("700")));
 
-    @Test
-    void shouldCreateDebitTransaction() throws Exception
-    {
-        CreateTransactionRequest request = new CreateTransactionRequest();
-        request.setAmount(new BigDecimal("300"));
-        request.setIndicator(Indicator.DB);
-        request.setDescription("Shopping");
-        mockMvc.perform(post("/api/v1/user/transaction")
-                        .with(userJwt())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request))
-                )
-                .andExpect(status().isOk());
+        // Verify the transaction was saved in the database
+        Page<Transaction> transactions = transactionRepository.findByAccountUserId(
+                account.getUserId(),
+                PageRequest.of(0, 10));
 
-        Balance updatedBalance = balanceRepository.findByAccountUserId(account.getUserId())
-                        .orElseThrow();
+        assertEquals(1, transactions.getTotalElements());
 
-        assert updatedBalance.getAmount().compareTo(new BigDecimal("700")) == 0;
+        Transaction transaction = transactions.getContent().getFirst();
 
+        assertEquals("Shopping", transaction.getDescription());
+        assertEquals(Indicator.DB, transaction.getIndicator());
+        assertEquals(0,
+                transaction.getAmount().compareTo(new BigDecimal("300")));
     }
 
     @Test
@@ -167,19 +209,31 @@ class TransactionControllerIT
         request.setDescription("Large Payment");
 
         Exception exception = assertThrows(Exception.class, () -> mockMvc.perform(
-                post("/api/v1/user/transaction")
-                        .with(userJwt())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                        .andReturn()
-                );
+                        post("/api/v1/user/transaction")
+                                .with(userJwt())
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andReturn()
+        );
         assertInstanceOf(InsufficientBalanceException.class, exception.getCause());
+        Balance balance = balanceRepository
+                .findByAccountUserId(account.getUserId())
+                .orElseThrow();
+
+        assertEquals(0,
+                balance.getAmount().compareTo(new BigDecimal("1000")));
+
+        Page<Transaction> transactions = transactionRepository.findByAccountUserId(
+                account.getUserId(),
+                PageRequest.of(0, 10));
+
+        assertEquals(0, transactions.getTotalElements());
     }
 
     @Test
-    void shouldGetTransactions() throws Exception
-    {
+    void shouldGetTransactions() throws Exception {
+
         CreateTransactionRequest request = new CreateTransactionRequest();
         request.setAmount(new BigDecimal("200"));
         request.setIndicator(Indicator.CR);
@@ -191,12 +245,38 @@ class TransactionControllerIT
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
+
         mockMvc.perform(get("/api/v1/user/transaction")
+                        .param("page", "0")
+                        .param("size", "10")
                         .with(userJwt()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()")
-                                .value(1));
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.size").value(10))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.numberOfElements").value(1))
+                .andExpect(jsonPath("$.first").value(true))
+                .andExpect(jsonPath("$.last").value(true))
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].amount").value(200))
+                .andExpect(jsonPath("$.content[0].description").value("Deposit"))
+                .andExpect(jsonPath("$.content[0].indicator").value("CR"))
+                .andExpect(jsonPath("$.content[0].date").exists());
 
+        // Verify data directly from the database
+        Page<Transaction> transactions = transactionRepository.findByAccountUserId(
+                account.getUserId(),
+                PageRequest.of(0, 10));
+
+        assertEquals(1, transactions.getTotalElements());
+
+        Transaction transaction = transactions.getContent().getFirst();
+
+        assertEquals("Deposit", transaction.getDescription());
+        assertEquals(Indicator.CR, transaction.getIndicator());
+        assertEquals(0,
+                transaction.getAmount().compareTo(new BigDecimal("200")));
     }
 
     @Test
