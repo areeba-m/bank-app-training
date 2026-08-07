@@ -5,25 +5,24 @@ import com.redmath.account.repository.AccountRepository;
 import com.redmath.balance.entity.Balance;
 import com.redmath.balance.exception.BalanceNotFoundException;
 import com.redmath.balance.repository.BalanceRepository;
-import com.redmath.transactions.entity.Indicator;
-import com.redmath.transactions.entity.Transaction;
 import com.redmath.transactions.dto.CreateTransactionRequest;
 import com.redmath.transactions.dto.TransactionResponse;
+import com.redmath.transactions.entity.Indicator;
+import com.redmath.transactions.entity.Transaction;
 import com.redmath.transactions.exception.AccountNotFoundException;
 import com.redmath.transactions.exception.InsufficientBalanceException;
 import com.redmath.transactions.mapper.TransactionMapper;
 import com.redmath.transactions.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

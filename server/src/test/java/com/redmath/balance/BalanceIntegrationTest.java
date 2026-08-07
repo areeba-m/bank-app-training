@@ -6,6 +6,7 @@ import com.redmath.account.repository.AccountRepository;
 import com.redmath.balance.entity.Balance;
 import com.redmath.balance.repository.BalanceRepository;
 import com.redmath.transactions.entity.Indicator;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +24,9 @@ import java.time.Instant;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import org.jspecify.annotations.NonNull;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @SpringBootTest
 @AutoConfigureMockMvc

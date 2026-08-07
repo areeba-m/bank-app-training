@@ -1,8 +1,8 @@
 package com.redmath.authentication;
 
 import com.redmath.account.entity.Account;
-import com.redmath.account.repository.AccountRepository;
 import com.redmath.account.entity.Role;
+import com.redmath.account.repository.AccountRepository;
 import com.redmath.authentication.dto.LoginRequest;
 import com.redmath.authentication.dto.RegisterRequest;
 import com.redmath.authentication.entity.RefreshToken;
