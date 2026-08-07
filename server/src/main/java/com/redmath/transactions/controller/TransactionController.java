@@ -6,11 +6,10 @@ import com.redmath.transactions.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/user/transaction")
@@ -34,13 +33,17 @@ public class TransactionController {
 
 
     @GetMapping()
-    public ResponseEntity<List<TransactionResponse>> getTransactions(
-            @NonNull Authentication auth) {
-
-        String email = auth.getName();
+    public ResponseEntity<Page<TransactionResponse>> getTransactions(
+            Authentication authentication,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
         return ResponseEntity.ok(
-                transactionService.getTransactions(email)
+                transactionService.getTransactions(
+                        authentication.getName(),
+                        page,
+                        size
+                )
         );
     }
 }

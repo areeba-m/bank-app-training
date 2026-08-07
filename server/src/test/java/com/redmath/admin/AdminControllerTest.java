@@ -1,10 +1,10 @@
 package com.redmath.admin;
 
+import com.redmath.account.dto.AccountResponse;
 import com.redmath.account.entity.Role;
 import com.redmath.admin.controller.AdminController;
 import com.redmath.admin.dto.CreateUserRequest;
 import com.redmath.admin.dto.UpdateUserRequest;
-import com.redmath.account.dto.AccountResponse;
 import com.redmath.admin.service.AdminService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +19,8 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
