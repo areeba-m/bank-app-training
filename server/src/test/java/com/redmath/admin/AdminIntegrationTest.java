@@ -95,7 +95,7 @@ class AdminIntegrationTest {
                 "Islamabad"
         );
 
-        mockMvc.perform(put("/api/v1/admin/accounts/{id}", saved.getUserId())
+        mockMvc.perform(patch("/api/v1/admin/accounts/{id}", saved.getUserId())
                         .with(user("admin").roles("ADMIN"))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)

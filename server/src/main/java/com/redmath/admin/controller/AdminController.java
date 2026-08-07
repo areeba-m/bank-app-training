@@ -1,8 +1,8 @@
 package com.redmath.admin.controller;
 
+import com.redmath.account.dto.AccountResponse;
 import com.redmath.admin.dto.CreateUserRequest;
 import com.redmath.admin.dto.UpdateUserRequest;
-import com.redmath.account.dto.AccountResponse;
 import com.redmath.admin.service.AdminService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -43,7 +43,7 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getUserById(id));
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<AccountResponse> updateAccount(
             @PathVariable Long id,
             @Valid @RequestBody UpdateUserRequest request) {

@@ -32,15 +32,24 @@ public class RefreshTokenService {
         refreshToken.setToken(UUID.randomUUID().toString());
         refreshToken.setExpiryDate(Instant.now().plus(7, ChronoUnit.DAYS));
 
-        return refreshTokenRepository.save(refreshToken);
+        RefreshToken saved = refreshTokenRepository.save(refreshToken);
+
+        log.info("Issued refresh token for user '{}'.", user.getEmail());
+
+        return saved;
     }
 
 
     public RefreshToken verifyAndRotate(String token) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
-                .orElseThrow(() -> new BadCredentialsException("Invalid refresh token"));
+                .orElseThrow(() -> {
+                    log.warn("Refresh token validation failed: token not found.");
+                    return new BadCredentialsException("Invalid refresh token");
+                });
 
         if (refreshToken.getExpiryDate().isBefore(Instant.now())) {
+            log.warn("Expired refresh token used by user '{}'.", refreshToken.getUser().getEmail());
+
             refreshTokenRepository.delete(refreshToken);
             throw new BadCredentialsException("Refresh token expired");
         }
@@ -53,10 +62,12 @@ public class RefreshTokenService {
     @Scheduled(cron = "0 0 2 * * ?")
     @Transactional
     public void cleanupExpiredTokens() {
-        refreshTokenRepository.deleteAllByExpiryDateBefore(Instant.now());
+        Long count = refreshTokenRepository.deleteAllByExpiryDateBefore(Instant.now());
+        log.info("Deleted {} expired refresh tokens during scheduled cleanup.", count);
     }
 
     public void deleteByToken(String token){
-        refreshTokenRepository.deleteByToken(token);
+        Long count = refreshTokenRepository.deleteByToken(token);
+        log.info("Deleted {} refresh tokens", count);
     }
 }
