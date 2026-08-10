@@ -1,0 +1,20 @@
+package com.redmath.transfer.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+
+@Data
+@Builder
+@AllArgsConstructor
+public class TransferResponse {
+
+    private Instant date;
+    private String description;
+    private BigDecimal amount;
+    private String senderEmail;
+    private String recipientEmail;
+}

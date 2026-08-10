@@ -1,13 +1,14 @@
 package com.redmath.authentication;
 
 import com.redmath.account.entity.Account;
-import com.redmath.account.repository.AccountRepository;
 import com.redmath.account.entity.Role;
+import com.redmath.account.repository.AccountRepository;
 import com.redmath.authentication.dto.LoginRequest;
 import com.redmath.authentication.dto.RegisterRequest;
 import com.redmath.authentication.entity.RefreshToken;
 import com.redmath.authentication.repository.RefreshTokenRepository;
 import com.redmath.authentication.service.RefreshTokenService;
+import com.redmath.authentication.wrapper.AccountPrincipal;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.ObjectMapper;
@@ -28,6 +30,7 @@ import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -35,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 class AuthIntegrationTest {
 
     private static final String BASE = "/api/v1/auth";
@@ -260,9 +264,15 @@ class AuthIntegrationTest {
 
         assertThat(refreshTokenRepository.findByToken(tokenValue)).isPresent();
 
+        Account principalAccount = new Account();
+        principalAccount.setEmail(EMAIL);
+        principalAccount.setRole(Role.USER);
+        AccountPrincipal accountPrincipal = new AccountPrincipal(principalAccount);
+
         mockMvc.perform(post(BASE + "/logout")
                         .cookie(refreshCookie)
                         .with(csrf().asHeader())
+                        .with(user(accountPrincipal))
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 .andExpect(status().isNoContent())
                 .andExpect(cookie().maxAge("refresh_token", 0));
@@ -301,16 +311,6 @@ class AuthIntegrationTest {
         mockMvc.perform(get("/api/v1/user/me"))
                 .andExpect(status().isUnauthorized());
     }
-
-//    @Test
-//    void accessProtectedUserEndpoint_withValidAccessToken_succeeds() throws Exception {
-//        registerUser(EMAIL, PASSWORD);
-//        String accessToken = (String) loginAndGetResult().get("access_token");
-//
-//        mockMvc.perform(get("/api/v1/user/1").with(csrf().asHeader())
-//                        .header("Authorization", "Bearer " + accessToken))
-//                .andExpect(status().isOk());
-//    }
 
     // ---------------------------------------------------------------
     // Helpers
