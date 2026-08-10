@@ -39,7 +39,6 @@ public class RefreshTokenService {
         return saved;
     }
 
-
     public RefreshToken verifyAndRotate(String token) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
                 .orElseThrow(() -> {

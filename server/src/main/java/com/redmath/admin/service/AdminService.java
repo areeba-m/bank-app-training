@@ -14,6 +14,7 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 @Service
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminService {
 
     private final AccountRepository userRepository;
@@ -85,7 +87,7 @@ public class AdminService {
         if (request.address() != null && !request.address().isBlank()) {
             user.setAddress(request.address());
         }
-
+        user.setUpdatedAt(Instant.now());
         Account updatedUser = userRepository.save(user);
 
         return accountMapper.toResponse(updatedUser);

@@ -18,6 +18,7 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ public class TransactionService
     private final TransactionMapper transactionMapper;
     private final BalanceRepository balanceRepository;
 
+    @PreAuthorize("hasRole('USER')")
     private void updateBalance(Balance balance, BigDecimal amount, @NonNull Indicator indicator)
     {
         switch (indicator) {
@@ -50,6 +52,7 @@ public class TransactionService
 
 
     @Transactional
+    @PreAuthorize("hasRole('USER')")
     public TransactionResponse createTransaction(@NonNull CreateTransactionRequest request, String email)
     {
         Account account = accountRepository.findByEmail(email)
@@ -73,9 +76,10 @@ public class TransactionService
         return transactionMapper.toResponse(saved);
     }
 
-    public Page<TransactionResponse> getTransactions(String email, int page, int size) {
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public Page<TransactionResponse> getTransactions(Long userId, int page, int size) {
 
-        Account account = accountRepository.findByEmail(email)
+        Account account = accountRepository.findById(userId)
                 .orElseThrow(() ->
                         new AccountNotFoundException("Account not found"));
 
