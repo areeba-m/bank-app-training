@@ -3,8 +3,12 @@ import { useSelector } from 'react-redux';
 import PropTypes from "prop-types";
 
 export const ProtectedRoute = ({ children, requiredRole }) => {
-    const { user, isAuthenticated } = useSelector((state) => state.auth);
+    const { user, isAuthenticated ,status} = useSelector((state) => state.auth);
     const location = useLocation();
+
+    if(status==="checking" && !user){
+        return <div>Loading authentication...</div>;
+    }
 
     if (!isAuthenticated) {
         return <Navigate to="/login" state={{ from: location }} replace />;

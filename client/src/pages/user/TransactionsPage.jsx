@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchTransactions, executeTransaction } from '../../redux/    slices  /transactionsSlice.js';
+import { fetchTransactions, executeTransaction } from '../../redux/slices/transactionsSlice.js';
 import { TransactionModal } from '../../components/TransactionModal';
 import { Receipt, Search, Filter, PlusCircle, ArrowDownRight, ArrowUpRight } from 'lucide-react';
 

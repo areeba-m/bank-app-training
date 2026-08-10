@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.web.csrf.CsrfToken;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,18 +33,23 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
         LoginAndRefreshResult result = authService.login(request);
-        log.info("refresh token /login: {}", result.refreshToken());
+//        log.info("refresh token /login: {}", result.refreshToken());
         ResponseCookie cookie = cookieService.buildRefreshCookie(result.refreshToken());
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ResponseEntity.ok(new AuthResponse(result.accessToken(), result.userId(), result.email(), result.role()));
     }
 
+    @GetMapping("/csrf")
+    public CsrfToken csrf(CsrfToken csrfToken) {
+        return csrfToken;
+    }
+
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refresh(@CookieValue("refresh_token") String refreshToken,
                                                 HttpServletResponse response) {
         LoginAndRefreshResult result = authService.refresh(refreshToken);
-        log.info("refresh token /refresh: {}", result.refreshToken());
+//        log.info("refresh token /refresh: {}", result.refreshToken());
         ResponseCookie cookie = cookieService.buildRefreshCookie(result.refreshToken());
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 

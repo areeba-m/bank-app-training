@@ -26,51 +26,93 @@ export const fetchTransactions = createAsyncThunk(
 
 export const executeTransaction = createAsyncThunk(
     'transactions/executeTransaction',
-    async ({ accountId, transactionData }, { rejectWithValue, dispatch }) => {
+
+    async (
+        { accountId, transactionData },
+        { rejectWithValue, dispatch }
+    ) => {
+
         try {
-            const result = await bankApi.createTransaction(accountId, transactionData);
+
+            const result =
+                await bankApi.createTransaction(
+                    accountId,
+                    transactionData
+                );
+
             dispatch(fetchBalance(accountId));
             dispatch(fetchTransactions(accountId));
             dispatch(refreshUser(accountId));
+
             return result;
+
         } catch (err) {
-            return rejectWithValue(err.message);
+
+            return rejectWithValue(
+                err.message || 'Transaction failed'
+            );
         }
     }
 );
 
 const transactionsSlice = createSlice({
     name: 'transactions',
+
     initialState: {
         balanceInfo: null,
         list: [],
         status: 'idle',
         error: null,
     },
+
     reducers: {
+
         clearTransactionsError: (state) => {
             state.error = null;
         }
     },
+
     extraReducers: (builder) => {
+
         builder
-            .addCase(fetchBalance.fulfilled, (state, action) => {
-                state.balanceInfo = action.payload;
-            })
-            .addCase(fetchTransactions.pending, (state) => {
-                state.status = 'loading';
-            })
-            .addCase(fetchTransactions.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.list = action.payload;
-                state.error = null;
-            })
-            .addCase(fetchTransactions.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.payload;
-            });
+
+            .addCase(
+                fetchBalance.fulfilled,
+                (state, action) => {
+                    state.balanceInfo = action.payload;
+                }
+            )
+
+            .addCase(
+                fetchTransactions.pending,
+                (state) => {
+                    state.status = 'loading';
+                }
+            )
+
+            .addCase(
+                fetchTransactions.fulfilled,
+                (state, action) => {
+
+                    state.status = 'succeeded';
+                    state.list = action.payload;
+                    state.error = null;
+                }
+            )
+
+            .addCase(
+                fetchTransactions.rejected,
+                (state, action) => {
+
+                    state.status = 'failed';
+                    state.error = action.payload;
+                }
+            );
     },
 });
 
-export const { clearTransactionsError } = transactionsSlice.actions;
+export const {
+    clearTransactionsError
+} = transactionsSlice.actions;
+
 export default transactionsSlice.reducer;

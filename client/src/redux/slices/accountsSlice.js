@@ -1,11 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { bankApi } from '../../services/api';
+import { adminApi } from '../../services/AdminApi.js';
 
 export const fetchAccounts = createAsyncThunk(
     'accounts/fetchAccounts',
-    async (_, { rejectWithValue }) => {
+    async ({page, size}, { getState, dispatch,rejectWithValue }) => {
         try {
-            return await bankApi.getAccounts();
+            return await adminApi.getAccounts(page,size ,{getState, dispatch});
         } catch (err) {
             return rejectWithValue(err.message);
         }
@@ -14,9 +14,9 @@ export const fetchAccounts = createAsyncThunk(
 
 export const fetchAccountById = createAsyncThunk(
     'accounts/fetchAccountById',
-    async (id, { rejectWithValue }) => {
+    async (id, { getState, dispatch, rejectWithValue }) => {
         try {
-            return await bankApi.getAccountById(id);
+            return await adminApi.getAccountById(id,{getState, dispatch});
         } catch (err) {
             return rejectWithValue(err.message);
         }
@@ -25,9 +25,9 @@ export const fetchAccountById = createAsyncThunk(
 
 export const createNewAccount = createAsyncThunk(
     'accounts/createNewAccount',
-    async (accountData, { rejectWithValue, dispatch }) => {
+    async (accountData, { getState,rejectWithValue, dispatch }) => {
         try {
-            const created = await bankApi.createAccount(accountData);
+            const created = await adminApi.createAccount(accountData,{getState, dispatch});
             dispatch(fetchAccounts());
             return created;
         } catch (err) {
@@ -38,9 +38,9 @@ export const createNewAccount = createAsyncThunk(
 
 export const updateExistingAccount = createAsyncThunk(
     'accounts/updateExistingAccount',
-    async ({ id, data }, { rejectWithValue, dispatch }) => {
+    async ({ id, data }, {getState, rejectWithValue, dispatch }) => {
         try {
-            const updated = await bankApi.updateAccount(id, data);
+            const updated = await adminApi.updateAccount(id, data,{getState,dispatch});
             dispatch(fetchAccounts());
             return updated;
         } catch (err) {
@@ -51,9 +51,9 @@ export const updateExistingAccount = createAsyncThunk(
 
 export const deleteExistingAccount = createAsyncThunk(
     'accounts/deleteExistingAccount',
-    async (id, { rejectWithValue, dispatch }) => {
+    async (id, { getState,rejectWithValue, dispatch }) => {
         try {
-            const res = await bankApi.deleteAccount(id);
+            const res = await adminApi.deleteAccount(id,{getState,dispatch});
             dispatch(fetchAccounts());
             return { id, ...res };
         } catch (err) {
@@ -66,9 +66,14 @@ const accountsSlice = createSlice({
     name: 'accounts',
     initialState: {
         items: [],
-        selectedAccount: null,
-        status: 'idle',
+        page: 0,
+        size: 10,
+        totalPages: 0,
+        totalElements: 0,
+        loading: false,
         error: null,
+        selectedAccount: null,
+        status: 'checking',
     },
     reducers: {
         clearSelectedAccount: (state) => {
@@ -85,7 +90,12 @@ const accountsSlice = createSlice({
             })
             .addCase(fetchAccounts.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.items = action.payload;
+                state.items = action.payload.content;
+                state.page = action.payload.number;
+                state.size = action.payload.size;
+                state.totalPages = action.payload.totalPages;
+                state.totalElements = action.payload.totalElements;
+                state.loading = false;
                 state.error = null;
             })
             .addCase(fetchAccounts.rejected, (state, action) => {

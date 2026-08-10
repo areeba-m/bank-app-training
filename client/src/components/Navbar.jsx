@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../redux/    slices  /authSlice.js';
+import { logoutUser } from '../redux/slices/authSlice.js';
 import { Building2, LogOut, User, Shield, Sparkles } from 'lucide-react';
 
 export const Navbar = () => {
@@ -9,8 +9,14 @@ export const Navbar = () => {
     const navigate = useNavigate();
 
     const handleLogout = () => {
-        dispatch(logout());
-        navigate('/');
+        dispatch(logoutUser())
+            .unwrap()
+            .then(() => {
+                navigate('/');
+            })
+            .catch((err) => {
+                console.error("Logout failed:", err);
+            });
     };
 
     return (

@@ -2,6 +2,7 @@ package com.redmath.authentication.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -19,7 +20,7 @@ import java.util.List;
 public class JwtService {
     private final JwtEncoder jwtEncoder;
 
-    public String generateAccessToken(Authentication authentication) {
+    public String generateAccessToken(@NonNull Authentication authentication) {
         Instant now = Instant.now();
 
         List<String> roles = authentication.getAuthorities().stream()
@@ -30,7 +31,7 @@ public class JwtService {
                 .issuer("self")
                 .subject(authentication.getName())
                 .issuedAt(now)
-                .expiresAt(now.plus(15, ChronoUnit.MINUTES))
+                .expiresAt(now.plus(15, ChronoUnit.SECONDS))
                 .claim("roles", roles)
                 .build();
 

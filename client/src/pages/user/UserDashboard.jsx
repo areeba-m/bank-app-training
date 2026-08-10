@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchBalance, fetchTransactions, executeTransaction } from '../../redux/    slices  /transactionsSlice.js';
+import { fetchBalance, fetchTransactions, executeTransaction } from '../../redux/slices/transactionsSlice.js';
 import { TransactionModal } from '../../components/TransactionModal';
 import {
     Wallet, ArrowDownRight, ArrowUpRight, Receipt,

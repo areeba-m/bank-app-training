@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser, clearAuthError } from '../redux/    slices  /authSlice.js';
-import { Lock, User, Shield, KeyRound, AlertCircle, Sparkles } from 'lucide-react';
+import { loginUser, clearAuthError } from '../redux/slices/authSlice.js';
+import { Lock, User, Shield, KeyRound, AlertCircle, Sparkles, Eye, EyeOff } from 'lucide-react';
 
 export const LoginPage = () => {
     const navigate = useNavigate();
@@ -13,7 +13,7 @@ export const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [localError, setLocalError] = useState('');
-
+    const [showPassword, setShowPassword] = useState(false);
     useEffect(() => {
         const prefill = location.state?.prefill;
 
@@ -133,15 +133,26 @@ export const LoginPage = () => {
 
                             <div className="relative">
                                 <input
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
-                                    className="w-full pl-9 pr-3 py-2.5 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-burgundy-500 focus:border-burgundy-500 font-mono"
+                                    className="w-full pl-9 pr-10 py-2.5 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-burgundy-500 focus:border-burgundy-500 font-mono"
                                     required
                                 />
 
                                 <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-3 text-slate-400 hover:text-burgundy-700"
+                                >
+                                    {showPassword ? (
+                                        <EyeOff className="w-4 h-4" />
+                                    ) : (
+                                        <Eye className="w-4 h-4" />
+                                    )}
+                                </button>
                             </div>
                         </div>
 

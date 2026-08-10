@@ -5,7 +5,7 @@ import {
     createNewAccount,
     updateExistingAccount,
     deleteExistingAccount
-} from '../../redux/    slices  /accountsSlice.js';
+} from '../../redux/slices/accountsSlice.js';
 import { AccountModal } from '../../components/AccountModal';
 import {
     Users, Plus, Search, Edit3, Trash2, Shield, Eye, DollarSign,
@@ -14,10 +14,19 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 export const AdminDashboard = () => {
+
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const { items: accounts, status, error } = useSelector((state) => state.accounts);
+    const {
+        items: accounts,
+        status,
+        error,
+        page,
+        totalPages,
+        totalElements
+    } = useSelector((state) => state.accounts);
+
     const loading = status === 'loading';
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -25,10 +34,14 @@ export const AdminDashboard = () => {
     const [accountToEdit, setAccountToEdit] = useState(null);
     const [deleteConfirmId, setDeleteConfirmId] = useState(null);
     const [toastMessage, setToastMessage] = useState(null);
+    const [pageSize] = useState(10);
 
     useEffect(() => {
-        dispatch(fetchAccounts());
-    }, [dispatch]);
+        dispatch(fetchAccounts({
+            page: 0,
+            size: pageSize
+        }));
+    }, [dispatch, pageSize]);
 
     const showToast = (msg) => {
         setToastMessage(msg);
@@ -47,18 +60,41 @@ export const AdminDashboard = () => {
 
     const handleSaveAccount = async (formData) => {
         if (accountToEdit) {
-            await dispatch(updateExistingAccount({ id: accountToEdit.id, data: formData })).unwrap();
-            showToast(`Account &apos;${formData.id}&apos; updated successfully.`);
+
+            await dispatch(
+                updateExistingAccount({
+                    id: accountToEdit.id,
+                    data: formData
+                })
+            ).unwrap();
+
+
+            showToast(
+                `Account '${accountToEdit.id}' updated successfully.`
+            );
+
         } else {
-            await dispatch(createNewAccount(formData)).unwrap();
-            showToast(`New account &apos;${formData.id}&apos; created successfully.`);
+
+            await dispatch(
+                createNewAccount(formData)
+            ).unwrap();
+            await dispatch(
+                fetchAccounts({
+                    page: page,
+                    size: pageSize
+                })
+            ).unwrap();
+
+            showToast('New account created successfully.');
         }
+
+        setAccountToEdit(null);
     };
 
     const handleDeleteAccount = async (id) => {
         try {
             await dispatch(deleteExistingAccount(id)).unwrap();
-            showToast(`Account &apos;${id}&apos; deleted successfully.`);
+            showToast(`Account ${id} deleted successfully.`);
             setDeleteConfirmId(null);
         } catch (err) {
             console.error('Delete failed:', err);
@@ -66,12 +102,30 @@ export const AdminDashboard = () => {
     };
 
     const filteredAccounts = accounts.filter(acc =>
-        acc.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        String(acc.id).toLowerCase().includes(searchTerm.toLowerCase()) ||
         acc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         acc.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const totalSystemBalance = accounts.reduce((acc, curr) => acc + (curr.balance || 0), 0);
+
+    const handleNextPage = () => {
+        if (page + 1 < totalPages) {
+            dispatch(fetchAccounts({
+                page: page + 1,
+                size: pageSize
+            }));
+        }
+    };
+
+    const handlePreviousPage = () => {
+        if (page > 0) {
+            dispatch(fetchAccounts({
+                page: page - 1,
+                size: pageSize
+            }));
+        }
+    };
 
     return (
         <div className="space-y-6">
@@ -142,7 +196,10 @@ export const AdminDashboard = () => {
                     </div>
 
                     <button
-                        onClick={() => dispatch(fetchAccounts())}
+                        onClick={() => dispatch(fetchAccounts({
+                            page: 0,
+                            size: pageSize
+                        }))}
                         className="px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 transition-colors flex items-center gap-1.5 justify-center"
                     >
                         <RefreshCw className="w-3.5 h-3.5" />
@@ -208,9 +265,9 @@ export const AdminDashboard = () => {
 
                                         <button
                                             onClick={() => setDeleteConfirmId(acc.id)}
-                                            disabled={acc.id === 'admin'}
+                                            disabled={acc.role === 'ADMIN'}
                                             className="p-1 text-slate-600 hover:bg-rose-50 rounded-lg transition-colors inline-flex disabled:opacity-30"
-                                            title={acc.id === 'admin' ? 'Cannot delete admin' : 'Delete Account'}
+                                            title={acc.role === 'ADMIN' ? 'Cannot delete admin' : 'Delete Account'}
                                         >
                                             <Trash2 className="w-4 h-4 text-rose-600" />
                                         </button>
@@ -220,6 +277,33 @@ export const AdminDashboard = () => {
                         )}
                         </tbody>
                     </table>
+                </div>
+                <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100">
+
+                    <div className="text-xs text-slate-500 font-semibold">
+                        Showing page {page + 1} of {totalPages}
+                        <span className="ml-2">({totalElements} accounts)</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+
+                        <button
+                            onClick={handlePreviousPage}
+                            disabled={page === 0}
+                            className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-100">
+                            ← Previous
+                        </button>
+
+                        <button
+                            onClick={handleNextPage}
+                            disabled={page + 1 >= totalPages}
+                            className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-100"
+                        >
+                            Next →
+                        </button>
+
+                    </div>
+
                 </div>
 
             </div>

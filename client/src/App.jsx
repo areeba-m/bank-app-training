@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useAuthInit}from "./hooks/useAuthInit.js";
 import {Navbar} from './components/Navbar';
 import {LandingPage} from './pages/LandingPage';
 import {LoginPage} from './pages/LoginPage';
@@ -12,6 +13,7 @@ import { AccountDetailView } from './pages/admin/AccountDetailView';
 
 
 export function AppRoutes() {
+    useAuthInit();
     return (
         <div className="min-h-screen bg-[#FAF9FA] text-slate-800 flex flex-col font-sans">
             <Navbar/>
