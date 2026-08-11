@@ -9,7 +9,6 @@ import com.redmath.balance.repository.BalanceRepository;
 import com.redmath.transactions.dto.CreateTransactionRequest;
 import com.redmath.transactions.entity.Indicator;
 import com.redmath.transactions.entity.Transaction;
-import com.redmath.transactions.exception.InsufficientBalanceException;
 import com.redmath.transactions.repository.TransactionRepository;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +29,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -209,15 +208,15 @@ class TransactionIntegrationTest
         request.setIndicator(Indicator.DB);
         request.setDescription("Large Payment");
 
-        Exception exception = assertThrows(Exception.class, () -> mockMvc.perform(
-                        post("/api/v1/user/transaction")
-                                .with(userJwt())
-                                .with(csrf())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                .andReturn()
-        );
-        assertInstanceOf(InsufficientBalanceException.class, exception.getCause());
+        mockMvc.perform(post("/api/v1/user/transaction")
+                        .with(userJwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status").value(403))
+                .andExpect(jsonPath("$.message").exists());
+
         Balance balance = balanceRepository
                 .findByAccountUserId(account.getUserId())
                 .orElseThrow();

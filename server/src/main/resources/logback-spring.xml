@@ -1,111 +1,92 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <!-- Read logging.file.path from Spring, default to "logs" -->
+    <!-- Pull in Spring Boot's own property/pattern/color/exception definitions
+         (CONSOLE_LOG_PATTERN, FILE_LOG_PATTERN, %clr conversion rule, %wEx conversion rule, etc.) -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
     <springProperty
             scope="context"
             name="LOG_DIR"
             source="logging.file.path"
             defaultValue="logs"/>
 
-    <!-- Console -->
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{36}) - %msg%n</pattern>
-        </encoder>
-    </appender>
+    <!-- Spring Boot's actual CONSOLE appender bean (name="CONSOLE").
+         Identical output/colors/exception handling to an app with no custom logback config at all. -->
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
-    <!-- Business logs -->
-    <appender name="APPLICATION"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <!-- Business/application logs -->
+    <appender name="APPLICATION" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR}/application.log</file>
-
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${LOG_DIR}/application-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
-
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
         </encoder>
     </appender>
 
     <!-- Security logs -->
-    <appender name="SECURITY"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="SECURITY" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR}/security.log</file>
-
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${LOG_DIR}/security-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
-
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
         </encoder>
     </appender>
 
-    <!-- Error logs -->
-    <appender name="ERRORS"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <!-- Error logs: ERROR level from anywhere in the app (business, security, or framework) -->
+    <appender name="ERRORS" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR}/error.log</file>
-
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${LOG_DIR}/error-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
-
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>ERROR</level>
-        </filter>
-
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
         </encoder>
     </appender>
 
-    <!-- Business modules -->
-    <logger name="com.redmath.account" additivity="false">
+    <!-- Business modules: write to application.log, then propagate (additivity defaults to true)
+         up to root, which handles console + error.log for everyone -->
+    <logger name="com.redmath.account">
         <appender-ref ref="APPLICATION"/>
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="ERRORS"/>
+    </logger>
+    <logger name="com.redmath.balance">
+        <appender-ref ref="APPLICATION"/>
+    </logger>
+    <logger name="com.redmath.transactions">
+        <appender-ref ref="APPLICATION"/>
+    </logger>
+    <logger name="com.redmath.transfer">
+        <appender-ref ref="APPLICATION"/>
+    </logger>
+    <logger name="com.redmath.admin">
+        <appender-ref ref="APPLICATION"/>
+    </logger>
+    <logger name="com.redmath.exception_handler">
+        <appender-ref ref="APPLICATION"/>
     </logger>
 
-    <logger name="com.redmath.balance" additivity="false">
-        <appender-ref ref="APPLICATION"/>
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="ERRORS"/>
-    </logger>
-
-    <logger name="com.redmath.transaction" additivity="false">
-        <appender-ref ref="APPLICATION"/>
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="ERRORS"/>
-    </logger>
-
-    <logger name="com.redmath.admin" additivity="false">
-        <appender-ref ref="APPLICATION"/>
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="ERRORS"/>
-    </logger>
-
-    <!-- Authentication -->
-    <logger name="com.redmath.authentication" additivity="false">
+    <!-- Auth/security modules: write to security.log, propagate up for console + error.log -->
+    <logger name="com.redmath.authentication">
         <appender-ref ref="SECURITY"/>
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="ERRORS"/>
     </logger>
-
-    <logger name="com.redmath.security" additivity="false">
+    <logger name="com.redmath.security">
         <appender-ref ref="SECURITY"/>
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="ERRORS"/>
     </logger>
 
-    <!-- Root -->
+    <!-- Root: Spring's default console behavior + centralized error file, for the whole app -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="ERRORS"/>

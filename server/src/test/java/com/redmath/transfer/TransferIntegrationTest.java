@@ -10,9 +10,6 @@ import com.redmath.transactions.entity.Indicator;
 import com.redmath.transactions.repository.TransactionRepository;
 import com.redmath.transfer.dto.CreateTransferRequest;
 import com.redmath.transfer.entity.Transfer;
-import com.redmath.transfer.exception.InsufficientBalanceException;
-import com.redmath.transfer.exception.RecipientNotFoundException;
-import com.redmath.transfer.exception.SelfTransferException;
 import com.redmath.transfer.repository.TransferRepository;
 import com.redmath.transfer.service.TransferService;
 import org.jspecify.annotations.NonNull;
@@ -34,7 +31,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -167,16 +164,14 @@ class TransferIntegrationTest {
                 "Too much"
         );
 
-        Exception exception = assertThrows(Exception.class, () -> mockMvc.perform(
-                        post("/api/v1/user/transfer")
-                                .with(jwtFor("sender@gmail.com"))
-                                .with(csrf())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                .andReturn()
-        );
-
-        assertInstanceOf(InsufficientBalanceException.class, exception.getCause());
+        mockMvc.perform(post("/api/v1/user/transfer")
+                        .with(jwtFor("sender@gmail.com"))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status").value(403))
+                .andExpect(jsonPath("$.message").exists());
 
         Balance senderBalance = balanceRepository.findByAccountUserId(sender.getUserId()).orElseThrow();
         assertEquals(0, senderBalance.getAmount().compareTo(new BigDecimal("1000")));
@@ -192,16 +187,14 @@ class TransferIntegrationTest {
                 "Ghost"
         );
 
-        Exception exception = assertThrows(Exception.class, () -> mockMvc.perform(
-                        post("/api/v1/user/transfer")
-                                .with(jwtFor("sender@gmail.com"))
-                                .with(csrf())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                .andReturn()
-        );
-
-        assertInstanceOf(RecipientNotFoundException.class, exception.getCause());
+        mockMvc.perform(post("/api/v1/user/transfer")
+                        .with(jwtFor("sender@gmail.com"))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").exists());
     }
 
     @Test
@@ -213,16 +206,14 @@ class TransferIntegrationTest {
                 "To myself"
         );
 
-        Exception exception = assertThrows(Exception.class, () -> mockMvc.perform(
-                        post("/api/v1/user/transfer")
-                                .with(jwtFor("sender@gmail.com"))
-                                .with(csrf())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                .andReturn()
-        );
-
-        assertInstanceOf(SelfTransferException.class, exception.getCause());
+        mockMvc.perform(post("/api/v1/user/transfer")
+                        .with(jwtFor("sender@gmail.com"))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").exists());
     }
 
     @Test

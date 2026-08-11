@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 
 @Data
 @AllArgsConstructor
-//@RequiredArgsConstructor
 @NoArgsConstructor
 public class CreateTransactionRequest
 {
