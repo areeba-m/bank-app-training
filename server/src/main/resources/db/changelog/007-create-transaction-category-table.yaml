@@ -1,0 +1,54 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-transaction-category-table
+      author: mashhood
+
+      changes:
+        - createTable:
+            tableName: transaction_category
+            columns:
+
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: transaction_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    unique: true
+
+              - column:
+                  name: category
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: category_source
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: confidence
+                  type: DOUBLE
+
+              - column:
+                  name: categorized_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+
+
+        - addForeignKeyConstraint:
+            baseTableName: transaction_category
+            baseColumnNames: transaction_id
+            referencedTableName: transactions
+            referencedColumnNames: id
+            constraintName: fk_transaction_category_transaction
