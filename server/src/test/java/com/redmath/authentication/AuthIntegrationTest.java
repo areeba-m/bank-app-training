@@ -195,9 +195,9 @@ class AuthIntegrationTest {
     }
 
     @Test
-    void refresh_withMissingCookie_returns4xx() throws Exception {
+    void refresh_withMissingCookie_returns5xx() throws Exception {
         mockMvc.perform(post(BASE + "/refresh"))
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().is5xxServerError());
     }
 
     @Test

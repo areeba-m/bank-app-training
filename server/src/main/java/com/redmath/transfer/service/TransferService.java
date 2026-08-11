@@ -7,17 +7,18 @@ import com.redmath.balance.exception.BalanceNotFoundException;
 import com.redmath.balance.repository.BalanceRepository;
 import com.redmath.transactions.entity.Indicator;
 import com.redmath.transactions.entity.Transaction;
+import com.redmath.transactions.exception.InsufficientBalanceException;
 import com.redmath.transactions.repository.TransactionRepository;
 import com.redmath.transfer.dto.CreateTransferRequest;
 import com.redmath.transfer.dto.TransferResponse;
 import com.redmath.transfer.entity.Transfer;
-import com.redmath.transfer.exception.InsufficientBalanceException;
 import com.redmath.transfer.exception.RecipientNotFoundException;
 import com.redmath.transfer.exception.SelfTransferException;
 import com.redmath.transfer.exception.SenderAccountNotFoundException;
 import com.redmath.transfer.mapper.TransferMapper;
 import com.redmath.transfer.repository.TransferRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransferService {
@@ -97,6 +99,9 @@ public class TransferService {
 
         transactionRepository.save(debit);
         transactionRepository.save(credit);
+
+        log.info("User made a transfer. From: userId={}, transaction_id={}, To: userId={}, transaction_id={}",
+                sender.getUserId(), debit.getId(), receiver.getUserId(), credit.getId());
 
         return transferMapper.toResponse(savedTransfer);
     }

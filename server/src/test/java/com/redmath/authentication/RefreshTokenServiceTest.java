@@ -2,6 +2,7 @@ package com.redmath.authentication;
 
 import com.redmath.account.entity.Account;
 import com.redmath.authentication.entity.RefreshToken;
+import com.redmath.authentication.exception.InvalidRefreshTokenException;
 import com.redmath.authentication.repository.RefreshTokenRepository;
 import com.redmath.authentication.service.RefreshTokenService;
 import org.junit.jupiter.api.Test;
@@ -9,7 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.Instant;
@@ -44,8 +44,8 @@ class RefreshTokenServiceTest {
         when(refreshTokenRepository.findByToken("expired-token"))
                 .thenReturn(Optional.of(refreshToken));
 
-        BadCredentialsException exception = assertThrows(
-                BadCredentialsException.class,
+        InvalidRefreshTokenException exception = assertThrows(
+                InvalidRefreshTokenException.class,
                 () -> refreshTokenService.verifyAndRotate("expired-token")
         );
 

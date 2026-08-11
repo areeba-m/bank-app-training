@@ -1,10 +1,10 @@
 package com.redmath.user.service;
 
-import com.redmath.account.entity.Account;
-import com.redmath.account.repository.AccountRepository;
 import com.redmath.account.dto.AccountResponse;
+import com.redmath.account.entity.Account;
+import com.redmath.account.exception.UserNotFoundException;
 import com.redmath.account.mapper.AccountMapper;
-import com.redmath.transactions.exception.AccountNotFoundException;
+import com.redmath.account.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,7 @@ public class UserService {
     public AccountResponse getCurrentUser(String email)
     {
         Account account = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AccountNotFoundException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         return accountMapper.toResponse(account);
     }
