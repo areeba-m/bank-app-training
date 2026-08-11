@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -31,7 +32,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request, @NonNull HttpServletResponse response) {
         LoginAndRefreshResult result = authService.login(request);
 //        log.info("refresh token /login: {}", result.refreshToken());
         ResponseCookie cookie = cookieService.buildRefreshCookie(result.refreshToken());
@@ -47,7 +48,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refresh(@CookieValue("refresh_token") String refreshToken,
-                                                HttpServletResponse response) {
+                                                @NonNull HttpServletResponse response) {
         LoginAndRefreshResult result = authService.refresh(refreshToken);
 //        log.info("refresh token /refresh: {}", result.refreshToken());
         ResponseCookie cookie = cookieService.buildRefreshCookie(result.refreshToken());
@@ -58,7 +59,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@CookieValue(value = "refresh_token", required = false) String refreshToken,
-                                       HttpServletResponse response) {
+                                       @NonNull HttpServletResponse response) {
         authService.logout(refreshToken);
 
         ResponseCookie cookie = cookieService.deleteRefreshCookie();

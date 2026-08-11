@@ -1,4 +1,5 @@
 import {API_CONFIG} from "./api.js";
+import { authenticatedFetch } from "../redux/authenticatedFetch.js";
 
 export const getCsrfToken = () => {
 
@@ -41,17 +42,12 @@ export const authApi = {
         return data;
     },
 
-    logout: async (accessToken) =>
+    logout: async (authContext) =>
     {
-        const res = await fetch(`${API_CONFIG.BASE_URL}/auth/logout`,
+        const res = await authenticatedFetch(`${API_CONFIG.BASE_URL}/auth/logout`,
             {
                 method: "POST",
-                credentials: "include",
-                headers:
-                    {
-                        "Authorization": `Bearer ${accessToken}`
-                    }
-            });
+            },authContext);
         if (!res.ok) {
             throw new Error("Logout failed");
         }

@@ -183,17 +183,17 @@ export const bankApi = {
             return await res.json();
         }
     },
-
-    getTransactions: async (accountId) => {
-        if (API_CONFIG.USE_MOCK_API) {
-            const txns = getStoredTransactions();
-            return txns.filter(t => t.accountId === accountId);
-        } else {
-            const res = await fetch(`${API_CONFIG.BASE_URL}/accounts/${accountId}/transactions`);
-            if (!res.ok) throw new Error('Failed to fetch transactions');
-            return await res.json();
-        }
-    },
+    //
+    // getTransactions: async (accountId) => {
+    //     if (API_CONFIG.USE_MOCK_API) {
+    //         const txns = getStoredTransactions();
+    //         return txns.filter(t => t.accountId === accountId);
+    //     } else {
+    //         const res = await fetch(`${API_CONFIG.BASE_URL}/accounts/${accountId}/transactions`);
+    //         if (!res.ok) throw new Error('Failed to fetch transactions');
+    //         return await res.json();
+    //     }
+    // },
     createTransaction: async (accountId, { description, amount, type }) => {
         if (API_CONFIG.USE_MOCK_API) {
             const accounts = getStoredAccounts();

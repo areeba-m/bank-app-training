@@ -1,19 +1,14 @@
 import {useState, useEffect, useCallback} from 'react';
 import {useParams, useNavigate, Link} from 'react-router-dom';
 import {useSelector, useDispatch} from 'react-redux';
+
 import {fetchAccountById} from '../../redux/slices/accountsSlice.js';
 import {
-    fetchBalance,
-    fetchTransactions
+    fetchBalance, fetchTransactions
 } from '../../redux/slices/transactionsSlice.js';
+
 import {
-    ArrowLeft,
-    Mail,
-    MapPin,
-    Key,
-    Receipt,
-    Shield,
-    Calendar
+    ArrowLeft, Mail, MapPin, Key, Receipt, Shield, Calendar
 } from 'lucide-react';
 
 export const AccountDetailView = () => {
@@ -22,54 +17,93 @@ export const AccountDetailView = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const {selectedAccount: account} = useSelector(
-        (state) => state.accounts
-    );
+    const {
+        selectedAccount: account
+    } = useSelector((state) => state.accounts);
 
     const {
         balanceInfo,
-        list: transactions
-    } = useSelector(
-        (state) => state.transactions
-    );
+        list: transactions,
+        page: transactionPage,
+        size: transactionSize,
+        totalPages: transactionTotalPages,
+        totalElements: transactionTotalElements,
+        status: transactionStatus
+    } = useSelector((state) => state.transactions);
 
     const [loading, setLoading] = useState(true);
 
-    const loadData = useCallback(async () => {
+    const loadData = useCallback(async (page = 0) => {
+
         setLoading(true);
 
         try {
-            await Promise.all([
-                dispatch(fetchAccountById(id)).unwrap(),
+
+            await Promise.all([dispatch(fetchAccountById(id)).unwrap(),
+
                 dispatch(fetchBalance(id)).unwrap(),
-                dispatch(fetchTransactions(id)).unwrap()
-            ]);
+
+                dispatch(fetchTransactions({
+                    accountId: id, page, size: 10
+                })).unwrap()]);
+
         } catch (err) {
+
             console.error('Failed to load account:', err);
+
         } finally {
+
             setLoading(false);
+
         }
+
     }, [id, dispatch]);
 
     useEffect(() => {
+
         const fetchData = async () => {
-            await loadData();
+            await loadData(0);
         };
 
         void fetchData();
+
     }, [loadData]);
 
+
+    const handleNextTransactionPage = () => {
+
+        if (transactionPage + 1 < transactionTotalPages) {
+
+            dispatch(fetchTransactions({
+                accountId: id, page: transactionPage + 1, size: transactionSize
+            }));
+        }
+    };
+
+
+    const handlePreviousTransactionPage = () => {
+
+        if (transactionPage > 0) {
+
+            dispatch(fetchTransactions({
+                accountId: id, page: transactionPage - 1, size: transactionSize
+            }));
+        }
+    };
+
+
     if (loading) {
-        return (
-            <div className="p-8 text-center text-slate-400 text-xs">
+
+        return (<div className="p-8 text-center text-slate-400 text-xs">
                 Loading statement details...
-            </div>
-        );
+            </div>);
     }
 
+
     if (!account) {
-        return (
-            <div className="p-8 space-y-4">
+
+        return (<div className="p-8 space-y-4">
+
                 <p className="text-xs font-semibold text-rose-700">
                     Account not found.
                 </p>
@@ -80,15 +114,17 @@ export const AccountDetailView = () => {
                 >
                     Back to Directory
                 </button>
-            </div>
-        );
+
+            </div>);
     }
 
-    return (
-        <div className="space-y-6">
+
+    return (<div className="space-y-6">
 
             {/* Back button */}
-            <div className="flex items-center">
+
+            <div className="flex items-center justify-between">
+
                 <Link
                     to="/admin/dashboard"
                     className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-burgundy-800 transition-colors"
@@ -96,9 +132,12 @@ export const AccountDetailView = () => {
                     <ArrowLeft className="w-4 h-4 text-burgundy-700"/>
                     Directory
                 </Link>
+
             </div>
 
-            {/* Account Information */}
+
+            {/* Account information */}
+
             <div
                 className="bg-white rounded-3xl p-6 border border-burgundy-100/80 shadow-xs grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
 
@@ -134,36 +173,57 @@ export const AccountDetailView = () => {
 
                     </div>
 
+
                     <div
                         className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600 pt-2 border-t border-slate-100">
 
                         <div className="flex items-center gap-2">
+
                             <Mail className="w-3.5 h-3.5 text-burgundy-600 shrink-0"/>
-                            <span>{account.email}</span>
+
+                            <span>
+                                {account.email}
+                            </span>
+
                         </div>
 
+
                         <div className="flex items-center gap-2">
+
                             <MapPin className="w-3.5 h-3.5 text-burgundy-600 shrink-0"/>
+
                             <span className="truncate">
                                 {account.address || 'N/A'}
                             </span>
+
                         </div>
 
+
                         <div className="flex items-center gap-2">
+
                             <Key className="w-3.5 h-3.5 text-burgundy-600 shrink-0"/>
-                            <span>Password protected</span>
+
+                            <span className="font-mono">
+                                Pass: {account.password}
+                            </span>
+
                         </div>
 
+
                         <div className="flex items-center gap-2">
+
                             <Shield className="w-3.5 h-3.5 text-burgundy-600 shrink-0"/>
-                            <span>Active</span>
+
+                            <span>
+                                Active
+                            </span>
+
                         </div>
 
                     </div>
 
                 </div>
 
-                {/* Current Balance */}
                 <div
                     className="lg:col-span-5 bg-gradient-to-br from-burgundy-900 via-burgundy-800 to-burgundy-950 p-5 rounded-2xl text-white shadow-burgundy-lg">
 
@@ -181,10 +241,11 @@ export const AccountDetailView = () => {
                     </div>
 
                     <p className="text-2xl font-extrabold font-mono tracking-tight text-white mb-2">
-                        ${(balanceInfo?.amount || 0).toLocaleString(
-                        'en-US',
-                        {minimumFractionDigits: 2}
-                    )}
+
+                        ${(balanceInfo?.amount || 0).toLocaleString('en-US', {
+                        minimumFractionDigits: 2
+                    })}
+
                     </p>
 
                     <div className="flex items-center gap-1.5 text-[10px] text-burgundy-200 font-mono">
@@ -201,7 +262,9 @@ export const AccountDetailView = () => {
 
             </div>
 
+
             {/* Transactions */}
+
             <div className="bg-white rounded-3xl border border-burgundy-100/80 shadow-xs p-5 space-y-4">
 
                 <div className="flex items-center justify-between">
@@ -217,10 +280,11 @@ export const AccountDetailView = () => {
                     </div>
 
                     <span className="text-[11px] text-slate-400 font-mono">
-                        {transactions.length} Records
+                        {transactionTotalElements} Records
                     </span>
 
                 </div>
+
 
                 <div className="overflow-x-auto">
 
@@ -230,92 +294,101 @@ export const AccountDetailView = () => {
                             className="bg-sand-50 text-burgundy-900 font-bold uppercase tracking-wider border-b border-burgundy-100">
 
                         <tr>
-                            <th className="py-3 px-4">Txn ID</th>
-                            <th className="py-3 px-4">Date & Time</th>
-                            <th className="py-3 px-4">Description</th>
-                            <th className="py-3 px-4">Indicator</th>
+
+                            <th className="py-3 px-4">
+                                Txn ID
+                            </th>
+
+                            <th className="py-3 px-4">
+                                Date & Time
+                            </th>
+
+                            <th className="py-3 px-4">
+                                Description
+                            </th>
+
+                            <th className="py-3 px-4">
+                                Indicator
+                            </th>
+
                             <th className="py-3 px-4 text-right">
                                 Amount ($)
                             </th>
+
                         </tr>
 
                         </thead>
 
+
                         <tbody className="divide-y divide-slate-100">
 
-                        {transactions.length === 0 ? (
+                        {transactionStatus === 'loading' ? (
 
                             <tr>
+
+                                <td
+                                    colSpan="5"
+                                    className="py-6 text-center text-slate-400"
+                                >
+                                    Loading transactions...
+                                </td>
+
+                            </tr>
+
+                        ) : transactions.length === 0 ? (
+
+                            <tr>
+
                                 <td
                                     colSpan="5"
                                     className="py-6 text-center text-slate-400"
                                 >
                                     No transactions recorded.
                                 </td>
+
                             </tr>
 
                         ) : (
 
-                            transactions.map((t) => (
+                            transactions.map((t) => {
+                                const indicator = t.dbCrIndicator ?? t.indicator;
 
-                                <tr
-                                    key={t.id}
-                                    className="hover:bg-sand-50/50 transition-colors"
-                                >
+                                return (<tr
+                                        key={t.id}
+                                        className="hover:bg-sand-50/50 transition-colors"
+                                    >
+                                        <td className="py-3 px-4 font-mono font-bold text-slate-800">
+                                            {t.id}
+                                        </td>
 
-                                    <td className="py-3 px-4 font-mono font-bold text-slate-800">
-                                        {t.id}
-                                    </td>
+                                        <td className="py-3 px-4 font-mono text-slate-500">
+                                            {new Date(t.date).toLocaleString()}
+                                        </td>
 
-                                    <td className="py-3 px-4 font-mono text-slate-500">
-                                        {new Date(t.date).toLocaleString()}
-                                    </td>
+                                        <td className="py-3 px-4 font-semibold text-slate-800">
+                                            {t.description}
+                                        </td>
 
-                                    <td className="py-3 px-4 font-semibold text-slate-800">
-                                        {t.description}
-                                    </td>
+                                        <td className="py-3 px-4">
+                <span
+                    className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${indicator === 'CR' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}`}
+                >
+                    {indicator || '-'}
+                </span>
+                                        </td>
 
-                                    <td className="py-3 px-4">
-
-                                            <span
-                                                className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
-                                                    t.dbCrIndicator === 'CR'
-                                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                                        : 'bg-rose-50 text-rose-700 border border-rose-200'
-                                                }`}
-                                            >
-                                                {t.dbCrIndicator}
-                                            </span>
-
-                                    </td>
-
-                                    <td className="py-3 px-4 text-right font-mono font-bold">
-
-                                            <span
-                                                className={
-                                                    t.dbCrIndicator === 'CR'
-                                                        ? 'text-emerald-700'
-                                                        : 'text-rose-700'
-                                                }
-                                            >
-                                                {t.dbCrIndicator === 'CR'
-                                                    ? '+'
-                                                    : '-'}
-                                                ${t.amount.toLocaleString(
-                                                'en-US',
-                                                {
-                                                    minimumFractionDigits: 2
-                                                }
-                                            )}
-                                            </span>
-
-                                    </td>
-
-                                </tr>
-
-                            ))
-
-                        )}
+                                        <td className="py-3 px-4 text-right font-mono font-bold">
+                <span
+                    className={indicator === 'CR' ? 'text-emerald-700' : 'text-rose-700'}
+                >
+                    {indicator === 'CR' ? '+' : '-'}
+                    ${Math.abs(Number(t.amount || 0)).toLocaleString('en-US', {
+                    minimumFractionDigits: 2
+                })}
+                </span>
+                                        </td>
+                                    </tr>);
+                            }))}
 
                         </tbody>
 
@@ -323,8 +396,46 @@ export const AccountDetailView = () => {
 
                 </div>
 
+
+                {/* Transaction pagination */}
+
+                <div className="flex items-center justify-between px-1 pt-3 border-t border-slate-100">
+
+                    <div className="text-xs text-slate-500 font-semibold">
+
+                        Showing page {transactionPage + 1} of {transactionTotalPages}
+
+                        <span className="ml-2">
+                            ({transactionTotalElements} transactions)
+                        </span>
+
+                    </div>
+
+
+                    <div className="flex items-center gap-2">
+
+                        <button
+                            onClick={handlePreviousTransactionPage}
+                            disabled={transactionPage === 0 || transactionStatus === 'loading'}
+                            className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-100"
+                        >
+                            ← Previous
+                        </button>
+
+
+                        <button
+                            onClick={handleNextTransactionPage}
+                            disabled={transactionPage + 1 >= transactionTotalPages || transactionStatus === 'loading'}
+                            className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-100"
+                        >
+                            Next →
+                        </button>
+
+                    </div>
+
+                </div>
+
             </div>
 
-        </div>
-    );
+        </div>);
 };

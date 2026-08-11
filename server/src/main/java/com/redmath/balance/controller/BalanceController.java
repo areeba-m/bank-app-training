@@ -1,5 +1,7 @@
 package com.redmath.balance.controller;
 
+import com.redmath.account.entity.Account;
+import com.redmath.account.repository.AccountRepository;
 import com.redmath.balance.dto.BalanceResponse;
 import com.redmath.balance.service.BalanceService;
 import lombok.RequiredArgsConstructor;
@@ -12,12 +14,17 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class BalanceController {
 
-    private final BalanceService userService;
+    private final BalanceService balanceService;
+    private final AccountRepository accountRepository;
 
-    @GetMapping()
-    public BalanceResponse getBalance(@NonNull Authentication auth)
-    {
-        String email= auth.getName();
-        return userService.getBalance(email);
+    public BalanceResponse getBalance(@NonNull Authentication auth) {
+
+        String email = auth.getName();
+        Account account = accountRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        Long id = account.getUserId();
+
+        return balanceService.getBalance(id);
     }
 }

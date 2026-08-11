@@ -1,12 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { bankApi } from '../../services/api';
+import { transactionApi } from '../../services/TransactionApi.js';
 import { refreshUser } from './authSlice';
 
 export const fetchBalance = createAsyncThunk(
     'transactions/fetchBalance',
-    async (accountId, { rejectWithValue }) => {
+    async (accountId, {getState,dispatch, rejectWithValue }) => {
         try {
-            return await bankApi.getBalance(accountId);
+            return await transactionApi.getBalance(accountId,{getState,dispatch});
         } catch (err) {
             return rejectWithValue(err.message);
         }
@@ -15,9 +15,17 @@ export const fetchBalance = createAsyncThunk(
 
 export const fetchTransactions = createAsyncThunk(
     'transactions/fetchTransactions',
-    async (accountId, { rejectWithValue }) => {
+    async (
+        { accountId, page = 0, size = 10 },
+        { getState, dispatch, rejectWithValue }
+    ) => {
         try {
-            return await bankApi.getTransactions(accountId);
+            return await transactionApi.getTransactions(
+                accountId,
+                page,
+                size,
+                { getState, dispatch }
+            );
         } catch (err) {
             return rejectWithValue(err.message);
         }
@@ -61,6 +69,12 @@ const transactionsSlice = createSlice({
     initialState: {
         balanceInfo: null,
         list: [],
+
+        page: 0,
+        size: 10,
+        totalPages: 0,
+        totalElements: 0,
+
         status: 'idle',
         error: null,
     },
@@ -95,7 +109,15 @@ const transactionsSlice = createSlice({
                 (state, action) => {
 
                     state.status = 'succeeded';
-                    state.list = action.payload;
+
+                    // Page<T> response
+                    state.list = action.payload.content;
+
+                    state.page = action.payload.number;
+                    state.size = action.payload.size;
+                    state.totalPages = action.payload.totalPages;
+                    state.totalElements = action.payload.totalElements;
+
                     state.error = null;
                 }
             )

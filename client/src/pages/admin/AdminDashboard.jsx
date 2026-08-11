@@ -94,6 +94,12 @@ export const AdminDashboard = () => {
     const handleDeleteAccount = async (id) => {
         try {
             await dispatch(deleteExistingAccount(id)).unwrap();
+            await dispatch(
+                fetchAccounts({
+                    page: page,
+                    size: pageSize
+                })
+            ).unwrap();
             showToast(`Account ${id} deleted successfully.`);
             setDeleteConfirmId(null);
         } catch (err) {

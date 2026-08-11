@@ -23,6 +23,7 @@ public class TransactionMapper
     public TransactionResponse toResponse(@NonNull Transaction transaction)
     {
         return new TransactionResponse(
+                transaction.getId(),
                 transaction.getDate(),
                 transaction.getDescription(),
                 transaction.getAmount(),

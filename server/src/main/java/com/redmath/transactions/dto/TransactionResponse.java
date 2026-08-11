@@ -12,6 +12,7 @@ import java.time.Instant;
 @AllArgsConstructor
 public class TransactionResponse {
 
+    private Long id;
     private Instant date;
     private String description;
     private BigDecimal amount;

@@ -17,9 +17,9 @@ public class BalanceService {
     private final AccountRepository accountRepository;
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public BalanceResponse getBalance(String email) {
+    public BalanceResponse getBalance(long userId) {
 
-        Account account = accountRepository.findByEmail(email)
+        Account account = accountRepository.findById(userId)
                 .orElseThrow(() -> new AccountNotFoundException("Account not found for email: "));
 
         Balance balance = account.getBalance();

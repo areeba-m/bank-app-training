@@ -4,6 +4,8 @@ import com.redmath.account.dto.AccountResponse;
 import com.redmath.admin.dto.CreateUserRequest;
 import com.redmath.admin.dto.UpdateUserRequest;
 import com.redmath.admin.service.AdminService;
+import com.redmath.balance.dto.BalanceResponse;
+import com.redmath.balance.service.BalanceService;
 import com.redmath.transactions.dto.TransactionResponse;
 import com.redmath.transactions.service.TransactionService;
 import jakarta.validation.Valid;
@@ -20,7 +22,7 @@ public class AdminController {
 
     private final AdminService adminService;
     private final TransactionService transactionService;
-
+    private final BalanceService balanceService;
     @PostMapping
     public ResponseEntity<AccountResponse> createAccount(
             @Valid @RequestBody CreateUserRequest request) {
@@ -74,6 +76,15 @@ public class AdminController {
                         page,
                         size
                 )
+        );
+    }
+
+    @GetMapping("/{userId}/balance")
+    public ResponseEntity<BalanceResponse> getBalance(
+            @PathVariable Long userId) {
+
+        return ResponseEntity.ok(
+                balanceService.getBalance(userId)
         );
     }
 }

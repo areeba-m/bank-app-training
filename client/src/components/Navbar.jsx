@@ -28,7 +28,7 @@ export const Navbar = () => {
                     </div>
                     <div>
             <span className="text-lg font-extrabold text-burgundy-900 tracking-tight flex items-center gap-1">
-              MY <span className="font-light text-burgundy-600">BANK</span>
+              AURA <span className="font-light text-burgundy-600">BANK</span>
             </span>
                     </div>
                 </Link>

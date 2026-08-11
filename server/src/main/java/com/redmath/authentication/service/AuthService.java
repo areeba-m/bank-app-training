@@ -12,6 +12,7 @@ import com.redmath.authentication.exception.EmailAlreadyExistsException;
 import com.redmath.authentication.wrapper.AccountPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -34,7 +35,7 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
 
     @Transactional
-    public AccountResponse register(RegisterRequest request) {
+    public AccountResponse register(@NonNull RegisterRequest request) {
         if (accountRepository.existsByEmail(request.email())) {
             log.warn("Registration failed: email '{}' is already registered.", request.email());
             throw new EmailAlreadyExistsException("Unable to register with the provided details");
@@ -54,7 +55,7 @@ public class AuthService {
                 saved.getUserId(),saved.getEmail(), saved.getRole());
 
         return new AccountResponse(saved.getUserId(),
-                saved.getName(), saved.getEmail(), saved.getAddress(), saved.getRole());
+                saved.getName(), saved.getEmail(), saved.getAddress(), saved.getRole(),saved.getBalance().getAmount());
     }
 
     @Transactional

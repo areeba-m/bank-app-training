@@ -15,10 +15,10 @@ export const loginUser = createAsyncThunk(
 
 export const logoutUser = createAsyncThunk(
     "auth/logoutUser",
-    async (_, {  getState,rejectWithValue }) => {
+    async (_, {  getState,dispatch,rejectWithValue }) => {
         try {
             const token = getState().auth.accessToken;
-            await authApi.logout(token);
+            await authApi.logout({getState,dispatch});
             return true;
         } catch (err) {
             return rejectWithValue(err.message || "Logout failed");

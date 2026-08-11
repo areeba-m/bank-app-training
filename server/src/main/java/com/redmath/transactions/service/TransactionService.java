@@ -80,8 +80,7 @@ public class TransactionService
     public Page<TransactionResponse> getTransactions(Long userId, int page, int size) {
 
         Account account = accountRepository.findById(userId)
-                .orElseThrow(() ->
-                        new AccountNotFoundException("Account not found"));
+                .orElseThrow(() -> new AccountNotFoundException("Account not found"));
 
         Pageable pageable = PageRequest.of(page, size);
 
