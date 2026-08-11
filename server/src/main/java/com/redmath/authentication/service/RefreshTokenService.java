@@ -2,11 +2,11 @@ package com.redmath.authentication.service;
 
 import com.redmath.account.entity.Account;
 import com.redmath.authentication.entity.RefreshToken;
+import com.redmath.authentication.exception.InvalidRefreshTokenException;
 import com.redmath.authentication.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,14 +43,14 @@ public class RefreshTokenService {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
                 .orElseThrow(() -> {
                     log.warn("Refresh token validation failed: token not found.");
-                    return new BadCredentialsException("Invalid refresh token");
+                    return new InvalidRefreshTokenException("Invalid refresh token");
                 });
 
         if (refreshToken.getExpiryDate().isBefore(Instant.now())) {
             log.warn("Expired refresh token used by user '{}'.", refreshToken.getUser().getEmail());
 
             refreshTokenRepository.delete(refreshToken);
-            throw new BadCredentialsException("Refresh token expired");
+            throw new InvalidRefreshTokenException("Refresh token expired");
         }
 
         refreshToken.setToken(UUID.randomUUID().toString());

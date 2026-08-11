@@ -108,7 +108,8 @@ class TransactionIntegrationTest
     private @NonNull RequestPostProcessor userJwt()
     {
         return jwt().jwt(jwt -> jwt
-                        .subject("test@gmail.com"))
+                        .subject("test@gmail.com")
+                        .claim("userId", account.getUserId()))
                 .authorities(
                         new SimpleGrantedAuthority("ROLE_USER")
                 );

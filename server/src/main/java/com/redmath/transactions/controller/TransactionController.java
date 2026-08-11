@@ -1,6 +1,5 @@
 package com.redmath.transactions.controller;
 
-import com.redmath.authentication.wrapper.AccountPrincipal;
 import com.redmath.transactions.dto.CreateTransactionRequest;
 import com.redmath.transactions.dto.TransactionResponse;
 import com.redmath.transactions.service.TransactionService;
@@ -10,6 +9,7 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import java.util.Objects;
 
@@ -40,7 +40,8 @@ public class TransactionController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        Long userId = ((AccountPrincipal) Objects.requireNonNull(authentication.getPrincipal())).getUserId();
+        Long userId = ((Jwt) Objects.requireNonNull(authentication.getPrincipal())).getClaim("userId");
+
         return ResponseEntity.ok(
                 transactionService.getTransactions(
                         userId,

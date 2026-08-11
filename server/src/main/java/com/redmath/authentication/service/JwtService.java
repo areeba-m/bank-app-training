@@ -1,5 +1,6 @@
 package com.redmath.authentication.service;
 
+import com.redmath.authentication.wrapper.AccountPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -27,11 +29,14 @@ public class JwtService {
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
+        Long userId = ((AccountPrincipal) Objects.requireNonNull(authentication.getPrincipal())).getUserId();
+
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("self")
                 .subject(authentication.getName())
                 .issuedAt(now)
-                .expiresAt(now.plus(15, ChronoUnit.SECONDS))
+                .expiresAt(now.plus(15, ChronoUnit.MINUTES))
+                .claim("userId", userId)
                 .claim("roles", roles)
                 .build();
 

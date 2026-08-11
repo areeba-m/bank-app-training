@@ -1,0 +1,2 @@
+2026-08-11 09:02:31.978 [http-nio-8080-exec-2] INFO  c.r.a.service.AuthService - User 'admin@bank.com' authenticated successfully.
+2026-08-11 09:02:32.000 [http-nio-8080-exec-2] INFO  c.r.a.service.RefreshTokenService - Issued refresh token for user 'admin@bank.com'.

@@ -190,8 +190,8 @@ class AuthIntegrationTest {
         assertThat(rotatedCookie.getValue()).isNotEqualTo(initialRefreshCookie.getValue());
 
         // old token should no longer be valid after rotation
-        mockMvc.perform(post(BASE + "/refresh").cookie(initialRefreshCookie))
-                .andExpect(status().isForbidden());
+        mockMvc.perform(post(BASE + "/refresh").with(csrf().asHeader()).cookie(initialRefreshCookie))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -201,10 +201,10 @@ class AuthIntegrationTest {
     }
 
     @Test
-    void refresh_withInvalidToken_returns401() throws Exception {
+    void refresh_withInvalidToken_returns400() throws Exception {
         mockMvc.perform(post(BASE + "/refresh").with(csrf().asHeader())
                 .cookie(new Cookie("refresh_token", "not-a-real-token")))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
