@@ -1,6 +1,7 @@
 package com.redmath.transactions.entity;
 
 import com.redmath.account.entity.Account;
+import com.redmath.transfer.entity.Transfer;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,10 +23,22 @@ public class Transaction {
     private Instant date;
     private String description;
     private BigDecimal amount;
+
     @Enumerated(EnumType.STRING)
     private Indicator indicator;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id")
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "account_id", nullable = false)
     private Account account;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "counterparty_account_id")
+    private Account counterpartyAccount;
+    String counterpartyName;
+    String counterpartyEmail;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "transfer_id")
+    private Transfer transfer;
 
 }

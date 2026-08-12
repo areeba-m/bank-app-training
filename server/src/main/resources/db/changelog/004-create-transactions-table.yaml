@@ -1,13 +1,12 @@
 databaseChangeLog:
   - changeSet:
       id: create-transactions-table
-      author: simal
+      author: simal-areeba
 
       changes:
         - createTable:
             tableName: transactions
             columns:
-
               - column:
                   name: id
                   type: BIGINT
@@ -46,6 +45,27 @@ databaseChangeLog:
                   constraints:
                     nullable: false
 
+              - column:
+                  name: counterparty_account_id
+                  type: BIGINT
+
+              - column:
+                  name: counterparty_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: true
+
+              - column:
+                  name: counterparty_email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: true
+
+              - column:
+                  name: transfer_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true
 
         - addForeignKeyConstraint:
             baseTableName: transactions
@@ -53,3 +73,17 @@ databaseChangeLog:
             referencedTableName: account
             referencedColumnNames: user_id
             constraintName: fk_transaction_account
+
+        - addForeignKeyConstraint:
+            baseTableName: transactions
+            baseColumnNames: counterparty_account_id
+            referencedTableName: account
+            referencedColumnNames: user_id
+            constraintName: fk_transaction_counterparty_account
+
+        - addForeignKeyConstraint:
+            baseTableName: transactions
+            baseColumnNames: transfer_id
+            referencedTableName: transfers
+            referencedColumnNames: id
+            constraintName: fk_transaction_transfer
