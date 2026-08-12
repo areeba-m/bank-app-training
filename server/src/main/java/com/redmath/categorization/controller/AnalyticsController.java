@@ -28,8 +28,7 @@ public class AnalyticsController {
     /**
      * GET /api/v1/user/analytics/spending
      * GET /api/v1/user/analytics/spending?from=2026-08-01&to=2026-08-31
-     * GET /api/v1/user/analytics/spending?insight=true
-     *
+     * GET /api/v1/user/analytics/spending?insight=true*
      * With no "from"/"to" supplied, defaults to the current calendar month.
      * "to" is treated as inclusive of that whole day.
      */

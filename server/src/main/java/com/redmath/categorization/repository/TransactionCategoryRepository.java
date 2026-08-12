@@ -16,7 +16,6 @@ public interface TransactionCategoryRepository extends JpaRepository<Transaction
 
     Optional<TransactionCategory> findByTransactionId(Long transactionId);
 
-    boolean existsByTransactionId(Long transactionId);
 
     @Query("select tc.category as category, sum(t.amount) as total "
             + "from TransactionCategory tc join tc.transaction t "
