@@ -86,4 +86,5 @@ databaseChangeLog:
             baseColumnNames: transfer_id
             referencedTableName: transfers
             referencedColumnNames: id
+            onDelete: RESTRICT
             constraintName: fk_transaction_transfer

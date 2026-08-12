@@ -41,7 +41,9 @@ public class TransferService {
     private final BalanceRepository balanceRepository;
     private final TransactionRepository transactionRepository;
     private final TransferMapper transferMapper;
-    
+
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('ADMIN')")
     public Page<TransferResponse> getTransfers(String email, int page, int size) {
 
         Account account = accountRepository.findByEmail(email)

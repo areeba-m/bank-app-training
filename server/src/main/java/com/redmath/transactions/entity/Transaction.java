@@ -4,6 +4,8 @@ import com.redmath.account.entity.Account;
 import com.redmath.transfer.entity.Transfer;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -39,6 +41,7 @@ public class Transaction {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "transfer_id")
+    @OnDelete(action = OnDeleteAction.RESTRICT)
     private Transfer transfer;
 
 }
