@@ -7,27 +7,31 @@ import com.redmath.balance.exception.BalanceNotFoundException;
 import com.redmath.balance.repository.BalanceRepository;
 import com.redmath.transactions.entity.Indicator;
 import com.redmath.transactions.entity.Transaction;
+import com.redmath.transactions.exception.InsufficientBalanceException;
 import com.redmath.transactions.repository.TransactionRepository;
 import com.redmath.transfer.dto.CreateTransferRequest;
+import com.redmath.transfer.dto.LockedBalances;
 import com.redmath.transfer.dto.TransferResponse;
 import com.redmath.transfer.entity.Transfer;
-import com.redmath.transfer.exception.InsufficientBalanceException;
 import com.redmath.transfer.exception.RecipientNotFoundException;
 import com.redmath.transfer.exception.SelfTransferException;
 import com.redmath.transfer.exception.SenderAccountNotFoundException;
 import com.redmath.transfer.mapper.TransferMapper;
 import com.redmath.transfer.repository.TransferRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransferService {
@@ -38,69 +42,8 @@ public class TransferService {
     private final TransactionRepository transactionRepository;
     private final TransferMapper transferMapper;
 
-    @Transactional
-    public TransferResponse createTransfer(@NonNull CreateTransferRequest request, String senderEmail) {
-
-        if (senderEmail != null && senderEmail.equalsIgnoreCase(request.getRecipientEmail())) {
-            throw new SelfTransferException("Cannot transfer money to your own account");
-        }
-
-        Account sender = accountRepository.findByEmail(senderEmail)
-                .orElseThrow(() -> new SenderAccountNotFoundException("Sender account not found"));
-
-        Account receiver = accountRepository.findByEmail(request.getRecipientEmail())
-                .orElseThrow(() -> new RecipientNotFoundException("Recipient account not found"));
-
-        Balance senderBalance = balanceRepository.findByAccountUserId(sender.getUserId())
-                .orElseThrow(() -> new BalanceNotFoundException("Balance not found for sender account"));
-
-        Balance receiverBalance = balanceRepository.findByAccountUserId(receiver.getUserId())
-                .orElseThrow(() -> new BalanceNotFoundException("Balance not found for recipient account"));
-
-        BigDecimal amount = request.getAmount();
-
-        if (senderBalance.getAmount().compareTo(amount) < 0) {
-            throw new InsufficientBalanceException("Insufficient balance");
-        }
-
-        senderBalance.setAmount(senderBalance.getAmount().subtract(amount));
-        receiverBalance.setAmount(receiverBalance.getAmount().add(amount));
-
-        Instant now = Instant.now();
-
-        String description = (request.getDescription() == null || request.getDescription().isBlank())
-                ? "Transfer" : request.getDescription();
-
-        Transfer transfer = transferMapper.toEntity(description, sender, receiver, amount);
-        transfer.setDate(now);
-
-        Transfer savedTransfer = transferRepository.save(transfer);
-
-        balanceRepository.save(senderBalance);
-        balanceRepository.save(receiverBalance);
-
-        Transaction debit = Transaction.builder()
-                .date(now)
-                .description(description + " to " + receiver.getEmail())
-                .amount(amount)
-                .indicator(Indicator.DB)
-                .account(sender)
-                .build();
-
-        Transaction credit = Transaction.builder()
-                .date(now)
-                .description(description + " from " + sender.getEmail())
-                .amount(amount)
-                .indicator(Indicator.CR)
-                .account(receiver)
-                .build();
-
-        transactionRepository.save(debit);
-        transactionRepository.save(credit);
-
-        return transferMapper.toResponse(savedTransfer);
-    }
-
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('ADMIN')")
     public Page<TransferResponse> getTransfers(String email, int page, int size) {
 
         Account account = accountRepository.findByEmail(email)
@@ -111,5 +54,122 @@ public class TransferService {
         return transferRepository
                 .findAllByAccountUserId(account.getUserId(), pageable)
                 .map(transferMapper::toResponse);
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('USER')")
+    public TransferResponse createTransfer(@NonNull CreateTransferRequest request, String senderEmail) {
+        validateTransferRequest(request, senderEmail);
+
+        Account sender = findSender(senderEmail);
+        Account receiver = findReceiver(request.getRecipientEmail());
+
+        LockedBalances balances = lockBalancesConcurrently(sender, receiver);
+
+        validateSufficientBalance(balances.sender(), request.getAmount());
+        updateBalances(balances.sender(), balances.receiver(), request.getAmount());
+
+        Instant now = Instant.now();
+        String description = resolveDescription(request.getDescription());
+
+        Transfer transfer = createTransferEntity(sender, receiver, request.getAmount(), description, now);
+
+        createTransactions(sender, receiver, transfer, request.getAmount(), now);
+
+        log.info("User made a transfer. senderId={}, receiverId={}, amount={}",
+                sender.getUserId(), receiver.getUserId(), request.getAmount());
+
+        return transferMapper.toResponse(transfer);
+    }
+
+    private void validateTransferRequest(CreateTransferRequest request, String senderEmail) {
+        if (senderEmail != null && senderEmail.equalsIgnoreCase(request.getRecipientEmail())) {
+            throw new SelfTransferException("Cannot transfer money to your own account");
+        }
+    }
+
+    private Account findSender(String senderEmail) {
+        return accountRepository.findByEmail(senderEmail)
+                .orElseThrow(() -> new SenderAccountNotFoundException("Sender account not found"));
+    }
+
+    private Account findReceiver(String recipientEmail) {
+        return accountRepository.findByEmail(recipientEmail)
+                .orElseThrow(() -> new RecipientNotFoundException("Recipient account not found"));
+    }
+
+    private LockedBalances lockBalancesConcurrently(Account sender, Account receiver) {
+        Long senderId = sender.getUserId();
+        Long receiverId = receiver.getUserId();
+
+        if (senderId < receiverId) {
+            Balance senderBalance = findBalanceForUpdate(senderId);
+            Balance receiverBalance = findBalanceForUpdate(receiverId);
+
+            return new LockedBalances(senderBalance, receiverBalance);
+        }
+
+        Balance receiverBalance = findBalanceForUpdate(receiverId);
+        Balance senderBalance = findBalanceForUpdate(senderId);
+
+        return new LockedBalances(senderBalance, receiverBalance);
+    }
+
+    private Balance findBalanceForUpdate(Long userId) {
+        return balanceRepository.findByAccountUserIdForUpdate(userId)
+                .orElseThrow(() -> new BalanceNotFoundException("Balance not found for account: " + userId));
+    }
+
+    private void validateSufficientBalance(Balance senderBalance, BigDecimal amount) {
+        if (senderBalance.getAmount().compareTo(amount) < 0) {
+            throw new InsufficientBalanceException("Insufficient balance");
+        }
+    }
+
+    private void updateBalances(Balance senderBalance, Balance receiverBalance, BigDecimal amount) {
+        senderBalance.setAmount(senderBalance.getAmount().subtract(amount));
+        receiverBalance.setAmount(receiverBalance.getAmount().add(amount));
+    }
+
+    private Transfer createTransferEntity(Account sender, Account receiver,
+                                          BigDecimal amount, String description, Instant date) {
+        Transfer transfer = transferMapper.toEntity(description, sender, receiver, amount);
+        transfer.setDate(date);
+
+        return transferRepository.save(transfer);
+    }
+
+    private void createTransactions(Account sender, Account receiver, Transfer transfer,
+                                    BigDecimal amount, Instant date) {
+        Transaction debit = Transaction.builder()
+                .date(date)
+                .description("Sent to " + receiver.getEmail())
+                .amount(amount)
+                .indicator(Indicator.DB)
+                .account(sender)
+                .counterpartyAccount(receiver)
+                .counterpartyName(receiver.getName())
+                .counterpartyEmail(receiver.getEmail())
+                .transfer(transfer)
+                .build();
+
+        Transaction credit = Transaction.builder()
+                .date(date)
+                .description("Received from " + sender.getEmail())
+                .amount(amount)
+                .indicator(Indicator.CR)
+                .account(receiver)
+                .counterpartyAccount(sender)
+                .counterpartyName(sender.getName())
+                .counterpartyEmail(sender.getEmail())
+                .transfer(transfer)
+                .build();
+
+        transactionRepository.save(debit);
+        transactionRepository.save(credit);
+    }
+
+    private String resolveDescription(String description) {
+        return description == null || description.isBlank() ? "Transfer" : description;
     }
 }

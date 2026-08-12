@@ -16,4 +16,6 @@ public class TransactionResponse {
     private String description;
     private BigDecimal amount;
     private String indicator;
+    private String counterpartyName;
+    private String counterpartyEmail;
 }

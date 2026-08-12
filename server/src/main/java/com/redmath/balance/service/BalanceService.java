@@ -1,11 +1,11 @@
 package com.redmath.balance.service;
 
 import com.redmath.account.entity.Account;
+import com.redmath.account.exception.UserNotFoundException;
 import com.redmath.account.repository.AccountRepository;
-import com.redmath.balance.entity.Balance;
 import com.redmath.balance.dto.BalanceResponse;
+import com.redmath.balance.entity.Balance;
 import com.redmath.balance.exception.BalanceNotFoundException;
-import com.redmath.transactions.exception.AccountNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ public class BalanceService {
     public BalanceResponse getBalance(String email) {
 
         Account account = accountRepository.findByEmail(email)
-                .orElseThrow(() -> new AccountNotFoundException("Account not found for email: "));
+                .orElseThrow(() -> new UserNotFoundException("Account not found for email: "));
 
         Balance balance = account.getBalance();
         if (balance == null)

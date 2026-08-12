@@ -15,23 +15,19 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
-
     private String name;
 
     @NotBlank
     @Email
     @Column(unique = true)
     private String email;
-
     private String password;
-
     private String address;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
     private Instant createdAt;
-
     private Instant updatedAt;
 
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)

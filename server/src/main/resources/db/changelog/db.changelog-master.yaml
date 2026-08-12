@@ -6,10 +6,11 @@ databaseChangeLog:
   - include:
       file: db/changelog/005-create-balance-table.yaml
   - include:
-      file: db/changelog/004-create-transaction-table.yaml
+      file: db/changelog/006-create-transfers-table.yaml
+  - include:
+      file: db/changelog/004-create-transactions-table.yaml
   - include:
       file: db/changelog/003-create-refresh-token-table.yaml
   - include:
-      file: db/changelog/006-create-transfer-table.yaml
-  - include:
       file: db/changelog/007-create-transaction-category-table.yaml
+

@@ -1,6 +1,8 @@
 package com.redmath.balance.exception;
 
-public class BalanceNotFoundException extends RuntimeException {
+import com.redmath.exception_handler.exception.ResourceNotFoundException;
+
+public class BalanceNotFoundException extends ResourceNotFoundException {
 
     public BalanceNotFoundException(String message)
     {
