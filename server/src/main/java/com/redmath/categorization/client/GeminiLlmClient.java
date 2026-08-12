@@ -90,10 +90,9 @@ public class GeminiLlmClient implements LlmClient {
                 .responseSchema(responseSchema)
                 .build();
 
-        try {
-            GenerateContentResponse response = buildClient().models
+        try (Client client = buildClient()) {
+            GenerateContentResponse response = client.models
                     .generateContent(properties.model(), prompt, config);
-
             return parseCategorizationJson(response.text());
         } catch (RuntimeException ex) {
             LOGGER.warn("Gemini categorization call failed, falling back to UNCATEGORIZED", ex);
@@ -118,8 +117,8 @@ public class GeminiLlmClient implements LlmClient {
                 .candidateCount(1)
                 .build();
 
-        try {
-            GenerateContentResponse response = buildClient().models
+        try (Client client = buildClient()){
+            GenerateContentResponse response = client.models
                     .generateContent(properties.model(), prompt, config);
 
             String text = response.text();
