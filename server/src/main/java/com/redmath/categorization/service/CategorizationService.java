@@ -59,7 +59,7 @@ public class CategorizationService {
 
         Category category;
         CategorySource source;
-        Double confidence;
+        double confidence;
 
         Optional<Category> ruleMatch = ruleBasedCategorizer.match(transaction.getDescription());
 

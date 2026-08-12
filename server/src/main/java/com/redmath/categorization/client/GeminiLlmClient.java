@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Component
 @EnableConfigurationProperties(LlmProperties.class)
@@ -51,7 +52,7 @@ public class GeminiLlmClient implements LlmClient {
             return Optional.empty();
         }
 
-        List<String> allowedCategoryNames = List.of(Category.values()).stream()
+        List<String> allowedCategoryNames = Stream.of(Category.values())
                 .map(Enum::name)
                 .toList();
 
@@ -135,7 +136,7 @@ public class GeminiLlmClient implements LlmClient {
         }
         try {
             JsonNode node = objectMapper.readTree(content);
-            String categoryText = node.path("category").asText(null);
+            String categoryText = node.path("category").asString(null);
             double confidence = node.path("confidence").asDouble(0.0);
 
             if (categoryText == null) {

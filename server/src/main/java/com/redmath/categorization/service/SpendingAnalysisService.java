@@ -99,9 +99,8 @@ public class SpendingAnalysisService {
         long spanMillis = to.toEpochMilli() - from.toEpochMilli();
 
         Instant previousFrom = Instant.ofEpochMilli(from.toEpochMilli() - spanMillis);
-        Instant previousTo = from;
 
-        Map<String, BigDecimal> previousTotals = calculateTotals(userId, previousFrom, previousTo);
+        Map<String, BigDecimal> previousTotals = calculateTotals(userId, previousFrom, from);
 
         Optional<String> insight = llmClient.explainSpending(
                 Map.copyOf(currentTotals),
