@@ -74,7 +74,7 @@ public class TransferService {
 
         Transfer transfer = createTransferEntity(sender, receiver, request.getAmount(), description, now);
 
-        createTransactions(sender, receiver, transfer, request.getAmount(), now);
+        createTransactions(sender, receiver, transfer, request.getAmount(), now, description);
 
         log.info("User made a transfer. senderId={}, receiverId={}, amount={}",
                 sender.getUserId(), receiver.getUserId(), request.getAmount());
@@ -140,10 +140,10 @@ public class TransferService {
     }
 
     private void createTransactions(Account sender, Account receiver, Transfer transfer,
-                                    BigDecimal amount, Instant date) {
+                                    BigDecimal amount, Instant date, String description) {
         Transaction debit = Transaction.builder()
                 .date(date)
-                .description("Sent to " + receiver.getEmail())
+                .description(description)
                 .amount(amount)
                 .indicator(Indicator.DB)
                 .account(sender)
@@ -155,7 +155,7 @@ public class TransferService {
 
         Transaction credit = Transaction.builder()
                 .date(date)
-                .description("Received from " + sender.getEmail())
+                .description(description)
                 .amount(amount)
                 .indicator(Indicator.CR)
                 .account(receiver)

@@ -320,6 +320,7 @@ export const UserDashboard = () => {
                 <th className="py-3 px-4">Txn ID</th>
                 <th className="py-3 px-4">Date & Time</th>
                 <th className="py-3 px-4">Description</th>
+                <th className="py-3 px-4">Counter Party</th>
                 <th className="py-3 px-4">Indicator</th>
                 <th className="py-3 px-4 text-right">Amount ($)</th>
               </tr>
@@ -354,6 +355,17 @@ export const UserDashboard = () => {
 
                     <td className="py-3 px-4 font-semibold text-slate-800">
                       {t.description}
+                    </td>
+
+                    <td className="py-3 px-4 font-semibold text-slate-800">
+                      {t.counterpartyName !== "null" && t.counterpartyName ? (
+                        <div>
+                          <div>{t.counterpartyName}</div>
+                          <div>{t.counterpartyEmail}</div>
+                        </div>
+                      ) : (
+                        "---------"
+                      )}
                     </td>
 
                     <td className="py-3 px-4">
