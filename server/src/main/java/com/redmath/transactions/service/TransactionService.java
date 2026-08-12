@@ -5,6 +5,7 @@ import com.redmath.account.repository.AccountRepository;
 import com.redmath.balance.entity.Balance;
 import com.redmath.balance.exception.BalanceNotFoundException;
 import com.redmath.balance.repository.BalanceRepository;
+import com.redmath.categorization.event.TransactionCreatedEvent;
 import com.redmath.transactions.dto.CreateTransactionRequest;
 import com.redmath.transactions.dto.TransactionResponse;
 import com.redmath.transactions.entity.Indicator;
@@ -15,6 +16,7 @@ import com.redmath.transactions.mapper.TransactionMapper;
 import com.redmath.transactions.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +35,8 @@ public class TransactionService
     private final AccountRepository accountRepository;
     private final TransactionMapper transactionMapper;
     private final BalanceRepository balanceRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
+
 
     @PreAuthorize("hasRole('USER')")
     private void updateBalance(Balance balance, BigDecimal amount, @NonNull Indicator indicator)
@@ -72,6 +76,8 @@ public class TransactionService
         Transaction saved = transactionRepository.save(transaction);
 
         balanceRepository.save(balance);
+
+        applicationEventPublisher.publishEvent(new TransactionCreatedEvent(this, saved.getId()));
 
         return transactionMapper.toResponse(saved);
     }
