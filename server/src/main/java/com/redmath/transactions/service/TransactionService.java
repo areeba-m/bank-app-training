@@ -60,22 +60,18 @@ public class TransactionService
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("Account not found"));
 
-        Balance balance = balanceRepository.findByAccountUserId(account.getUserId())
+        Balance balance = balanceRepository.findByAccountUserIdForUpdate(account.getUserId())
                 .orElseThrow(() -> new BalanceNotFoundException("Balance not found for account"));
 
         updateBalance(balance, request.getAmount(), request.getIndicator());
 
         Transaction transaction = transactionMapper.toEntity(request);
-
         transaction.setAccount(account);
-
         transaction.setDate(Instant.now());
 
         Transaction saved = transactionRepository.save(transaction);
 
-        balanceRepository.save(balance);
-
-        log.info("User made a transaction. userId={}, transaction_id={}", account.getUserId(),transaction.getId());
+        log.info("User made a transaction. userId={}, transaction_id={}", account.getUserId(), saved.getId());
 
         return transactionMapper.toResponse(saved);
     }

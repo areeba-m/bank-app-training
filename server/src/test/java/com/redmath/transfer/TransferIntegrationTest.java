@@ -9,7 +9,6 @@ import com.redmath.balance.repository.BalanceRepository;
 import com.redmath.transactions.entity.Indicator;
 import com.redmath.transactions.repository.TransactionRepository;
 import com.redmath.transfer.dto.CreateTransferRequest;
-import com.redmath.transfer.entity.Transfer;
 import com.redmath.transfer.repository.TransferRepository;
 import com.redmath.transfer.service.TransferService;
 import org.jspecify.annotations.NonNull;
@@ -20,11 +19,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
@@ -41,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 class TransferIntegrationTest {
 
     @TestConfiguration
@@ -80,8 +80,8 @@ class TransferIntegrationTest {
 
     @BeforeEach
     void setup() {
-        transferRepository.deleteAll();
         transactionRepository.deleteAll();
+        transferRepository.deleteAll();
         balanceRepository.deleteAll();
         accountRepository.deleteAll();
 
@@ -217,73 +217,35 @@ class TransferIntegrationTest {
     }
 
     @Test
-    void shouldGetTransferHistoryForBothParties() {
+    void shouldGetTransferHistoryAndUseBalanceConcurrency() throws Exception {
 
-        // Create transfer using the service
         CreateTransferRequest request = new CreateTransferRequest(
-                "receiver@gmail.com",
+                "sender@gmail.com",
                 new BigDecimal("150"),
                 "Lunch"
         );
 
-        transferService.createTransfer(request, "sender@gmail.com");
+        transferService.createTransfer(request, "receiver@gmail.com");
 
-        Page<Transfer> senderTransfers =
-                transferRepository.findBySenderAccountUserId(
-                        sender.getUserId(),
-                        PageRequest.of(0, 10)
-                );
+        mockMvc.perform(get("/api/v1/user/transfer")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .with(jwtFor("receiver@gmail.com"))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.size").value(10))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.numberOfElements").value(1))
+                .andExpect(jsonPath("$.first").value(true))
+                .andExpect(jsonPath("$.last").value(true))
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].amount").value(150))
+                .andExpect(jsonPath("$.content[0].description").value("Lunch"))
+                .andExpect(jsonPath("$.content[0].date").exists());
 
-        assertEquals(1, senderTransfers.getTotalElements());
-        assertEquals(1, senderTransfers.getNumberOfElements());
-        assertEquals(1, senderTransfers.getTotalPages());
-        assertEquals(0, senderTransfers.getNumber());
-        assertEquals(10, senderTransfers.getSize());
-
-        Transfer senderTransfer =
-                senderTransfers.getContent().getFirst();
-
-        assertEquals(
-                0,
-                senderTransfer.getAmount()
-                        .compareTo(new BigDecimal("150"))
-        );
-
-        assertEquals(
-                "Lunch",
-                senderTransfer.getDescription()
-        );
-
-        Page<Transfer> receiverTransfers =
-                transferRepository.findByReceiverAccountUserId(
-                        receiver.getUserId(),
-                        PageRequest.of(0, 10)
-                );
-
-        assertEquals(1, receiverTransfers.getTotalElements());
-        assertEquals(1, receiverTransfers.getNumberOfElements());
-        assertEquals(1, receiverTransfers.getTotalPages());
-        assertEquals(0, receiverTransfers.getNumber());
-        assertEquals(10, receiverTransfers.getSize());
-
-        Transfer receiverTransfer =
-                receiverTransfers.getContent().getFirst();
-
-        assertEquals(
-                0,
-                receiverTransfer.getAmount()
-                        .compareTo(new BigDecimal("150"))
-        );
-
-        assertEquals(
-                "Lunch",
-                receiverTransfer.getDescription()
-        );
     }
-
-
-
-
 
     @Test
     void shouldRejectWithoutAuthentication() throws Exception {

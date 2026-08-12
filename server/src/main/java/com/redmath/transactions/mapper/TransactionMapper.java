@@ -26,7 +26,9 @@ public class TransactionMapper
                 transaction.getDate(),
                 transaction.getDescription(),
                 transaction.getAmount(),
-                transaction.getIndicator().name()
+                transaction.getIndicator().name(),
+                transaction.getCounterpartyName(),
+                transaction.getCounterpartyEmail()
         );
     }
 }
