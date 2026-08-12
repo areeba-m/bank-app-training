@@ -1,5 +1,6 @@
-import { API_CONFIG } from "./api.js";
-import { authenticatedFetch } from "../redux/authenticatedFetch.js";
+import { API_CONFIG } from "./Api.js";
+import { authenticatedFetch } from "../redux/AuthenticatedFetch.js";
+import { handleApiResponse } from "./HandleApiResponse.js";
 
 export const adminTransactionApi = {
   getTransactions: async (accountId, page = 0, size = 10, authContext) => {
@@ -8,11 +9,8 @@ export const adminTransactionApi = {
       {},
       authContext,
     );
-    if (!res.ok) {
-      throw new Error("Failed to fetch transactions");
-    }
-
-    return await res.json();
+    const response = await handleApiResponse(res);
+    return response.json();
   },
 
   getBalance: async (accountId, authContext) => {
@@ -21,7 +19,7 @@ export const adminTransactionApi = {
       {},
       authContext,
     );
-    if (!res.ok) throw new Error("Failed to fetch balance");
-    return await res.json();
+    const response = await handleApiResponse(res);
+    return response.json();
   },
 };

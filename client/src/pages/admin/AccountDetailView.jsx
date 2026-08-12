@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAccountById } from "../../redux/slices/accountsSlice.js";
+import { fetchAccountById } from "../../redux/slices/AccountsSlice.js";
 import {
   fetchBalance,
   fetchTransactions,

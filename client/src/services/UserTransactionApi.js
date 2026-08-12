@@ -1,5 +1,6 @@
-import { API_CONFIG } from "./api.js";
-import { authenticatedFetch } from "../redux/authenticatedFetch.js";
+import { API_CONFIG } from "./Api.js";
+import { authenticatedFetch } from "../redux/AuthenticatedFetch.js";
+import { handleApiResponse } from "./HandleApiResponse.js";
 
 export const userTransactionApi = {
   getTransactions: async (page = 0, size = 10, authContext) => {
@@ -8,11 +9,8 @@ export const userTransactionApi = {
       {},
       authContext,
     );
-    if (!res.ok) {
-      throw new Error("Failed to fetch transactions");
-    }
-
-    return await res.json();
+    const response = await handleApiResponse(res);
+    return response.json();
   },
 
   getBalance: async (authContext) => {
@@ -21,8 +19,8 @@ export const userTransactionApi = {
       {},
       authContext,
     );
-    if (!res.ok) throw new Error("Failed to fetch balance");
-    return await res.json();
+    const response = await handleApiResponse(res);
+    return response.json();
   },
 
   createTransaction: async (transactionData, authContext) => {
@@ -42,19 +40,7 @@ export const userTransactionApi = {
       authContext,
     );
 
-    if (!res.ok) {
-      const errorBody = await res.json().catch(() => null);
-
-      console.error("Transaction API error:", {
-        status: res.status,
-        body: errorBody,
-      });
-
-      throw new Error(
-        errorBody?.message || errorBody?.error || "Transaction failed",
-      );
-    }
-
-    return await res.json();
+    const response = await handleApiResponse(res);
+    return response.json();
   },
 };

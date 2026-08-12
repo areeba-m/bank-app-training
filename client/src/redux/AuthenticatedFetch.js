@@ -1,9 +1,12 @@
-import { refreshToken } from "./slices/authSlice.js";
-import { apiFetch } from "../services/apiFetch.js";
+import { refreshToken } from "./slices/AuthSlice.js";
+import { apiFetch } from "../services/ApiFetch.js";
 
 let refreshPromise = null;
-export const authenticatedFetch = async (url, options = {}, { getState, dispatch },) => {
-
+export const authenticatedFetch = async (
+  url,
+  options = {},
+  { getState, dispatch },
+) => {
   let accessToken = getState().auth.accessToken;
   let response = await apiFetch(url, accessToken, options);
   if (response.status !== 401) {

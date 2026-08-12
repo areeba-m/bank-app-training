@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { userTransactionApi } from "../../services/UserTransactionApi.js";
-import { refreshUser } from "./authSlice.js";
+import { refreshUser } from "./AuthSlice.js";
 
 export const fetchBalance = createAsyncThunk(
   "userTransactions/fetchBalance",

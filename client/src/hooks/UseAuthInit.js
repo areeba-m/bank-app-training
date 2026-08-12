@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { refreshToken } from "../redux/slices/authSlice.js";
+import { refreshToken } from "../redux/slices/AuthSlice.js";
 import { authApi } from "../services/AuthApi.js";
 
 export const useAuthInit = () => {

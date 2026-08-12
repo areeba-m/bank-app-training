@@ -91,8 +91,10 @@ const accountsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+
       .addCase(fetchAccounts.pending, (state) => {
         state.status = "loading";
+        state.error = null;
       })
       .addCase(fetchAccounts.fulfilled, (state, action) => {
         state.status = "succeeded";
@@ -106,10 +108,61 @@ const accountsSlice = createSlice({
       })
       .addCase(fetchAccounts.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload;
+        state.loading = false;
+        state.error = action.payload || "Failed to fetch accounts";
+      })
+
+      .addCase(fetchAccountById.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
       })
       .addCase(fetchAccountById.fulfilled, (state, action) => {
+        state.status = "succeeded";
         state.selectedAccount = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchAccountById.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload || "Failed to fetch account";
+      })
+
+      .addCase(createNewAccount.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(createNewAccount.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.error = null;
+      })
+      .addCase(createNewAccount.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload || "Failed to create account";
+      })
+
+      .addCase(updateExistingAccount.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(updateExistingAccount.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.error = null;
+      })
+      .addCase(updateExistingAccount.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload || "Failed to update account";
+      })
+
+      .addCase(deleteExistingAccount.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(deleteExistingAccount.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.error = null;
+      })
+      .addCase(deleteExistingAccount.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload || "Failed to delete account";
       });
   },
 });

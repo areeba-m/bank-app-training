@@ -17,3 +17,57 @@
 2026-08-12 09:36:24.420 [http-nio-8080-exec-10] INFO  c.r.a.service.RefreshTokenService - Issued refresh token for user 'z@bank.com'.
 2026-08-12 09:37:15.717 [http-nio-8080-exec-8] INFO  c.r.a.service.AuthService - User 'admin@bank.com' authenticated successfully.
 2026-08-12 09:37:15.719 [http-nio-8080-exec-8] INFO  c.r.a.service.RefreshTokenService - Issued refresh token for user 'admin@bank.com'.
+2026-08-12T10:47:36.326+05:00  INFO 18328 --- [server] [http-nio-8080-exec-2] c.r.authentication.service.AuthService   : User 'admin@bank.com' authenticated successfully.
+2026-08-12T10:47:36.351+05:00  INFO 18328 --- [server] [http-nio-8080-exec-2] c.r.a.service.RefreshTokenService        : Issued refresh token for user 'admin@bank.com'.
+2026-08-12T10:50:04.138+05:00  INFO 18328 --- [server] [http-nio-8080-exec-9] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 'admin@bank.com'.
+2026-08-12T10:52:22.413+05:00  INFO 18328 --- [server] [http-nio-8080-exec-9] c.r.authentication.service.AuthService   : User 'admin@bank.com' authenticated successfully.
+2026-08-12T10:52:22.416+05:00  INFO 18328 --- [server] [http-nio-8080-exec-9] c.r.a.service.RefreshTokenService        : Issued refresh token for user 'admin@bank.com'.
+2026-08-12T10:53:18.210+05:00  INFO 18328 --- [server] [http-nio-8080-exec-7] c.r.authentication.service.AuthService   : User 's@bank.com' authenticated successfully.
+2026-08-12T10:53:18.212+05:00  INFO 18328 --- [server] [http-nio-8080-exec-7] c.r.a.service.RefreshTokenService        : Issued refresh token for user 's@bank.com'.
+2026-08-12T10:54:27.649+05:00  INFO 18328 --- [server] [http-nio-8080-exec-9] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 's@bank.com'.
+2026-08-12T10:54:36.507+05:00  INFO 18328 --- [server] [http-nio-8080-exec-1] c.r.authentication.service.AuthService   : User 'z@bank.com' authenticated successfully.
+2026-08-12T10:54:36.508+05:00  INFO 18328 --- [server] [http-nio-8080-exec-1] c.r.a.service.RefreshTokenService        : Issued refresh token for user 'z@bank.com'.
+2026-08-12T10:55:38.014+05:00  INFO 18328 --- [server] [http-nio-8080-exec-8] c.r.authentication.service.AuthService   : User 'admin@bank.com' authenticated successfully.
+2026-08-12T10:55:38.018+05:00  INFO 18328 --- [server] [http-nio-8080-exec-8] c.r.a.service.RefreshTokenService        : Issued refresh token for user 'admin@bank.com'.
+2026-08-12T10:55:59.061+05:00  INFO 18328 --- [server] [http-nio-8080-exec-2] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 'admin@bank.com'.
+2026-08-12T10:56:37.141+05:00  INFO 18328 --- [server] [http-nio-8080-exec-3] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 'admin@bank.com'.
+2026-08-12T11:02:30.878+05:00  INFO 18328 --- [server] [http-nio-8080-exec-7] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 'admin@bank.com'.
+2026-08-12T11:08:50.785+05:00  INFO 18328 --- [server] [http-nio-8080-exec-10] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 'admin@bank.com'.
+2026-08-12T11:15:00.311+05:00  INFO 18328 --- [server] [http-nio-8080-exec-9] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 'admin@bank.com'.
+2026-08-12T11:15:25.274+05:00  INFO 18328 --- [server] [http-nio-8080-exec-4] c.r.authentication.service.AuthService   : User 'z@bank.com' authenticated successfully.
+2026-08-12T11:15:25.276+05:00  INFO 18328 --- [server] [http-nio-8080-exec-4] c.r.a.service.RefreshTokenService        : Issued refresh token for user 'z@bank.com'.
+2026-08-12T11:15:32.670+05:00  INFO 18328 --- [server] [http-nio-8080-exec-5] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 'z@bank.com'.
+2026-08-12T11:16:15.324+05:00  INFO 18328 --- [server] [http-nio-8080-exec-6] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 'z@bank.com'.
+2026-08-12T11:18:40.401+05:00  INFO 18328 --- [server] [http-nio-8080-exec-4] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 'z@bank.com'.
+2026-08-12T11:19:08.001+05:00  INFO 18328 --- [server] [http-nio-8080-exec-6] c.r.authentication.service.AuthService   : User 'admin@bank.com' authenticated successfully.
+2026-08-12T11:19:08.002+05:00  INFO 18328 --- [server] [http-nio-8080-exec-6] c.r.a.service.RefreshTokenService        : Issued refresh token for user 'admin@bank.com'.
+2026-08-12T11:19:23.571+05:00  INFO 18328 --- [server] [http-nio-8080-exec-3] c.r.authentication.service.AuthService   : User 'z@bank.com' authenticated successfully.
+2026-08-12T11:19:23.572+05:00  INFO 18328 --- [server] [http-nio-8080-exec-3] c.r.a.service.RefreshTokenService        : Issued refresh token for user 'z@bank.com'.
+2026-08-12T11:19:56.646+05:00  INFO 18328 --- [server] [http-nio-8080-exec-7] c.r.authentication.service.AuthService   : User 's@bank.com' authenticated successfully.
+2026-08-12T11:19:56.648+05:00  INFO 18328 --- [server] [http-nio-8080-exec-7] c.r.a.service.RefreshTokenService        : Issued refresh token for user 's@bank.com'.
+2026-08-12T11:21:49.708+05:00  INFO 18328 --- [server] [http-nio-8080-exec-1] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 's@bank.com'.
+2026-08-12T11:27:47.654+05:00  INFO 18328 --- [server] [http-nio-8080-exec-7] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 's@bank.com'.
+2026-08-12T11:30:24.461+05:00  INFO 18328 --- [server] [http-nio-8080-exec-2] c.r.authentication.service.AuthService   : User 'admin@bank.com' authenticated successfully.
+2026-08-12T11:30:24.463+05:00  INFO 18328 --- [server] [http-nio-8080-exec-2] c.r.a.service.RefreshTokenService        : Issued refresh token for user 'admin@bank.com'.
+2026-08-12T11:31:23.509+05:00  INFO 18328 --- [server] [http-nio-8080-exec-6] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 'admin@bank.com'.
+2026-08-12T11:34:42.495+05:00  INFO 18328 --- [server] [http-nio-8080-exec-4] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 'admin@bank.com'.
+2026-08-12T11:35:34.363+05:00  INFO 18328 --- [server] [http-nio-8080-exec-8] c.r.authentication.service.AuthService   : User 's@bank.com' authenticated successfully.
+2026-08-12T11:35:34.365+05:00  INFO 18328 --- [server] [http-nio-8080-exec-8] c.r.a.service.RefreshTokenService        : Issued refresh token for user 's@bank.com'.
+2026-08-12T12:07:30.117+05:00  INFO 18328 --- [server] [http-nio-8080-exec-4] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 's@bank.com'.
+2026-08-12T12:08:31.054+05:00  INFO 18328 --- [server] [http-nio-8080-exec-8] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 's@bank.com'.
+2026-08-12T12:08:31.288+05:00  INFO 18328 --- [server] [http-nio-8080-exec-2] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 's@bank.com'.
+2026-08-12T12:16:22.414+05:00  INFO 18328 --- [server] [http-nio-8080-exec-9] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 's@bank.com'.
+2026-08-12T12:18:36.832+05:00  INFO 18328 --- [server] [http-nio-8080-exec-7] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 's@bank.com'.
+2026-08-12T12:19:47.206+05:00  INFO 18328 --- [server] [http-nio-8080-exec-8] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 's@bank.com'.
+2026-08-12T12:20:24.444+05:00  INFO 18328 --- [server] [http-nio-8080-exec-6] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 's@bank.com'.
+2026-08-12T12:20:24.835+05:00  INFO 18328 --- [server] [http-nio-8080-exec-10] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 's@bank.com'.
+2026-08-12T12:20:26.052+05:00  INFO 18328 --- [server] [http-nio-8080-exec-5] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 's@bank.com'.
+2026-08-12T12:45:30.572+05:00  INFO 18328 --- [server] [http-nio-8080-exec-6] c.r.authentication.service.AuthService   : Refresh token rotated successfully for user 's@bank.com'.
+2026-08-12T15:20:57.861+05:00  INFO 31276 --- [server] [http-nio-8080-exec-2] c.r.authentication.service.AuthService   : User 'admin@bank.com' authenticated successfully.
+2026-08-12T15:20:57.886+05:00  INFO 31276 --- [server] [http-nio-8080-exec-2] c.r.a.service.RefreshTokenService        : Issued refresh token for user 'admin@bank.com'.
+2026-08-12T15:33:13.546+05:00  INFO 31276 --- [server] [http-nio-8080-exec-7] c.r.authentication.service.AuthService   : User 'admin@bank.com' authenticated successfully.
+2026-08-12T15:33:13.549+05:00  INFO 31276 --- [server] [http-nio-8080-exec-7] c.r.a.service.RefreshTokenService        : Issued refresh token for user 'admin@bank.com'.
+2026-08-12T15:34:47.257+05:00  INFO 31276 --- [server] [http-nio-8080-exec-5] c.r.authentication.service.AuthService   : User 'admin@bank.com' authenticated successfully.
+2026-08-12T15:34:47.259+05:00  INFO 31276 --- [server] [http-nio-8080-exec-5] c.r.a.service.RefreshTokenService        : Issued refresh token for user 'admin@bank.com'.
+2026-08-12T15:49:50.962+05:00  INFO 31276 --- [server] [http-nio-8080-exec-4] c.r.authentication.service.AuthService   : User 'admin@bank.com' authenticated successfully.
+2026-08-12T15:49:50.964+05:00  INFO 31276 --- [server] [http-nio-8080-exec-4] c.r.a.service.RefreshTokenService        : Issued refresh token for user 'admin@bank.com'.

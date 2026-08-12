@@ -1,5 +1,6 @@
-import { API_CONFIG } from "./api.js";
-import { authenticatedFetch } from "../redux/authenticatedFetch.js";
+import { API_CONFIG } from "./Api.js";
+import { authenticatedFetch } from "../redux/AuthenticatedFetch.js";
+import { handleApiResponse } from "./HandleApiResponse.js";
 
 export const moneyTransferApi = {
   transferMoney: async (transferData, authContext) => {
@@ -19,15 +20,7 @@ export const moneyTransferApi = {
       authContext,
     );
 
-    if (!res.ok) {
-      let message = "Transfer failed";
-
-      try {
-        const errorBody = await res.json();
-        message = errorBody?.message || message;
-      } catch {}
-      throw new Error(message);
-    }
-    return await res.json();
+    const response = await handleApiResponse(res);
+    return response.json();
   },
 };

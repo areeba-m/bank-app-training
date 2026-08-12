@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  clearAccountsError,
   createNewAccount,
   deleteExistingAccount,
   fetchAccounts,
   updateExistingAccount,
-} from "../../redux/slices/accountsSlice.js";
+} from "../../redux/slices/AccountsSlice.js";
 import { AccountModal } from "../../components/AccountModal";
 import {
   AlertCircle,
@@ -53,6 +54,16 @@ export const AdminDashboard = () => {
     );
   }, [dispatch, pageSize]);
 
+  useEffect(() => {
+    if (!error) return;
+
+    const timer = setTimeout(() => {
+      dispatch(clearAccountsError());
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [error, dispatch]);
+
   const showToast = (msg) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
@@ -69,34 +80,42 @@ export const AdminDashboard = () => {
   };
 
   const handleSaveAccount = async (formData) => {
-    if (accountToEdit) {
-      await dispatch(
-        updateExistingAccount({
-          id: accountToEdit.id,
-          data: formData,
-        }),
-      ).unwrap();
-      await dispatch(
-        fetchAccounts({
-          page: page,
-          size: pageSize,
-        }),
-      ).unwrap();
+    try {
+      if (accountToEdit) {
+        await dispatch(
+          updateExistingAccount({
+            id: accountToEdit.id,
+            data: formData,
+          }),
+        ).unwrap();
 
-      showToast(`Account '${accountToEdit.id}' updated successfully.`);
-    } else {
-      await dispatch(createNewAccount(formData)).unwrap();
-      await dispatch(
-        fetchAccounts({
-          page: page,
-          size: pageSize,
-        }),
-      ).unwrap();
+        await dispatch(
+          fetchAccounts({
+            page,
+            size: pageSize,
+          }),
+        ).unwrap();
 
-      showToast("New account created successfully.");
+        showToast(`Account '${accountToEdit.id}' updated successfully.`);
+      } else {
+        await dispatch(createNewAccount(formData)).unwrap();
+
+        await dispatch(
+          fetchAccounts({
+            page,
+            size: pageSize,
+          }),
+        ).unwrap();
+
+        showToast("New account created successfully.");
+      }
+
+      setAccountToEdit(null);
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error("Save account failed:", err);
+      // showToast(err || "Failed to save account");
     }
-
-    setAccountToEdit(null);
   };
 
   const handleDeleteAccount = async (id) => {
@@ -111,6 +130,7 @@ export const AdminDashboard = () => {
       showToast(`Account ${id} deleted successfully.`);
       setDeleteConfirmId(null);
     } catch (err) {
+      setError(err?.message || err || "Delete account failed");
       console.error("Delete failed:", err);
     }
   };

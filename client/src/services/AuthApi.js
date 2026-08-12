@@ -1,5 +1,6 @@
-import { API_CONFIG } from "./api.js";
-import { authenticatedFetch } from "../redux/authenticatedFetch.js";
+import { API_CONFIG } from "./Api.js";
+import { authenticatedFetch } from "../redux/AuthenticatedFetch.js";
+import { handleApiResponse } from "./HandleApiResponse.js";
 
 export const getCsrfToken = () => {
   const cookies = document.cookie.split("; ");
@@ -27,13 +28,8 @@ export const authApi = {
       }),
     });
 
-    if (!res.ok) {
-      const error = await res.text();
-      throw new Error(error || "Invalid email or password");
-    }
-
-    const data = await res.json();
-    return data;
+    const response = await handleApiResponse(res);
+    return response.json();
   },
 
   logout: async (authContext) => {
@@ -44,9 +40,7 @@ export const authApi = {
       },
       authContext,
     );
-    if (!res.ok) {
-      throw new Error("Logout failed");
-    }
+    await handleApiResponse(res);
   },
 
   initCsrf: async () => {
@@ -72,11 +66,7 @@ export const authApi = {
         "X-XSRF-TOKEN": csrfToken,
       },
     });
-    if (!res.ok) {
-      throw new Error("Refresh token expired");
-    }
-
-    const data = await res.json();
-    return data;
+    const response = await handleApiResponse(res);
+    return response.json();
   },
 };

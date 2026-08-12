@@ -36,7 +36,7 @@ export const TransferModal = ({ isOpen, onClose, onExecuteTransfer }) => {
       setError("");
       onClose();
     } catch (err) {
-      setError(err?.message || "Transfer failed");
+      setError(err?.message || err || "Transfer failed");
     } finally {
       setLoading(false);
     }

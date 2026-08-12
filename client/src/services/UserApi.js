@@ -1,5 +1,6 @@
-import { API_CONFIG } from "./api.js";
-import { authenticatedFetch } from "../redux/authenticatedFetch.js";
+import { API_CONFIG } from "./Api.js";
+import { authenticatedFetch } from "../redux/AuthenticatedFetch.js";
+import { handleApiResponse } from "./HandleApiResponse.js";
 
 export const userApi = {
   getCurrentUser: async (authContext) => {
@@ -8,11 +9,7 @@ export const userApi = {
       {},
       authContext,
     );
-
-    if (!res.ok) {
-      throw new Error("Failed to fetch current user");
-    }
-
-    return await res.json();
+    const response = await handleApiResponse(res);
+    return response.json();
   },
 };

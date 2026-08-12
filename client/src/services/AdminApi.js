@@ -1,5 +1,6 @@
-import { API_CONFIG } from "./api.js";
-import { authenticatedFetch } from "../redux/authenticatedFetch.js";
+import { API_CONFIG } from "./Api.js";
+import { authenticatedFetch } from "../redux/AuthenticatedFetch.js";
+import { handleApiResponse } from "./HandleApiResponse.js";
 
 export const adminApi = {
   getAccounts: async (page = 0, size = 10, authContext) => {
@@ -8,10 +9,8 @@ export const adminApi = {
       {},
       authContext,
     );
-    if (!res.ok) {
-      throw new Error("Failed to fetch accounts");
-    }
-    return await res.json();
+    const response = await handleApiResponse(res);
+    return response.json();
   },
 
   getAccountById: async (id, authContext) => {
@@ -20,8 +19,8 @@ export const adminApi = {
       {},
       authContext,
     );
-    if (!res.ok) throw new Error("Failed to fetch account details");
-    return await res.json();
+    const response = await handleApiResponse(res);
+    return response.json();
   },
 
   createAccount: async (accountData, authContext) => {
@@ -34,8 +33,8 @@ export const adminApi = {
       },
       authContext,
     );
-    if (!res.ok) throw new Error("Failed to create account");
-    return await res.json();
+    const response = await handleApiResponse(res);
+    return response.json();
   },
 
   updateAccount: async (id, updatedData, authContext) => {
@@ -48,8 +47,8 @@ export const adminApi = {
       },
       authContext,
     );
-    if (!res.ok) throw new Error("Failed to update account");
-    return await res.json();
+    const response = await handleApiResponse(res);
+    return response.json();
   },
 
   deleteAccount: async (id, authContext) => {
@@ -60,7 +59,7 @@ export const adminApi = {
       },
       authContext,
     );
-    if (!res.ok) throw new Error("Failed to delete account");
-    return true;
+    const response = await handleApiResponse(res);
+    return response.json();
   },
 };
