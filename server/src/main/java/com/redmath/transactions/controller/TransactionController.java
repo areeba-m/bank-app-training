@@ -36,7 +36,7 @@ public class TransactionController {
 
     @GetMapping()
     public ResponseEntity<Page<TransactionResponse>> getTransactions(
-            Authentication authentication,
+            @NonNull Authentication authentication,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 

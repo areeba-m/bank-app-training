@@ -1,13 +1,19 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore } from "@reduxjs/toolkit";
 
-import authReducer from './slices/authSlice.js';
-import accountsReducer from './slices/accountsSlice.js';
-import transactionsReducer from './slices/transactionsSlice.js';
+import authReducer from "./slices/authSlice.js";
+import accountsReducer from "./slices/accountsSlice.js";
+import adminTransactionsReducer from "./slices/AdminTransactionsSlice.js";
+import userTransactionReducer from "./slices/UserTransactionSlice.js";
+import userReducer from "./slices/UserSlice.js";
+import moneyTransferReducer from "./slices/MoneyTransferSlice.js";
 
 export const store = configureStore({
-    reducer: {
-        auth: authReducer,
-        accounts: accountsReducer,
-        transactions: transactionsReducer,
-    },
-})
+  reducer: {
+    auth: authReducer,
+    accounts: accountsReducer,
+    adminTransactions: adminTransactionsReducer,
+    userTransactions: userTransactionReducer,
+    user: userReducer,
+    moneyTransfer: moneyTransferReducer,
+  },
+});

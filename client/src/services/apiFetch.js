@@ -1,16 +1,16 @@
 export const apiFetch = async (url, accessToken = null, options = {}) => {
-    const headers = {
-        ...options.headers,
-        ...(accessToken
-            ? {
-                Authorization: `Bearer ${accessToken}`
-            }
-            : {})
-    };
+  const headers = {
+    ...options.headers,
+    ...(accessToken
+      ? {
+          Authorization: `Bearer ${accessToken}`,
+        }
+      : {}),
+  };
 
-    return fetch(url, {
-        ...options,
-        credentials: "include",
-        headers
-    });
+  return fetch(url, {
+    ...options,
+    credentials: "include",
+    headers,
+  });
 };

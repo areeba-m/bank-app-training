@@ -1,95 +1,82 @@
-import {API_CONFIG} from "./api.js";
+import { API_CONFIG } from "./api.js";
 import { authenticatedFetch } from "../redux/authenticatedFetch.js";
 
 export const getCsrfToken = () => {
+  const cookies = document.cookie.split("; ");
 
-    const cookies = document.cookie.split("; ");
+  const csrfCookie = cookies.find((cookie) => cookie.startsWith("XSRF-TOKEN="));
 
-    const csrfCookie = cookies.find(cookie =>
-        cookie.startsWith("XSRF-TOKEN=")
-    );
+  console.log("ALL COOKIES:", cookies);
+  console.log("CSRF COOKIE:", csrfCookie);
 
-    console.log("ALL COOKIES:", cookies);
-    console.log("CSRF COOKIE:", csrfCookie);
+  if (!csrfCookie) {
+    return null;
+  }
 
-    if (!csrfCookie) {
-        return null;
-    }
-
-    return decodeURIComponent(
-        csrfCookie.split("=")[1]
-    );
+  return decodeURIComponent(csrfCookie.split("=")[1]);
 };
 export const authApi = {
-    login: async (email, password) => {
-        const res = await fetch(`${API_CONFIG.BASE_URL}/auth/login`,
-            {
-                method: "POST",
-                credentials: "include",
-                headers: {"Content-Type": "application/json",},
-                body: JSON.stringify({
-                    email,
-                    password,
-                }),
-            });
+  login: async (email, password) => {
+    const res = await fetch(`${API_CONFIG.BASE_URL}/auth/login`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    });
 
-        if (!res.ok) {
-            const error = await res.text();
-            throw new Error(error || "Invalid email or password");
-        }
+    if (!res.ok) {
+      const error = await res.text();
+      throw new Error(error || "Invalid email or password");
+    }
 
-        const data = await res.json();
-        return data;
-    },
+    const data = await res.json();
+    return data;
+  },
 
-    logout: async (authContext) =>
-    {
-        const res = await authenticatedFetch(`${API_CONFIG.BASE_URL}/auth/logout`,
-            {
-                method: "POST",
-            },authContext);
-        if (!res.ok) {
-            throw new Error("Logout failed");
-        }
-    },
+  logout: async (authContext) => {
+    const res = await authenticatedFetch(
+      `${API_CONFIG.BASE_URL}/auth/logout`,
+      {
+        method: "POST",
+      },
+      authContext,
+    );
+    if (!res.ok) {
+      throw new Error("Logout failed");
+    }
+  },
 
-    initCsrf: async () => {
-        const res = await fetch(
-            `${API_CONFIG.BASE_URL}/auth/csrf`,
-            {
-                method:"GET",
-                credentials:"include"
-            }
-        );
-        if (!res.ok)
-        {
-            throw new Error( "Failed to initialize CSRF token" );
-        }
-        return await res.json();
-    },
+  initCsrf: async () => {
+    const res = await fetch(`${API_CONFIG.BASE_URL}/auth/csrf`, {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!res.ok) {
+      throw new Error("Failed to initialize CSRF token");
+    }
+    return await res.json();
+  },
 
-    refresh: async () =>
-    {
-        const csrfToken = getCsrfToken();
-        console.log("Sending refresh CSRF:", csrfToken);
+  refresh: async () => {
+    const csrfToken = getCsrfToken();
+    console.log("Sending refresh CSRF:", csrfToken);
 
-        const res = await fetch(
-            `${API_CONFIG.BASE_URL}/auth/refresh`,
-            {
-                method: "POST",
-                credentials: "include",
-                headers:{
-                    "Content-Type":"application/json",
-                    "X-XSRF-TOKEN": csrfToken
-                }
-            }
-        );
-        if (!res.ok)
-        {
-            throw new Error("Refresh token expired");
-        }
+    const res = await fetch(`${API_CONFIG.BASE_URL}/auth/refresh`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "X-XSRF-TOKEN": csrfToken,
+      },
+    });
+    if (!res.ok) {
+      throw new Error("Refresh token expired");
+    }
 
-        const data = await res.json();
-        return data
-    },
-}
+    const data = await res.json();
+    return data;
+  },
+};
