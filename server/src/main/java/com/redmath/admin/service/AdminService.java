@@ -10,6 +10,7 @@ import com.redmath.admin.dto.UpdateUserRequest;
 import com.redmath.authentication.exception.EmailAlreadyExistsException;
 import com.redmath.balance.entity.Balance;
 import com.redmath.transactions.entity.Indicator;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+@Slf4j
 @Service
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminService {
@@ -52,6 +54,8 @@ public class AdminService {
         user.setBalance(balance);
 
         Account savedUser = userRepository.save(user);
+        log.info("New account created. userId={}, email={}, role={}",
+                savedUser.getUserId(),savedUser.getEmail(), savedUser.getRole());
 
         return accountMapper.toResponse(savedUser);
     }
@@ -90,6 +94,7 @@ public class AdminService {
         user.setUpdatedAt(Instant.now());
         Account updatedUser = userRepository.save(user);
 
+        log.info("User {} updated by admin", updatedUser.getEmail());
         return accountMapper.toResponse(updatedUser);
     }
 
@@ -100,5 +105,7 @@ public class AdminService {
                         new UserNotFoundException("User with id " + id + " not found."));
 
         userRepository.delete(user);
+
+        log.info("User {} deleted by admin.", user.getEmail());
     }
 }

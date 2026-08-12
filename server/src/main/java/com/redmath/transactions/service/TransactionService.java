@@ -1,6 +1,7 @@
 package com.redmath.transactions.service;
 
 import com.redmath.account.entity.Account;
+import com.redmath.account.exception.UserNotFoundException;
 import com.redmath.account.repository.AccountRepository;
 import com.redmath.balance.entity.Balance;
 import com.redmath.balance.exception.BalanceNotFoundException;
@@ -9,11 +10,11 @@ import com.redmath.transactions.dto.CreateTransactionRequest;
 import com.redmath.transactions.dto.TransactionResponse;
 import com.redmath.transactions.entity.Indicator;
 import com.redmath.transactions.entity.Transaction;
-import com.redmath.transactions.exception.AccountNotFoundException;
 import com.redmath.transactions.exception.InsufficientBalanceException;
 import com.redmath.transactions.mapper.TransactionMapper;
 import com.redmath.transactions.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransactionService
@@ -56,7 +58,7 @@ public class TransactionService
     public TransactionResponse createTransaction(@NonNull CreateTransactionRequest request, String email)
     {
         Account account = accountRepository.findByEmail(email)
-                .orElseThrow(() -> new AccountNotFoundException("Account not found"));
+                .orElseThrow(() -> new UserNotFoundException("Account not found"));
 
         Balance balance = balanceRepository.findByAccountUserId(account.getUserId())
                 .orElseThrow(() -> new BalanceNotFoundException("Balance not found for account"));
@@ -73,6 +75,8 @@ public class TransactionService
 
         balanceRepository.save(balance);
 
+        log.info("User made a transaction. userId={}, transaction_id={}", account.getUserId(),transaction.getId());
+
         return transactionMapper.toResponse(saved);
     }
 
@@ -80,7 +84,7 @@ public class TransactionService
     public Page<TransactionResponse> getTransactions(Long userId, int page, int size) {
 
         Account account = accountRepository.findById(userId)
-                .orElseThrow(() -> new AccountNotFoundException("Account not found"));
+                .orElseThrow(() -> new UserNotFoundException("Account not found"));
 
         Pageable pageable = PageRequest.of(page, size);
 
