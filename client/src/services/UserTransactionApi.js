@@ -24,12 +24,14 @@ export const userTransactionApi = {
   },
 
   createTransaction: async (transactionData, authContext) => {
+    const idempotencyKey = crypto.randomUUID();
     const res = await authenticatedFetch(
       `${API_CONFIG.BASE_URL}/user/transaction`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Idempotency-Key": idempotencyKey,
         },
         body: JSON.stringify({
           description: transactionData.description,
