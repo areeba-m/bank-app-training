@@ -11,7 +11,8 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
-@Table(name = "transactions")
+@Table(name = "transactions", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_transaction_account_idempotency", columnNames = {"account_id", "idempotency_key"})})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -43,5 +44,8 @@ public class Transaction {
     @JoinColumn(name = "transfer_id")
     @OnDelete(action = OnDeleteAction.RESTRICT)
     private Transfer transfer;
+
+    @Column(name = "idempotency_key", nullable = false)
+    private String idempotencyKey;
 
 }

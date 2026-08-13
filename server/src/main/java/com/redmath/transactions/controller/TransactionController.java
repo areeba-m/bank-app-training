@@ -24,14 +24,15 @@ public class TransactionController {
 
     @PostMapping()
     public ResponseEntity<TransactionResponse> createTransaction(
+            @RequestHeader("Idempotency-Key") String idempotencyKey,
             @Valid @RequestBody CreateTransactionRequest request,
             @NonNull Authentication auth) {
 
         String email = auth.getName();
 
-        return ResponseEntity.ok(
-                transactionService.createTransaction(request, email)
-        );
+        return ResponseEntity.ok()
+                .header("Idempotency-Key", idempotencyKey)
+                .body(transactionService.createTransaction(request, email, idempotencyKey));
     }
 
 

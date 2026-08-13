@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -59,10 +60,17 @@ public class TransactionService
 
     @Transactional
     @PreAuthorize("hasRole('USER')")
-    public TransactionResponse createTransaction(@NonNull CreateTransactionRequest request, String email)
+    public TransactionResponse createTransaction(@NonNull CreateTransactionRequest request,
+                                                 String email, String idempotencyKey)
     {
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("Account not found"));
+
+        Optional<Transaction> existingTransaction =
+                transactionRepository.findByAccountAndIdempotencyKey(account, idempotencyKey);
+        if (existingTransaction.isPresent()) {
+            return transactionMapper.toResponse(existingTransaction.get());
+        }
 
         Balance balance = balanceRepository.findByAccountUserIdForUpdate(account.getUserId())
                 .orElseThrow(() -> new BalanceNotFoundException("Balance not found for account"));
@@ -72,6 +80,7 @@ public class TransactionService
         Transaction transaction = transactionMapper.toEntity(request);
         transaction.setAccount(account);
         transaction.setDate(Instant.now());
+        transaction.setIdempotencyKey(idempotencyKey);
 
         Transaction saved = transactionRepository.save(transaction);
 
