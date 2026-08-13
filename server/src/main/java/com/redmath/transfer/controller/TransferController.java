@@ -20,14 +20,15 @@ public class TransferController {
 
     @PostMapping()
     public ResponseEntity<TransferResponse> createTransfer(
+            @RequestHeader("Idempotency-Key") String idempotencyKey,
             @Valid @RequestBody CreateTransferRequest request,
             @NonNull Authentication auth) {
 
         String email = auth.getName();
 
-        return ResponseEntity.ok(
-                transferService.createTransfer(request, email)
-        );
+        return ResponseEntity.ok()
+                .header("Idempotency-Key", idempotencyKey)
+                .body(transferService.createTransfer(request, email, idempotencyKey));
     }
 
     @GetMapping()

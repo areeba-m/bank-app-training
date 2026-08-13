@@ -8,7 +8,8 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
-@Table(name = "transfers")
+@Table(name = "transfers", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_transfer_sender_idempotency", columnNames = {"sender_account_id", "idempotency_key"})})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -34,4 +35,6 @@ public class Transfer {
     @JoinColumn(name = "receiver_account_id")
     private Account receiverAccount;
 
+    @Column(name = "idempotency_key", nullable = false)
+    private String idempotencyKey;
 }

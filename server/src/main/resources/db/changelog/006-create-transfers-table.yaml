@@ -46,6 +46,16 @@ databaseChangeLog:
                   constraints:
                     nullable: false
 
+              - column:
+                  name: idempotency_key
+                  type: VARCHAR(36)
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: transfers
+            columnNames: sender_account_id, idempotency_key
+            constraintName: uk_transfer_sender_idempotency
 
         - addForeignKeyConstraint:
             baseTableName: transfers

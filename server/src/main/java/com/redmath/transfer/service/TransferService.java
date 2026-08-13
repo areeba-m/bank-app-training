@@ -26,10 +26,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -56,12 +58,18 @@ public class TransferService {
                 .map(transferMapper::toResponse);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
     @PreAuthorize("hasRole('USER')")
-    public TransferResponse createTransfer(@NonNull CreateTransferRequest request, String senderEmail) {
+    public TransferResponse createTransfer(@NonNull CreateTransferRequest request,
+                                           String senderEmail, String idempotencyKey) {
         validateTransferRequest(request, senderEmail);
 
         Account sender = findSender(senderEmail);
+        Optional<Transfer> existingTransfer = transferRepository.findBySenderAccountAndIdempotencyKey(sender, idempotencyKey);
+        if (existingTransfer.isPresent()) {
+            return transferMapper.toResponse(existingTransfer.get());
+        }
+
         Account receiver = findReceiver(request.getRecipientEmail());
 
         LockedBalances balances = lockBalancesConcurrently(sender, receiver);
@@ -72,9 +80,9 @@ public class TransferService {
         Instant now = Instant.now();
         String description = resolveDescription(request.getDescription());
 
-        Transfer transfer = createTransferEntity(sender, receiver, request.getAmount(), description, now);
+        Transfer transfer = createTransferEntity(sender, receiver, request.getAmount(), description, now, idempotencyKey);
 
-        createTransactions(sender, receiver, transfer, request.getAmount(), now);
+        createTransactions(sender, receiver, transfer, request.getAmount(), now, idempotencyKey);
 
         log.info("User made a transfer. senderId={}, receiverId={}, amount={}",
                 sender.getUserId(), receiver.getUserId(), request.getAmount());
@@ -131,16 +139,17 @@ public class TransferService {
         receiverBalance.setAmount(receiverBalance.getAmount().add(amount));
     }
 
-    private Transfer createTransferEntity(Account sender, Account receiver,
-                                          BigDecimal amount, String description, Instant date) {
+    private Transfer createTransferEntity(Account sender, Account receiver, BigDecimal amount,
+                                          String description, Instant date, String idempotencyKey) {
         Transfer transfer = transferMapper.toEntity(description, sender, receiver, amount);
         transfer.setDate(date);
+        transfer.setIdempotencyKey(idempotencyKey);
 
         return transferRepository.save(transfer);
     }
 
     private void createTransactions(Account sender, Account receiver, Transfer transfer,
-                                    BigDecimal amount, Instant date) {
+                                    BigDecimal amount, Instant date, String idempotencyKey) {
         Transaction debit = Transaction.builder()
                 .date(date)
                 .description("Sent to " + receiver.getEmail())
@@ -150,6 +159,7 @@ public class TransferService {
                 .counterpartyAccount(receiver)
                 .counterpartyName(receiver.getName())
                 .counterpartyEmail(receiver.getEmail())
+                .idempotencyKey(idempotencyKey)
                 .transfer(transfer)
                 .build();
 
@@ -162,6 +172,7 @@ public class TransferService {
                 .counterpartyAccount(sender)
                 .counterpartyName(sender.getName())
                 .counterpartyEmail(sender.getEmail())
+                .idempotencyKey(idempotencyKey)
                 .transfer(transfer)
                 .build();
 
