@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   executeTransaction,
   fetchBalance,
+  fetchSpendingAnalytics,
   fetchTransactions,
 } from "../../redux/slices/UserTransactionSlice.js";
 import { executeTransfer } from "../../redux/slices/MoneyTransferSlice.js";
@@ -17,6 +18,7 @@ import {
   Send,
 } from "lucide-react";
 import { TransferModal } from "../../components/TransferModal.jsx";
+import { SpendingAnalytics } from "../../components/SpendingAnalytics.jsx";
 
 export const TransactionsPage = () => {
   const dispatch = useDispatch();
@@ -31,6 +33,9 @@ export const TransactionsPage = () => {
     size,
     totalPages,
     totalElements,
+    spendingAnalytics,
+    analyticsStatus,
+    analyticsError,
   } = useSelector((state) => state.userTransactions);
 
   const loading = status === "loading";
@@ -39,13 +44,24 @@ export const TransactionsPage = () => {
   const [filterType, setFilterType] = useState("ALL");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { status: transferStatus, error: transferError } = useSelector(
+  const { status: transferStatus } = useSelector(
     (state) => state.moneyTransfer,
   );
 
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+
   const [toastMsg, setToastMsg] = useState("");
 
+  const [analyticsFrom, setAnalyticsFrom] = useState(() => {
+    const date = new Date();
+    date.setDate(date.getDate() - 7);
+
+    return date.toISOString().split("T")[0];
+  });
+
+  const [analyticsTo, setAnalyticsTo] = useState(() => {
+    return new Date().toISOString().split("T")[0];
+  });
   const loadTransactions = useCallback(async () => {
     if (!user) return;
 
@@ -65,6 +81,41 @@ export const TransactionsPage = () => {
     void loadTransactions();
   }, [loadTransactions]);
 
+  useEffect(() => {
+    if (!user || !analyticsFrom || !analyticsTo) {
+      return;
+    }
+
+    void dispatch(
+      fetchSpendingAnalytics({
+        from: analyticsFrom,
+        to: analyticsTo,
+        insight: false,
+      }),
+    );
+  }, [user, dispatch, analyticsFrom, analyticsTo]);
+
+  const refreshTransactionData = async () => {
+    await Promise.all([
+      dispatch(fetchBalance()).unwrap(),
+
+      dispatch(
+        fetchTransactions({
+          page: 0,
+          size,
+        }),
+      ).unwrap(),
+
+      dispatch(
+        fetchSpendingAnalytics({
+          from: analyticsFrom,
+          to: analyticsTo,
+          insight: false,
+        }),
+      ).unwrap(),
+    ]);
+  };
+
   const handleExecute = async (txnData) => {
     try {
       await dispatch(
@@ -74,17 +125,15 @@ export const TransactionsPage = () => {
         }),
       ).unwrap();
 
-      await Promise.all([
-        dispatch(fetchBalance()).unwrap(),
-        dispatch(
-          fetchTransactions({
-            page: 0,
-            size,
-          }),
-        ).unwrap(),
-      ]);
-
       setIsModalOpen(false);
+
+      await refreshTransactionData();
+
+      setToastMsg("Transaction executed successfully.");
+
+      setTimeout(() => {
+        setToastMsg("");
+      }, 3000);
     } catch (err) {
       console.error("Transaction failed:", err);
       throw err;
@@ -109,15 +158,11 @@ export const TransactionsPage = () => {
     try {
       await dispatch(executeTransfer(transferData)).unwrap();
 
-      setToastMsg("Money transferred successfully.");
       setIsTransferModalOpen(false);
 
-      await dispatch(
-        fetchTransactions({
-          page: 0,
-          size,
-        }),
-      ).unwrap();
+      await refreshTransactionData();
+
+      setToastMsg("Money transferred successfully.");
 
       setTimeout(() => {
         setToastMsg("");
@@ -150,8 +195,37 @@ export const TransactionsPage = () => {
     }
   };
 
+  const handleAnalyzeSpending = async (includeInsight = true) => {
+    if (!analyticsFrom || !analyticsTo) {
+      return;
+    }
+
+    if (analyticsFrom > analyticsTo) {
+      console.error("Invalid analytics date range");
+      return;
+    }
+
+    try {
+      await dispatch(
+        fetchSpendingAnalytics({
+          from: analyticsFrom,
+          to: analyticsTo,
+          insight: includeInsight,
+        }),
+      ).unwrap();
+    } catch (err) {
+      console.error("Failed to fetch spending analytics:", err);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {toastMsg && (
+        <div className="fixed bottom-6 right-6 z-50 bg-burgundy-900 text-white px-4 py-3 rounded-2xl shadow-burgundy-lg flex items-center gap-2 text-xs font-bold animate-bounce">
+          {toastMsg}
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-3xl border border-burgundy-100/80 shadow-xs">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-burgundy-700 text-white rounded-xl shadow-burgundy-glow">
@@ -385,6 +459,17 @@ export const TransactionsPage = () => {
         onClose={() => setIsTransferModalOpen(false)}
         onExecuteTransfer={handleTransfer}
         loading={transferStatus === "loading"}
+      />
+
+      <SpendingAnalytics
+        analytics={spendingAnalytics}
+        loading={analyticsStatus === "loading"}
+        error={analyticsError}
+        from={analyticsFrom}
+        to={analyticsTo}
+        onFromChange={setAnalyticsFrom}
+        onToChange={setAnalyticsTo}
+        onAnalyze={handleAnalyzeSpending}
       />
     </div>
   );

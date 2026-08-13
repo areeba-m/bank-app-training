@@ -16,12 +16,12 @@ springdoc:
     enabled: true
 
 logging:
-  #  level:
-  #    root: DEBUG
-  #    com.redmath: INFO
-  #    org.springframework.security: INFO
-  file:
-    path: logs
+  level:
+    root: DEBUG
+    com.redmath: INFO
+    org.springframework.security: INFO
+#  file:
+#    path: logs
 
 categorization:
   llm:

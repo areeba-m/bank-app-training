@@ -52,7 +52,7 @@ public class AuthService {
 
         Account saved = accountRepository.save(account);
         log.info("New account registered. userId={}, email={}, role={}",
-                saved.getUserId(),saved.getEmail(), saved.getRole());
+                saved.getUserId(), saved.getEmail(), saved.getRole());
 
         return new AccountResponse(saved.getUserId(),
                 saved.getName(), saved.getEmail(), saved.getAddress(), saved.getRole(),saved.getBalance().getAmount());
@@ -61,7 +61,7 @@ public class AuthService {
     @Transactional
     public LoginAndRefreshResult login(LoginRequest request) {
         Authentication authentication = authenticate(request);
-        Account user =  ((AccountPrincipal) Objects.requireNonNull(authentication.getPrincipal())).account();
+        Account user = ((AccountPrincipal) Objects.requireNonNull(authentication.getPrincipal())).account();
         log.info("User '{}' authenticated successfully.", user.getEmail());
 
         RefreshToken refreshToken = refreshTokenService.issueRefreshToken(user);

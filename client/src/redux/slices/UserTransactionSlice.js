@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { userTransactionApi } from "../../services/UserTransactionApi.js";
 import { refreshUser } from "./AuthSlice.js";
+import { spendingAnalyticsApi } from "../../services/SpendingAnalyticsApi.js";
 
 export const fetchBalance = createAsyncThunk(
   "userTransactions/fetchBalance",
@@ -66,6 +67,29 @@ export const executeTransaction = createAsyncThunk(
   },
 );
 
+export const fetchSpendingAnalytics = createAsyncThunk(
+  "userTransactions/fetchSpendingAnalytics",
+  async (
+    { from, to, insight = false },
+    { getState, dispatch, rejectWithValue },
+  ) => {
+    try {
+      return await spendingAnalyticsApi.getSpendingAnalytics(
+        {
+          from,
+          to,
+          insight,
+        },
+        { getState, dispatch },
+      );
+    } catch (error) {
+      return rejectWithValue(
+        error.message || "Failed to fetch spending analytics",
+      );
+    }
+  },
+);
+
 const userTransactionSlice = createSlice({
   name: "userTransactions",
 
@@ -85,6 +109,10 @@ const userTransactionSlice = createSlice({
 
     executeStatus: "idle",
     executeError: null,
+
+    spendingAnalytics: null,
+    analyticsStatus: "idle",
+    analyticsError: null,
   },
 
   reducers: {
@@ -158,14 +186,21 @@ const userTransactionSlice = createSlice({
         state.executeStatus = "failed";
 
         state.executeError = action.payload || "Transaction failed";
+      })
+      .addCase(fetchSpendingAnalytics.pending, (state) => {
+        state.analyticsStatus = "loading";
+        state.analyticsError = null;
+      })
+      .addCase(fetchSpendingAnalytics.fulfilled, (state, action) => {
+        state.analyticsStatus = "succeeded";
+        state.spendingAnalytics = action.payload;
+      })
+      .addCase(fetchSpendingAnalytics.rejected, (state, action) => {
+        state.analyticsStatus = "failed";
+        state.analyticsError =
+          action.payload || "Failed to fetch spending analytics";
       });
   },
 });
-
-export const {
-  clearTransactionsError,
-  clearExecuteTransactionError,
-  clearTransactions,
-} = userTransactionSlice.actions;
 
 export default userTransactionSlice.reducer;

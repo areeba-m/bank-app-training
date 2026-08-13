@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -14,12 +14,19 @@ export const TransactionModal = ({
   onClose,
   onExecuteTransaction,
   currentBalance,
+  initialType = "DEPOSIT",
 }) => {
-  const [type, setType] = useState("DEPOSIT");
+  const [type, setType] = useState(initialType);
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setType(initialType);
+    }
+  }, [isOpen, initialType]);
 
   if (!isOpen) return null;
 
@@ -66,6 +73,7 @@ export const TransactionModal = ({
       };
 
       await onExecuteTransaction(transactionData);
+
       setAmount("");
       setDescription("");
       setType("DEPOSIT");
@@ -209,4 +217,5 @@ TransactionModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   onExecuteTransaction: PropTypes.func.isRequired,
   currentBalance: PropTypes.number,
+  initialType: PropTypes.oneOf(["DEPOSIT", "WITHDRAW"]),
 };

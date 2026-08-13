@@ -46,8 +46,8 @@ export const UserDashboard = () => {
   const [isTxnModalOpen, setIsTxnModalOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
-
-  const { status: transferStatus, error: transferError } = useSelector(
+  const [transactionType, setTransactionType] = useState("DEPOSIT");
+  const { status: transferStatus } = useSelector(
     (state) => state.moneyTransfer,
   );
 
@@ -226,7 +226,10 @@ export const UserDashboard = () => {
 
           <div className="grid grid-cols-2 gap-3 pt-1">
             <button
-              onClick={() => setIsTxnModalOpen(true)}
+              onClick={() => {
+                setTransactionType("DEPOSIT");
+                setIsTxnModalOpen(true);
+              }}
               className="py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all"
             >
               <ArrowDownRight className="w-4 h-4 text-emerald-600" />
@@ -234,7 +237,10 @@ export const UserDashboard = () => {
             </button>
 
             <button
-              onClick={() => setIsTxnModalOpen(true)}
+              onClick={() => {
+                setTransactionType("WITHDRAW");
+                setIsTxnModalOpen(true);
+              }}
               className="py-2.5 px-3 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all"
             >
               <ArrowUpRight className="w-4 h-4 text-rose-600" />
@@ -411,6 +417,7 @@ export const UserDashboard = () => {
         onClose={() => setIsTxnModalOpen(false)}
         onExecuteTransaction={handleTransactionExecute}
         currentBalance={Number(balanceInfo?.amount ?? 0)}
+        initialType={transactionType}
       />
 
       <TransferModal
