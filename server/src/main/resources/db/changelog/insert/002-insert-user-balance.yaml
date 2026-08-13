@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-initial-balance-user
+      author: areeba
+      changes:
+        - insert:
+            tableName: balance
+            columns:
+              - column:
+                  name: date
+                  valueComputed: "NOW()"
+              - column:
+                  name: amount
+                  valueNumeric: 500.00
+              - column:
+                  name: indicator
+                  value: "CR"
+              - column:
+                  name: user_id
+                  valueComputed: "(SELECT user_id FROM account WHERE email = 'user@bank.com')"

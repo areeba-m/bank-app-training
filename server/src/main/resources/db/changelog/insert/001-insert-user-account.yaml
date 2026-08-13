@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-insert-user-account
+      author: areeba
+      changes:
+        - insert:
+            tableName: account
+            columns:
+              - column:
+                  name: name
+                  value: "Standard User"
+              - column:
+                  name: email
+                  value: "user@bank.com"
+              - column:
+                  name: password
+                  value: "{noop}user123"
+              - column:
+                  name: address
+                  value: "123 Main Street"
+              - column:
+                  name: role
+                  value: "USER"
+              - column:
+                  name: created_at
+                  valueComputed: "NOW()"
+              - column:
+                  name: updated_at
+                  valueComputed: "NOW()"

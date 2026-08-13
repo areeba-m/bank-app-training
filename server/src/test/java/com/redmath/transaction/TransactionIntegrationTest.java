@@ -6,6 +6,7 @@ import com.redmath.account.entity.Role;
 import com.redmath.account.repository.AccountRepository;
 import com.redmath.balance.entity.Balance;
 import com.redmath.balance.repository.BalanceRepository;
+import com.redmath.categorization.repository.TransactionCategoryRepository;
 import com.redmath.transactions.dto.CreateTransactionRequest;
 import com.redmath.transactions.entity.Indicator;
 import com.redmath.transactions.entity.Transaction;
@@ -67,6 +68,9 @@ class TransactionIntegrationTest
     private TransactionRepository transactionRepository;
 
     @Autowired
+    private TransactionCategoryRepository categoryRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     private Account account;
@@ -76,6 +80,7 @@ class TransactionIntegrationTest
     @BeforeEach
     void setup()
     {
+        categoryRepository.deleteAll();
         transactionRepository.deleteAll();
         balanceRepository.deleteAll();
         accountRepository.deleteAll();
