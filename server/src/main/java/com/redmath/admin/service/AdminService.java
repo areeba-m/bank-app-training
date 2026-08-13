@@ -2,6 +2,7 @@ package com.redmath.admin.service;
 
 import com.redmath.account.dto.AccountResponse;
 import com.redmath.account.entity.Account;
+import com.redmath.account.entity.Role;
 import com.redmath.account.exception.UserNotFoundException;
 import com.redmath.account.mapper.AccountMapper;
 import com.redmath.account.repository.AccountRepository;
@@ -64,7 +65,7 @@ public class AdminService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        return userRepository.findAll(pageable)
+        return userRepository.findByRole(Role.USER, pageable)
                 .map(accountMapper::toResponse);
     }
 
