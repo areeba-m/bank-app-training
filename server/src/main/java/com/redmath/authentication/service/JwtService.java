@@ -3,6 +3,7 @@ package com.redmath.authentication.service;
 import com.redmath.authentication.wrapper.AccountPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -21,7 +22,7 @@ import java.util.Objects;
 public class JwtService {
     private final JwtEncoder jwtEncoder;
 
-    public String generateAccessToken(Authentication authentication) {
+    public String generateAccessToken(@NonNull Authentication authentication) {
         Instant now = Instant.now();
 
         List<String> roles = authentication.getAuthorities().stream()

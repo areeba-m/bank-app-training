@@ -11,7 +11,7 @@ public record LlmProperties(
 ) {
     public LlmProperties {
         if (timeoutMillis <= 0) {
-            timeoutMillis = 5000;
+            timeoutMillis = 60000000;
         }
         if (model == null || model.isBlank()) {
             model = "gemini-3.6-flash";
