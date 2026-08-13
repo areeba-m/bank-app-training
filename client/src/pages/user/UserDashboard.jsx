@@ -418,6 +418,7 @@ export const UserDashboard = () => {
         onExecuteTransaction={handleTransactionExecute}
         currentBalance={Number(balanceInfo?.amount ?? 0)}
         initialType={transactionType}
+        onTypeChange={setTransactionType}
       />
 
       <TransferModal

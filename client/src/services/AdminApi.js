@@ -59,7 +59,6 @@ export const adminApi = {
       },
       authContext,
     );
-    const response = await handleApiResponse(res);
-    return response.json();
+    await handleApiResponse(res);
   },
 };

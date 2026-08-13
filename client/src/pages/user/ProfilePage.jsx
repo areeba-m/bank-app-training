@@ -2,7 +2,7 @@ import { useSelector } from "react-redux";
 import { CheckCircle2, Key, Mail, MapPin, User } from "lucide-react";
 
 export const ProfilePage = () => {
-  const { user, status, error } = useSelector((state) => state.user);
+  const { user } = useSelector((state) => state.user);
 
   return (
     <div className="max-w-3xl space-y-5">

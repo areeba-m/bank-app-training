@@ -44,7 +44,7 @@ export const AdminDashboard = () => {
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
   const [pageSize] = useState(10);
-
+  const [, setError] = useState(null);
   useEffect(() => {
     dispatch(
       fetchAccounts({
@@ -387,6 +387,7 @@ export const AdminDashboard = () => {
         </div>
       </div>
       <AccountModal
+        key={accountToEdit?.id ?? "new"}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveAccount}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -15,18 +15,13 @@ export const TransactionModal = ({
   onExecuteTransaction,
   currentBalance,
   initialType = "DEPOSIT",
+  onTypeChange,
 }) => {
-  const [type, setType] = useState(initialType);
+  const type = initialType;
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      setType(initialType);
-    }
-  }, [isOpen, initialType]);
 
   if (!isOpen) return null;
 
@@ -76,7 +71,6 @@ export const TransactionModal = ({
 
       setAmount("");
       setDescription("");
-      setType("DEPOSIT");
       setError("");
 
       onClose();
@@ -85,6 +79,13 @@ export const TransactionModal = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleClose = () => {
+    setAmount("");
+    setDescription("");
+    setError("");
+    onClose();
   };
 
   return (
@@ -99,7 +100,7 @@ export const TransactionModal = ({
 
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="text-burgundy-200 hover:text-white"
           >
             <X className="w-5 h-5" />
@@ -121,7 +122,9 @@ export const TransactionModal = ({
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => setType("DEPOSIT")}
+                onClick={() => {
+                  onTypeChange("DEPOSIT");
+                }}
                 className={`py-2.5 px-3 rounded-xl border font-bold text-xs flex items-center justify-center gap-2 transition-all ${
                   type === "DEPOSIT"
                     ? "bg-emerald-50 border-emerald-500 text-emerald-800 ring-2 ring-emerald-500/20"
@@ -134,7 +137,7 @@ export const TransactionModal = ({
 
               <button
                 type="button"
-                onClick={() => setType("WITHDRAW")}
+                onClick={() => onTypeChange("WITHDRAW")}
                 className={`py-2.5 px-3 rounded-xl border font-bold text-xs flex items-center justify-center gap-2 transition-all ${
                   type === "WITHDRAW"
                     ? "bg-rose-50 border-rose-500 text-rose-800 ring-2 ring-rose-500/20"
@@ -189,7 +192,7 @@ export const TransactionModal = ({
           <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               disabled={loading}
               className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl disabled:opacity-50"
             >
@@ -215,6 +218,7 @@ export const TransactionModal = ({
 TransactionModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  onTypeChange: PropTypes.func.isRequired,
   onExecuteTransaction: PropTypes.func.isRequired,
   currentBalance: PropTypes.number,
   initialType: PropTypes.oneOf(["DEPOSIT", "WITHDRAW"]),

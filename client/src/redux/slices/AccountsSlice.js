@@ -130,7 +130,7 @@ const accountsSlice = createSlice({
         state.status = "loading";
         state.error = null;
       })
-      .addCase(createNewAccount.fulfilled, (state, action) => {
+      .addCase(createNewAccount.fulfilled, (state) => {
         state.status = "succeeded";
         state.error = null;
       })
@@ -143,7 +143,7 @@ const accountsSlice = createSlice({
         state.status = "loading";
         state.error = null;
       })
-      .addCase(updateExistingAccount.fulfilled, (state, action) => {
+      .addCase(updateExistingAccount.fulfilled, (state) => {
         state.status = "succeeded";
         state.error = null;
       })
@@ -156,7 +156,7 @@ const accountsSlice = createSlice({
         state.status = "loading";
         state.error = null;
       })
-      .addCase(deleteExistingAccount.fulfilled, (state, action) => {
+      .addCase(deleteExistingAccount.fulfilled, (state) => {
         state.status = "succeeded";
         state.error = null;
       })

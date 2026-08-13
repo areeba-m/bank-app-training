@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   CheckCircle2,
   Eye,
@@ -26,35 +26,22 @@ export const AccountModal = ({
     address: "",
   };
 
-  const [formData, setFormData] = useState(emptyForm);
-  const [error, setError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
+  const [formData, setFormData] = useState(() => {
     if (accountToEdit) {
-      setFormData({
+      return {
         password: "",
         name: accountToEdit.name || "",
         email: accountToEdit.email || "",
         address: accountToEdit.address || "",
-      });
-    } else {
-      setFormData({
-        password: "",
-        name: "",
-        email: "",
-        address: "",
-      });
+      };
     }
 
-    setError("");
-    setShowPassword(false);
-  }, [isOpen, accountToEdit]);
+    return emptyForm;
+  });
+
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   if (!isOpen) {
     return null;
@@ -63,6 +50,7 @@ export const AccountModal = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
     if (!formData.name.trim()) {
       setError("Name is required.");
       return;
@@ -79,11 +67,12 @@ export const AccountModal = ({
     }
 
     setSubmitting(true);
+
     try {
       await onSave(formData);
       onClose();
     } catch (err) {
-      setError(err.message || "Failed to save account");
+      setError(err?.message || "Failed to save account");
     } finally {
       setSubmitting(false);
     }
@@ -99,6 +88,7 @@ export const AccountModal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
       <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-burgundy-100 overflow-hidden">
+        {/* Header */}
         <div className="bg-gradient-to-r from-burgundy-800 to-burgundy-950 px-6 py-4 flex items-center justify-between text-white">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-burgundy-700/80 flex items-center justify-center">
@@ -122,21 +112,26 @@ export const AccountModal = ({
             type="button"
             onClick={handleClose}
             className="p-1 rounded-lg hover:bg-white/10"
+            aria-label="Close modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
+        {/* Form */}
         <form
           onSubmit={handleSubmit}
           className="p-6 space-y-4"
           autoComplete="off"
         >
+          {/* Error */}
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl">
               {error}
             </div>
           )}
+
+          {/* Account ID */}
           {isEdit && (
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
@@ -146,11 +141,14 @@ export const AccountModal = ({
               <input
                 value={accountToEdit.id}
                 disabled
+                readOnly
                 autoComplete="off"
                 className="w-full px-3 py-2 text-sm border rounded-xl bg-slate-100 text-slate-500"
               />
             </div>
           )}
+
+          {/* Name */}
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
               Full Name *
@@ -162,16 +160,17 @@ export const AccountModal = ({
               autoComplete="off"
               value={formData.name}
               onChange={(e) =>
-                setFormData({
-                  ...formData,
+                setFormData((prev) => ({
+                  ...prev,
                   name: e.target.value,
-                })
+                }))
               }
               className="w-full px-3 py-2 text-sm border rounded-xl"
               required
             />
           </div>
 
+          {/* Email */}
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
               Email Address *
@@ -185,10 +184,10 @@ export const AccountModal = ({
                 disabled={isEdit}
                 value={formData.email}
                 onChange={(e) =>
-                  setFormData({
-                    ...formData,
+                  setFormData((prev) => ({
+                    ...prev,
                     email: e.target.value,
-                  })
+                  }))
                 }
                 className="w-full pl-9 pr-3 py-2 text-sm border rounded-xl disabled:bg-slate-100 disabled:text-slate-500"
                 required
@@ -198,6 +197,7 @@ export const AccountModal = ({
             </div>
           </div>
 
+          {/* Password */}
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
               {isEdit ? "Password" : "Password *"}
@@ -211,10 +211,10 @@ export const AccountModal = ({
                 disabled={isEdit}
                 value={formData.password}
                 onChange={(e) =>
-                  setFormData({
-                    ...formData,
+                  setFormData((prev) => ({
+                    ...prev,
                     password: e.target.value,
-                  })
+                  }))
                 }
                 className="w-full pl-9 pr-10 py-2 text-sm border rounded-xl disabled:bg-slate-100 disabled:text-slate-500"
                 required={!isEdit}
@@ -242,6 +242,7 @@ export const AccountModal = ({
             </div>
           </div>
 
+          {/* Address */}
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
               Address *
@@ -254,23 +255,26 @@ export const AccountModal = ({
                 autoComplete="off"
                 value={formData.address}
                 onChange={(e) =>
-                  setFormData({
-                    ...formData,
+                  setFormData((prev) => ({
+                    ...prev,
                     address: e.target.value,
-                  })
+                  }))
                 }
                 className="w-full pl-9 pr-3 py-2 text-sm border rounded-xl"
+                required
               />
 
               <MapPin className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
             </div>
           </div>
 
+          {/* Buttons */}
           <div className="pt-4 flex justify-end gap-3 border-t">
             <button
               type="button"
               onClick={handleClose}
-              className="px-4 py-2 text-xs font-bold rounded-xl hover:bg-slate-100"
+              disabled={submitting}
+              className="px-4 py-2 text-xs font-bold rounded-xl hover:bg-slate-100 disabled:opacity-50"
             >
               Cancel
             </button>
