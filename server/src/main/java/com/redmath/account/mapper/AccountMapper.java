@@ -1,13 +1,15 @@
 package com.redmath.account.mapper;
 
+import com.redmath.account.dto.AccountResponse;
 import com.redmath.account.entity.Account;
 import com.redmath.account.entity.Role;
 import com.redmath.admin.dto.CreateUserRequest;
-import com.redmath.account.dto.AccountResponse;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Component
@@ -31,14 +33,16 @@ public class AccountMapper {
         return user;
     }
 
-    public AccountResponse toResponse(Account user) {
+    public AccountResponse toResponse(@NonNull Account user) {
 
+        BigDecimal balance = user.getBalance() != null ? user.getBalance().getAmount() : BigDecimal.ZERO;
         return new AccountResponse(
                 user.getUserId(),
                 user.getName(),
                 user.getEmail(),
                 user.getAddress(),
-                user.getRole()
+                user.getRole(),
+                balance
         );
     }
 }

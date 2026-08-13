@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Objects;
 
 @RestController
@@ -38,7 +37,7 @@ public class TransactionController {
 
     @GetMapping()
     public ResponseEntity<Page<TransactionResponse>> getTransactions(
-            Authentication authentication,
+            @NonNull Authentication authentication,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
