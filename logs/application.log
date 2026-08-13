@@ -1197,3 +1197,9 @@ org.springframework.web.bind.MissingRequestCookieException: Required cookie 'ref
 2026-08-12T16:08:18.069+05:00  INFO 36527 --- [server] [http-nio-8080-exec-3] c.r.t.service.TransactionService         : User made a transaction. userId=2, transaction_id=1
 2026-08-12T16:08:40.526+05:00  INFO 36527 --- [server] [http-nio-8080-exec-1] c.r.transfer.service.TransferService     : User made a transfer. senderId=2, receiverId=3, amount=20
 2026-08-12T16:21:05.259+05:00  INFO 36527 --- [server] [http-nio-8080-exec-10] c.r.t.service.TransactionService         : User made a transaction. userId=3, transaction_id=4
+2026-08-12T17:15:10.636+05:00  WARN 41108 --- [server] [http-nio-8080-exec-3] c.r.e.GlobalExceptionHandler             : Bad request at /api/v1/auth/refresh: Invalid refresh token
+2026-08-12T17:15:15.452+05:00  WARN 41108 --- [server] [http-nio-8080-exec-5] c.r.e.GlobalExceptionHandler             : Bad request at /api/v1/auth/refresh: Invalid refresh token
+2026-08-12T17:15:31.658+05:00  INFO 41108 --- [server] [http-nio-8080-exec-1] com.redmath.admin.service.AdminService   : New account created. userId=2, email=s@bank.com, role=USER
+2026-08-12T17:15:42.930+05:00  INFO 41108 --- [server] [http-nio-8080-exec-5] com.redmath.admin.service.AdminService   : New account created. userId=3, email=z@bank.com, role=USER
+2026-08-12T17:15:52.461+05:00  INFO 41108 --- [server] [http-nio-8080-exec-9] c.r.t.service.TransactionService         : User made a transaction. userId=2, transaction_id=1
+2026-08-12T17:16:09.359+05:00  INFO 41108 --- [server] [http-nio-8080-exec-5] c.r.transfer.service.TransferService     : User made a transfer. senderId=2, receiverId=3, amount=20
