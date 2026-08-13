@@ -22,3 +22,10 @@ logging:
   #    org.springframework.security: INFO
   file:
     path: logs
+
+categorization:
+  llm:
+    enabled: ${CATEGORIZATION_LLM_ENABLED:true}
+    api-key: ${GEMINI_API_KEY}
+    model: ${CATEGORIZATION_LLM_MODEL:gemini-3.6-flash}
+    timeout-millis: ${CATEGORIZATION_LLM_TIMEOUT_MS:5000}
