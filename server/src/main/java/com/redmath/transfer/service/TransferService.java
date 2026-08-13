@@ -85,7 +85,7 @@ public class TransferService {
 
         Transfer transfer = createTransferEntity(sender, receiver, request.getAmount(), description, now, idempotencyKey);
 
-        createTransactions(sender, receiver, transfer, request.getAmount(),description, now, idempotencyKey);
+        createTransactions(sender, receiver, transfer, request.getAmount(), now, idempotencyKey, description);
 
         log.info("User made a transfer. senderId={}, receiverId={}, amount={}",
                 sender.getUserId(), receiver.getUserId(), request.getAmount());
@@ -152,7 +152,7 @@ public class TransferService {
     }
 
     private void createTransactions(Account sender, Account receiver, Transfer transfer,
-                                    BigDecimal amount, Instant date, String idempotencyKey,String description) {
+                                    BigDecimal amount, Instant date, String idempotencyKey, String description) {
         Transaction debit = Transaction.builder()
                 .date(date)
                 .description(description)
