@@ -5,6 +5,7 @@ import com.redmath.account.repository.AccountRepository;
 import com.redmath.balance.entity.Balance;
 import com.redmath.balance.exception.BalanceNotFoundException;
 import com.redmath.balance.repository.BalanceRepository;
+import com.redmath.categorization.event.TransactionCreatedEvent;
 import com.redmath.transactions.entity.Indicator;
 import com.redmath.transactions.entity.Transaction;
 import com.redmath.transactions.exception.InsufficientBalanceException;
@@ -21,6 +22,7 @@ import com.redmath.transfer.repository.TransferRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +43,7 @@ public class TransferService {
     private final BalanceRepository balanceRepository;
     private final TransactionRepository transactionRepository;
     private final TransferMapper transferMapper;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ADMIN')")
@@ -165,8 +168,12 @@ public class TransferService {
                 .transfer(transfer)
                 .build();
 
-        transactionRepository.save(debit);
+        Transaction savedDebit = transactionRepository.save(debit);
         transactionRepository.save(credit);
+
+        applicationEventPublisher.publishEvent(
+                new TransactionCreatedEvent(this, savedDebit.getId())
+        );
     }
 
     private String resolveDescription(String description) {
