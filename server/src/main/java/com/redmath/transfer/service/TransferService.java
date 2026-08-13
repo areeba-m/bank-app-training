@@ -5,6 +5,7 @@ import com.redmath.account.repository.AccountRepository;
 import com.redmath.balance.entity.Balance;
 import com.redmath.balance.exception.BalanceNotFoundException;
 import com.redmath.balance.repository.BalanceRepository;
+import com.redmath.categorization.event.TransactionCreatedEvent;
 import com.redmath.transactions.entity.Indicator;
 import com.redmath.transactions.entity.Transaction;
 import com.redmath.transactions.exception.InsufficientBalanceException;
@@ -21,15 +22,18 @@ import com.redmath.transfer.repository.TransferRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -41,6 +45,7 @@ public class TransferService {
     private final BalanceRepository balanceRepository;
     private final TransactionRepository transactionRepository;
     private final TransferMapper transferMapper;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ADMIN')")
@@ -56,12 +61,18 @@ public class TransferService {
                 .map(transferMapper::toResponse);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
     @PreAuthorize("hasRole('USER')")
-    public TransferResponse createTransfer(@NonNull CreateTransferRequest request, String senderEmail) {
+    public TransferResponse createTransfer(@NonNull CreateTransferRequest request,
+                                           String senderEmail, String idempotencyKey) {
         validateTransferRequest(request, senderEmail);
 
         Account sender = findSender(senderEmail);
+        Optional<Transfer> existingTransfer = transferRepository.findBySenderAccountAndIdempotencyKey(sender, idempotencyKey);
+        if (existingTransfer.isPresent()) {
+            return transferMapper.toResponse(existingTransfer.get());
+        }
+
         Account receiver = findReceiver(request.getRecipientEmail());
 
         LockedBalances balances = lockBalancesConcurrently(sender, receiver);
@@ -72,9 +83,9 @@ public class TransferService {
         Instant now = Instant.now();
         String description = resolveDescription(request.getDescription());
 
-        Transfer transfer = createTransferEntity(sender, receiver, request.getAmount(), description, now);
+        Transfer transfer = createTransferEntity(sender, receiver, request.getAmount(), description, now, idempotencyKey);
 
-        createTransactions(sender, receiver, transfer, request.getAmount(), now, description);
+        createTransactions(sender, receiver, transfer, request.getAmount(),description, now, idempotencyKey);
 
         log.info("User made a transfer. senderId={}, receiverId={}, amount={}",
                 sender.getUserId(), receiver.getUserId(), request.getAmount());
@@ -131,16 +142,17 @@ public class TransferService {
         receiverBalance.setAmount(receiverBalance.getAmount().add(amount));
     }
 
-    private Transfer createTransferEntity(Account sender, Account receiver,
-                                          BigDecimal amount, String description, Instant date) {
+    private Transfer createTransferEntity(Account sender, Account receiver, BigDecimal amount,
+                                          String description, Instant date, String idempotencyKey) {
         Transfer transfer = transferMapper.toEntity(description, sender, receiver, amount);
         transfer.setDate(date);
+        transfer.setIdempotencyKey(idempotencyKey);
 
         return transferRepository.save(transfer);
     }
 
     private void createTransactions(Account sender, Account receiver, Transfer transfer,
-                                    BigDecimal amount, Instant date, String description) {
+                                    BigDecimal amount, Instant date, String idempotencyKey,String description) {
         Transaction debit = Transaction.builder()
                 .date(date)
                 .description(description)
@@ -150,6 +162,7 @@ public class TransferService {
                 .counterpartyAccount(receiver)
                 .counterpartyName(receiver.getName())
                 .counterpartyEmail(receiver.getEmail())
+                .idempotencyKey(idempotencyKey)
                 .transfer(transfer)
                 .build();
 
@@ -162,11 +175,16 @@ public class TransferService {
                 .counterpartyAccount(sender)
                 .counterpartyName(sender.getName())
                 .counterpartyEmail(sender.getEmail())
+                .idempotencyKey(idempotencyKey)
                 .transfer(transfer)
                 .build();
 
-        transactionRepository.save(debit);
+        Transaction savedDebit = transactionRepository.save(debit);
         transactionRepository.save(credit);
+
+        applicationEventPublisher.publishEvent(
+                new TransactionCreatedEvent(this, savedDebit.getId())
+        );
     }
 
     private String resolveDescription(String description) {

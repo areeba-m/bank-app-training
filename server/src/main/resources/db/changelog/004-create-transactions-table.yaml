@@ -67,6 +67,17 @@ databaseChangeLog:
                   constraints:
                     nullable: true
 
+              - column:
+                  name: idempotency_key
+                  type: VARCHAR(36)
+                  constraints:
+                    nullable: false
+
+        - addUniqueConstraint:
+            tableName: transactions
+            columnNames: account_id, idempotency_key
+            constraintName: uk_transaction_account_idempotency
+
         - addForeignKeyConstraint:
             baseTableName: transactions
             baseColumnNames: account_id

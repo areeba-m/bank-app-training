@@ -20,12 +20,14 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -36,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 class CategorizationIntegrationTest {
 
     @Autowired
@@ -61,6 +64,8 @@ class CategorizationIntegrationTest {
 
     private Account account;
 
+    private String idempotencyKey;
+
     @BeforeEach
     void setup() {
         transactionCategoryRepository.deleteAll();
@@ -83,6 +88,8 @@ class CategorizationIntegrationTest {
         balance.setAmount(new BigDecimal("10000"));
         balance.setIndicator(Indicator.CR);
         balanceRepository.saveAndFlush(balance);
+
+        idempotencyKey = UUID.randomUUID().toString();
     }
 
     private @NonNull RequestPostProcessor userJwt() {
@@ -105,7 +112,8 @@ class CategorizationIntegrationTest {
                         .with(userJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Idempotency-Key", idempotencyKey))
                 .andExpect(status().isOk());
 
         var transaction = transactionRepository.findByAccountUserId(
@@ -137,7 +145,8 @@ class CategorizationIntegrationTest {
                         .with(userJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Idempotency-Key", idempotencyKey))
                 .andExpect(status().isOk());
 
         var transaction = transactionRepository.findByAccountUserId(
@@ -164,7 +173,8 @@ class CategorizationIntegrationTest {
                         .with(userJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Idempotency-Key", idempotencyKey))
                 .andExpect(status().isOk());
 
         var transaction = transactionRepository.findByAccountUserId(
@@ -219,7 +229,8 @@ class CategorizationIntegrationTest {
                         .with(userJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Idempotency-Key", idempotencyKey))
                 .andExpect(status().isOk());
     }
 }

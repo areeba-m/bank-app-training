@@ -6,6 +6,7 @@ import com.redmath.account.entity.Role;
 import com.redmath.account.repository.AccountRepository;
 import com.redmath.balance.entity.Balance;
 import com.redmath.balance.repository.BalanceRepository;
+import com.redmath.categorization.repository.TransactionCategoryRepository;
 import com.redmath.transactions.dto.CreateTransactionRequest;
 import com.redmath.transactions.entity.Indicator;
 import com.redmath.transactions.entity.Transaction;
@@ -28,6 +29,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -66,42 +68,41 @@ class TransactionIntegrationTest
     private TransactionRepository transactionRepository;
 
     @Autowired
+    private TransactionCategoryRepository categoryRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     private Account account;
 
+    private String idempotencyKey;
+
     @BeforeEach
     void setup()
     {
+        categoryRepository.deleteAll();
         transactionRepository.deleteAll();
         balanceRepository.deleteAll();
         accountRepository.deleteAll();
 
         account = new Account();
-
         account.setName("Test User");
-
         account.setEmail("test@gmail.com");
-
         account.setPassword(passwordEncoder.encode("password"));
-
         account.setAddress("Lahore");
-
         account.setRole(Role.USER);
-
         account.setCreatedAt(Instant.now());
-
         account.setUpdatedAt(Instant.now());
 
         account = accountRepository.saveAndFlush(account);
 
         Balance balance = new Balance();
-
         balance.setAccount(account);
-
         balance.setAmount(new BigDecimal("1000"));
         balance.setIndicator(Indicator.CR);
         balanceRepository.saveAndFlush(balance);
+
+        idempotencyKey = UUID.randomUUID().toString();
     }
 
     private @NonNull RequestPostProcessor userJwt()
@@ -121,33 +122,34 @@ class TransactionIntegrationTest
     void shouldCreateCreditTransaction() throws Exception {
 
         CreateTransactionRequest request = new CreateTransactionRequest(
-            "Salary",
-            new BigDecimal("500"),
-            Indicator.CR
+                "Salary",
+                new BigDecimal("500"),
+                Indicator.CR
         );
 
         mockMvc.perform(post("/api/v1/user/transaction")
-                    .with(userJwt())
-                    .with(csrf())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.amount").value(500))
-            .andExpect(jsonPath("$.description").value("Salary"))
-            .andExpect(jsonPath("$.indicator").value("CR"));
+                        .with(userJwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Idempotency-Key", idempotencyKey))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.amount").value(500))
+                .andExpect(jsonPath("$.description").value("Salary"))
+                .andExpect(jsonPath("$.indicator").value("CR"));
 
         // Verify balance updated
         Balance updatedBalance = balanceRepository
-            .findByAccountUserId(account.getUserId())
-            .orElseThrow();
+                .findByAccountUserId(account.getUserId())
+                .orElseThrow();
 
         assertEquals(0,
-            updatedBalance.getAmount().compareTo(new BigDecimal("1500")));
+                updatedBalance.getAmount().compareTo(new BigDecimal("1500")));
 
         // Verify transaction persisted
         Page<Transaction> transactions = transactionRepository.findByAccountUserId(
-            account.getUserId(),
-            PageRequest.of(0, 10));
+                account.getUserId(),
+                PageRequest.of(0, 10));
 
         assertEquals(1, transactions.getTotalElements());
 
@@ -156,7 +158,7 @@ class TransactionIntegrationTest
         assertEquals("Salary", transaction.getDescription());
         assertEquals(Indicator.CR, transaction.getIndicator());
         assertEquals(0,
-            transaction.getAmount().compareTo(new BigDecimal("500")));
+                transaction.getAmount().compareTo(new BigDecimal("500")));
     }
 
 
@@ -172,7 +174,8 @@ class TransactionIntegrationTest
                         .with(userJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Idempotency-Key", idempotencyKey))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.amount").value(300))
                 .andExpect(jsonPath("$.description").value("Shopping"))
@@ -212,7 +215,8 @@ class TransactionIntegrationTest
                         .with(userJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Idempotency-Key", idempotencyKey))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.status").value(403))
                 .andExpect(jsonPath("$.message").exists());
@@ -243,7 +247,8 @@ class TransactionIntegrationTest
                         .with(userJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Idempotency-Key", idempotencyKey))
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/v1/user/transaction")
@@ -286,4 +291,80 @@ class TransactionIntegrationTest
                 .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    void shouldNotCreateDuplicateTransferWithSameIdempotencyKey() throws Exception {
+
+        CreateTransactionRequest request = new CreateTransactionRequest();
+        request.setAmount(new BigDecimal("200"));
+        request.setIndicator(Indicator.CR);
+        request.setDescription("Deposit");
+
+        mockMvc.perform(post("/api/v1/user/transaction")
+                        .with(userJwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Idempotency-Key", idempotencyKey))
+                .andExpect(status().isOk());
+
+        // Retry with SAME key
+        mockMvc.perform(post("/api/v1/user/transaction")
+                        .with(userJwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Idempotency-Key", idempotencyKey))
+                .andExpect(status().isOk());
+
+        Balance senderBalance = balanceRepository.findByAccountUserId(account.getUserId()).orElseThrow();
+
+        assertEquals(0, senderBalance.getAmount().compareTo(new BigDecimal("1200")));
+        assertEquals(1, transactionRepository.count());
+    }
+
+    @Test
+    void shouldCreateSeparateTransfersWithDifferentIdempotencyKeys() throws Exception {
+        String idempotencyKey2 = UUID.randomUUID().toString();
+
+        CreateTransactionRequest request = new CreateTransactionRequest();
+        request.setAmount(new BigDecimal("200"));
+        request.setIndicator(Indicator.DB);
+        request.setDescription("Withdrawal");
+
+        mockMvc.perform(post("/api/v1/user/transaction")
+                        .with(userJwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Idempotency-Key", idempotencyKey))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/v1/user/transaction")
+                        .with(userJwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Idempotency-Key", idempotencyKey2))
+                .andExpect(status().isOk());
+
+        assertEquals(2, transactionRepository.count());
+        Balance senderBalance = balanceRepository.findByAccountUserId(account.getUserId()).orElseThrow();
+        assertEquals(0, senderBalance.getAmount().compareTo(new BigDecimal("600")));
+    }
+
+    @Test
+    void shouldRejectTransferWithoutIdempotencyKey() throws Exception {
+
+        CreateTransactionRequest request = new CreateTransactionRequest();
+        request.setAmount(new BigDecimal("200"));
+        request.setIndicator(Indicator.DB);
+        request.setDescription("Withdrawal");
+
+        mockMvc.perform(post("/api/v1/user/transaction")
+                        .with(userJwt())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
 }

@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -25,62 +26,40 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler({ResourceNotFoundException.class, UsernameNotFoundException.class})
-    public ResponseEntity<ErrorResponse> handleResourceNotFound(RuntimeException ex,
-                                                                HttpServletRequest request) {
-        ErrorResponse error = new ErrorResponse(
-                Instant.now(),
-                ex.getMessage(),
-                HttpStatus.NOT_FOUND.value(),
-                request.getRequestURI());
-
+    public ResponseEntity<ErrorResponse> handleResourceNotFound(RuntimeException ex, HttpServletRequest request) {
+        ErrorResponse error = generateError(ex.getMessage(), HttpStatus.NOT_FOUND, request);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleEmailAlreadyExists(EmailAlreadyExistsException ex,
                                                                   HttpServletRequest request) {
-        ErrorResponse error = new ErrorResponse(
-                Instant.now(),
-                ex.getMessage(),
-                HttpStatus.CONFLICT.value(),
-                request.getRequestURI());
-
+        ErrorResponse error = generateError(ex.getMessage(), HttpStatus.CONFLICT, request);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
-    @ExceptionHandler({InvalidRefreshTokenException.class, SelfTransferException.class})
-    public ResponseEntity<ErrorResponse> handleBadRequests(RuntimeException ex, HttpServletRequest request) {
+    @ExceptionHandler({InvalidRefreshTokenException.class,
+            SelfTransferException.class,
+            MissingRequestHeaderException.class})
+    public ResponseEntity<ErrorResponse> handleBadRequests(Exception ex, HttpServletRequest request) {
         log.warn("Bad request at {}: {}", request.getRequestURI(), ex.getMessage());
-        ErrorResponse error = new ErrorResponse(
-                Instant.now(),
-                ex.getMessage(),
-                HttpStatus.BAD_REQUEST.value(),
-                request.getRequestURI());
-
+        ErrorResponse error = generateError(ex.getMessage(), HttpStatus.BAD_REQUEST, request);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidCredentials(BadCredentialsException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleInvalidCredentials(BadCredentialsException ex,
+                                                                  HttpServletRequest request) {
         log.warn("Authentication failed for path: {}. Reason: {}", request.getRequestURI(), ex.getMessage());
-        ErrorResponse error = new ErrorResponse(
-                Instant.now(),
-                "Invalid email or password",
-                HttpStatus.UNAUTHORIZED.value(),
-                request.getRequestURI());
-
+        ErrorResponse error = generateError("Invalid email or password", HttpStatus.UNAUTHORIZED, request);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 
     @ExceptionHandler(InsufficientBalanceException.class)
-    public ResponseEntity<ErrorResponse> handleInsufficientBalance(InsufficientBalanceException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleInsufficientBalance(InsufficientBalanceException ex,
+                                                                   HttpServletRequest request) {
         log.error("Transaction rejected: {} at path: {}", ex.getMessage(), request.getRequestURI());
-        ErrorResponse error = new ErrorResponse(
-                Instant.now(),
-                ex.getMessage(),
-                HttpStatus.FORBIDDEN.value(),
-                request.getRequestURI());
-
+        ErrorResponse error = generateError(ex.getMessage(), HttpStatus.FORBIDDEN, request);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
@@ -93,30 +72,24 @@ public class GlobalExceptionHandler {
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.joining(", "));
 
-        ErrorResponse error = new ErrorResponse(
-                Instant.now(),
-                message,
-                HttpStatus.BAD_REQUEST.value(),
-                request.getRequestURI()
-        );
+        ErrorResponse error = generateError(message, HttpStatus.BAD_REQUEST, request);
         return ResponseEntity.badRequest().body(error);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpectedException(Exception ex, HttpServletRequest request) {
-        log.error("Unexpected error processing request {} {}",
-                request.getMethod(),
-                request.getRequestURI(),
-                ex
-        );
+        log.error("Unexpected error processing request {} {}", request.getMethod(), request.getRequestURI(), ex);
+        ErrorResponse error =
+                generateError("An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR, request);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
 
-        ErrorResponse error = new ErrorResponse(
+    private ErrorResponse generateError(String message, HttpStatus status, HttpServletRequest request){
+        return new ErrorResponse(
                 Instant.now(),
-                "An unexpected error occurred",
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                message,
+                status.value(),
                 request.getRequestURI()
         );
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 }

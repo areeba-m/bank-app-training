@@ -1,0 +1,73 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-initial-transactions-user
+      author: areeba
+      changes:
+        # 1. Debit Transaction (DB 100)
+        - insert:
+            tableName: transactions
+            columns:
+              - column:
+                  name: date
+                  valueComputed: "NOW()"
+              - column:
+                  name: description
+                  value: "went to swim"
+              - column:
+                  name: amount
+                  valueNumeric: 100.00
+              - column:
+                  name: indicator
+                  value: "DB"
+              - column:
+                  name: account_id
+                  valueComputed: "(SELECT user_id FROM account WHERE email = 'user@bank.com')"
+              - column:
+                  name: idempotency_key
+                  value: "tx-init-db-1000-001"
+
+        # 2. Debit Transaction (DB 200 - movie)
+        - insert:
+            tableName: transactions
+            columns:
+              - column:
+                  name: date
+                  valueComputed: "NOW()"
+              - column:
+                  name: description
+                  value: "watched a movie"
+              - column:
+                  name: amount
+                  valueNumeric: 200.00
+              - column:
+                  name: indicator
+                  value: "DB"
+              - column:
+                  name: account_id
+                  valueComputed: "(SELECT user_id FROM account WHERE email = 'user@bank.com')"
+              - column:
+                  name: idempotency_key
+                  value: "tx-movie-db-200-002"
+
+        # 3. Debit Transaction (DB 200 - trip)
+        - insert:
+            tableName: transactions
+            columns:
+              - column:
+                  name: date
+                  valueComputed: "NOW()"
+              - column:
+                  name: description
+                  value: "going on a trip with friends"
+              - column:
+                  name: amount
+                  valueNumeric: 200.00
+              - column:
+                  name: indicator
+                  value: "DB"
+              - column:
+                  name: account_id
+                  valueComputed: "(SELECT user_id FROM account WHERE email = 'user@bank.com')"
+              - column:
+                  name: idempotency_key
+                  value: "tx-trip-db-200-003"

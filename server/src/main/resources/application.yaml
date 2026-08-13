@@ -17,11 +17,14 @@ springdoc:
 
 logging:
   level:
-    root: DEBUG
-    com.redmath: INFO
-    org.springframework.security: INFO
-#  file:
-#    path: logs
+    com.google.genai: DEBUG
+    okhttp3: INFO
+    com.redmath.categorization.client.GeminiLlmClient: DEBUG
+    #    root: DEBUG
+    #    com.redmath: INFO
+    #    org.springframework.security: INFO
+  file:
+    path: logs
 
 categorization:
   llm:
