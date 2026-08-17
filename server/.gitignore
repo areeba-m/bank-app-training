@@ -23,3 +23,6 @@ target/
 
 # Ignore local application log files
 /logs/
+
+# Application configuration
+src/main/resources/application-dev.yaml

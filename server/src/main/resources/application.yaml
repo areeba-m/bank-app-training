@@ -5,6 +5,28 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: none
+  mail:
+    host: ${MAIL_HOST:smtp.example.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+
+app:
+  otp:
+    length: 6
+    expiry-minutes: 15
+    max-attempts: 5
+    resend-cooldown-seconds: 60
+  jwt:
+    password-reset-token-expiry-minutes: 10
 
 server:
   port: 8080

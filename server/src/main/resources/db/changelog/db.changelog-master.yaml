@@ -1,18 +1,18 @@
 databaseChangeLog:
   - include:
-      file: db/changelog/001-create-account-table.yaml
+      file: db/changelog/create/001-create-account-table.yaml
   - include:
-      file: db/changelog/002-insert-admin.yaml
+      file: db/changelog/insert/003-insert-admin.yaml
   - include:
-      file: db/changelog/005-create-balance-table.yaml
+      file: db/changelog/create/002-create-balance-table.yaml
   - include:
-      file: db/changelog/006-create-transfers-table.yaml
+      file: db/changelog/create/003-create-transfers-table.yaml
   - include:
-      file: db/changelog/004-create-transactions-table.yaml
+      file: db/changelog/create/004-create-transactions-table.yaml
   - include:
-      file: db/changelog/003-create-refresh-token-table.yaml
+      file: db/changelog/create/006-create-refresh-token-table.yaml
   - include:
-      file: db/changelog/007-create-transaction-category-table.yaml
+      file: db/changelog/create/005-create-transaction-category-table.yaml
   - include:
       file: db/changelog/insert/001-insert-user-account.yaml
   - include:
