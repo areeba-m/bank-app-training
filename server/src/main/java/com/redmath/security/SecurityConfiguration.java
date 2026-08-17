@@ -74,7 +74,6 @@ public class SecurityConfiguration {
                 throws ServletException, IOException {
             CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
             if (csrfToken != null) {
-                // Accessing getToken() populates the deferred CSRF cookie in CookieCsrfTokenRepository
                 csrfToken.getToken();
             }
             filterChain.doFilter(request, response);

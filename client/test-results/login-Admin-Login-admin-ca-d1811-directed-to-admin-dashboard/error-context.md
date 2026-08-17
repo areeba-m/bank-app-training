@@ -30,92 +30,92 @@ Call log:
 
 ```yaml
 - generic [ref=e3]:
-  - banner [ref=e4]:
-    - generic [ref=e5]:
-      - link "AURA BANK" [ref=e6] [cursor=pointer]:
-        - /url: /admin/dashboard
-        - generic [ref=e17]:
-          - text: AURA
-          - generic [ref=e18]: BANK
-      - generic [ref=e20]:
-        - generic [ref=e21]: ADMIN
-        - button "Logout" [ref=e24] [cursor=pointer]
-  - generic [ref=e30]:
-    - complementary [ref=e31]:
-      - generic [ref=e33]:
-        - paragraph [ref=e34]: Admin Portal
-        - navigation [ref=e35]:
-          - link "Accounts Management" [ref=e36] [cursor=pointer]:
-            - /url: /admin/dashboard
-    - main [ref=e43]:
-      - generic [ref=e44]:
-        - generic [ref=e45]:
-          - generic [ref=e46]:
-            - generic [ref=e47]: ADMIN PORTAL
-            - heading "Accounts Directory" [level=1] [ref=e50]
-          - button "New Account" [ref=e51] [cursor=pointer]
-        - generic [ref=e55]:
-          - generic [ref=e63]:
-            - paragraph [ref=e64]: Total Accounts
-            - paragraph [ref=e65]: "2"
-          - generic [ref=e71]:
-            - paragraph [ref=e72]: Total Deposits
-            - paragraph [ref=e73]: $500.00
-        - generic [ref=e74]:
-          - generic [ref=e75]:
-            - textbox "Search by ID, Name, or Email..." [ref=e77]
-            - button "Refresh" [ref=e81] [cursor=pointer]
-          - table [ref=e88]:
-            - rowgroup [ref=e89]:
-              - row [ref=e90]:
-                - columnheader "Account ID" [ref=e91]
-                - columnheader "Name" [ref=e92]
-                - columnheader "Email" [ref=e93]
-                - columnheader "Address" [ref=e94]
-                - columnheader "Role" [ref=e95]
-                - columnheader "Balance ($)" [ref=e96]
-                - columnheader "Actions" [ref=e97]
-            - rowgroup [ref=e98]:
-              - row [ref=e99]:
-                - cell "1" [ref=e100]
-                - cell "Admin" [ref=e101]
-                - cell "admin@bank.com" [ref=e102]
-                - cell "Bank Head Office" [ref=e103]
-                - cell "ADMIN" [ref=e104]
-                - cell "$0.00(CR)" [ref=e105]:
-                  - text: $0.00
-                  - generic [ref=e106]: (CR)
-                - cell [ref=e107]:
-                  - button "View Details" [ref=e108] [cursor=pointer]
-                  - button "Edit Account" [ref=e112] [cursor=pointer]
-                  - button "Cannot delete admin" [disabled] [ref=e116]
-              - row [ref=e123]:
-                - cell "2" [ref=e124]
-                - cell "Standard User" [ref=e125]
-                - cell "user@bank.com" [ref=e126]
-                - cell "123 Main Street" [ref=e127]
-                - cell "USER" [ref=e128]
-                - cell "$500.00(CR)" [ref=e129]:
-                  - text: $500.00
-                  - generic [ref=e130]: (CR)
-                - cell [ref=e131]:
-                  - button "View Details" [ref=e132] [cursor=pointer]
-                  - button "Edit Account" [ref=e136] [cursor=pointer]
-                  - button "Delete Account" [ref=e140] [cursor=pointer]
-          - generic [ref=e147]:
-            - generic [ref=e148]:
-              - text: Showing page 1 of 1
-              - generic [ref=e149]: (2 accounts)
-            - generic [ref=e150]:
-              - button "← Previous" [disabled] [ref=e151]
-              - button "Next →" [disabled] [ref=e152]
+    - banner [ref=e4]:
+        - generic [ref=e5]:
+            - link "AURA BANK" [ref=e6] [cursor=pointer]:
+                - /url: /admin/dashboard
+                - generic [ref=e17]:
+                    - text: AURA
+                    - generic [ref=e18]: BANK
+            - generic [ref=e20]:
+                - generic [ref=e21]: ADMIN
+                - button "Logout" [ref=e24] [cursor=pointer]
+    - generic [ref=e30]:
+        - complementary [ref=e31]:
+            - generic [ref=e33]:
+                - paragraph [ref=e34]: Admin Portal
+                - navigation [ref=e35]:
+                    - link "Accounts Management" [ref=e36] [cursor=pointer]:
+                        - /url: /admin/dashboard
+        - main [ref=e43]:
+            - generic [ref=e44]:
+                - generic [ref=e45]:
+                    - generic [ref=e46]:
+                        - generic [ref=e47]: ADMIN PORTAL
+                        - heading "Accounts Directory" [level=1] [ref=e50]
+                    - button "New Account" [ref=e51] [cursor=pointer]
+                - generic [ref=e55]:
+                    - generic [ref=e63]:
+                        - paragraph [ref=e64]: Total Accounts
+                        - paragraph [ref=e65]: "2"
+                    - generic [ref=e71]:
+                        - paragraph [ref=e72]: Total Deposits
+                        - paragraph [ref=e73]: $500.00
+                - generic [ref=e74]:
+                    - generic [ref=e75]:
+                        - textbox "Search by ID, Name, or Email..." [ref=e77]
+                        - button "Refresh" [ref=e81] [cursor=pointer]
+                    - table [ref=e88]:
+                        - rowgroup [ref=e89]:
+                            - row [ref=e90]:
+                                - columnheader "Account ID" [ref=e91]
+                                - columnheader "Name" [ref=e92]
+                                - columnheader "Email" [ref=e93]
+                                - columnheader "Address" [ref=e94]
+                                - columnheader "Role" [ref=e95]
+                                - columnheader "Balance ($)" [ref=e96]
+                                - columnheader "Actions" [ref=e97]
+                        - rowgroup [ref=e98]:
+                            - row [ref=e99]:
+                                - cell "1" [ref=e100]
+                                - cell "Admin" [ref=e101]
+                                - cell "admin@bank.com" [ref=e102]
+                                - cell "Bank Head Office" [ref=e103]
+                                - cell "ADMIN" [ref=e104]
+                                - cell "$0.00(CR)" [ref=e105]:
+                                    - text: $0.00
+                                    - generic [ref=e106]: (CR)
+                                - cell [ref=e107]:
+                                    - button "View Details" [ref=e108] [cursor=pointer]
+                                    - button "Edit Account" [ref=e112] [cursor=pointer]
+                                    - button "Cannot delete admin" [disabled] [ref=e116]
+                            - row [ref=e123]:
+                                - cell "2" [ref=e124]
+                                - cell "Standard User" [ref=e125]
+                                - cell "user@bank.com" [ref=e126]
+                                - cell "123 Main Street" [ref=e127]
+                                - cell "USER" [ref=e128]
+                                - cell "$500.00(CR)" [ref=e129]:
+                                    - text: $500.00
+                                    - generic [ref=e130]: (CR)
+                                - cell [ref=e131]:
+                                    - button "View Details" [ref=e132] [cursor=pointer]
+                                    - button "Edit Account" [ref=e136] [cursor=pointer]
+                                    - button "Delete Account" [ref=e140] [cursor=pointer]
+                    - generic [ref=e147]:
+                        - generic [ref=e148]:
+                            - text: Showing page 1 of 1
+                            - generic [ref=e149]: (2 accounts)
+                        - generic [ref=e150]:
+                            - button "← Previous" [disabled] [ref=e151]
+                            - button "Next →" [disabled] [ref=e152]
 ```
 
 # Test source
 
 ```ts
   1  | import { expect, test } from "@playwright/test";
-  2  | 
+  2  |
   3  | test.describe("Admin Login", () => {
   4  |   test("admin can login and is redirected to admin dashboard", async ({
   5  |     page,
@@ -127,7 +127,7 @@ Call log:
   11 |       }),
   12 |     ).toBeVisible();
   13 |     await page.getByLabel("Email Address *").fill("admin@bank.com");
-  14 | 
+  14 |
   15 |     await page.getByLabel("Password *").fill("admin");
   16 |     await page
   17 |       .getByRole("button", {
@@ -139,5 +139,5 @@ Call log:
      |                                                            ^ Error: expect(locator).toBeVisible() failed
   23 |   });
   24 | });
-  25 | 
+  25 |
 ```

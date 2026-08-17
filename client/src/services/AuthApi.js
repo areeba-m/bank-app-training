@@ -47,7 +47,6 @@ export const authApi = {
   },
 
   refresh: async () => {
-    // Ensure CSRF token cookie is initialized
     let csrfToken = getCsrfToken();
     if (!csrfToken) {
       await authApi.initCsrf();
@@ -56,9 +55,11 @@ export const authApi = {
 
     const headers = {
       "Content-Type": "application/json",
+      
     };
 
     if (csrfToken) {
+      
       headers["X-XSRF-TOKEN"] = csrfToken;
     }
 

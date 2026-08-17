@@ -148,7 +148,6 @@ export const AccountModal = ({
             </div>
           )}
 
-          {/* Name */}
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
               Full Name *
@@ -170,7 +169,6 @@ export const AccountModal = ({
             />
           </div>
 
-          {/* Email */}
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
               Email Address *
@@ -197,7 +195,6 @@ export const AccountModal = ({
             </div>
           </div>
 
-          {/* Password */}
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
               {isEdit ? "Password" : "Password *"}
@@ -242,7 +239,6 @@ export const AccountModal = ({
             </div>
           </div>
 
-          {/* Address */}
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
               Address *
@@ -268,7 +264,6 @@ export const AccountModal = ({
             </div>
           </div>
 
-          {/* Buttons */}
           <div className="pt-4 flex justify-end gap-3 border-t">
             <button
               type="button"

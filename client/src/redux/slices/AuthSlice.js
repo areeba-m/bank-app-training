@@ -31,7 +31,6 @@ export const refreshToken = createAsyncThunk(
 
     try {
       const response = await authApi.refresh();
-      // console.log("REFRESH RESPONSE", response);
       return response;
     } catch (err) {
       console.log("REFRESH ERROR", err);
