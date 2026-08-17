@@ -4,6 +4,7 @@ import com.redmath.account.entity.Account;
 import com.redmath.transfer.entity.Transfer;
 import jakarta.persistence.*;
 import lombok.*;
+import org.checkerframework.checker.optional.qual.OptionalBottom;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -40,7 +41,7 @@ public class Transaction {
     String counterpartyName;
     String counterpartyEmail;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = true)
     @JoinColumn(name = "transfer_id")
     @OnDelete(action = OnDeleteAction.RESTRICT)
     private Transfer transfer;

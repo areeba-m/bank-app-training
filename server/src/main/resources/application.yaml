@@ -5,6 +5,12 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: none
+  ai:
+    google:
+      genai:
+        api-key: ${GEMINI_API_KEY}
+        chat:
+          model: gemini-3.6-flash
 
 server:
   port: 8080
