@@ -1,6 +1,7 @@
 package com.redmath.exception_handler;
 
 import com.redmath.authentication.exception.EmailAlreadyExistsException;
+import com.redmath.authentication.exception.EmailSendException;
 import com.redmath.authentication.exception.InvalidRefreshTokenException;
 import com.redmath.exception_handler.dto.ErrorResponse;
 import com.redmath.exception_handler.exception.ResourceNotFoundException;
@@ -74,6 +75,13 @@ public class GlobalExceptionHandler {
 
         ErrorResponse error = generateError(message, HttpStatus.BAD_REQUEST, request);
         return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(EmailSendException.class)
+    public ResponseEntity<ErrorResponse> handleEmailSendException(EmailSendException ex, HttpServletRequest request) {
+        log.error("Unable to send email {} {}", request.getMethod(), request.getRequestURI(), ex);
+        ErrorResponse error = generateError(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, request);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
     @ExceptionHandler(Exception.class)
