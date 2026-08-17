@@ -24,7 +24,7 @@ public class AccountMapper {
 
         user.setName(request.name());
         user.setEmail(request.email());
-        user.setPassword(passwordEncoder.encode(request.password()));
+//        user.setPassword(passwordEncoder.encode(request.password()));
         user.setAddress(request.address());
         user.setRole(Role.USER);
         user.setCreatedAt(Instant.now());

@@ -10,6 +10,7 @@ import com.redmath.admin.dto.CreateUserRequest;
 import com.redmath.admin.dto.UpdateUserRequest;
 import com.redmath.admin.service.AdminService;
 import com.redmath.authentication.exception.EmailAlreadyExistsException;
+import com.redmath.authentication.service.OtpService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -39,6 +41,12 @@ class AdminServiceTest {
     @Mock
     private AccountMapper accountMapper;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private OtpService otpService;
+
     @InjectMocks
     private AdminService adminService;
 
@@ -52,7 +60,7 @@ class AdminServiceTest {
         validCreateRequest = new CreateUserRequest(
                 "Alice Johnson",
                 "alice@example.com",
-                "password123",
+//                "password123",
                 "123 Maple Street"
         );
 
@@ -88,6 +96,7 @@ class AdminServiceTest {
         when(accountMapper.toEntity(validCreateRequest)).thenReturn(existingUser);
         when(userRepository.save(existingUser)).thenReturn(existingUser);
         when(accountMapper.toResponse(existingUser)).thenReturn(accountResponse);
+        when(passwordEncoder.encode(anyString())).thenReturn("encoded-password");
 
         // When
         AccountResponse result = adminService.createUser(validCreateRequest);

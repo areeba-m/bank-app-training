@@ -1,12 +1,10 @@
 package com.redmath.authentication.controller;
 
 import com.redmath.account.dto.AccountResponse;
-import com.redmath.authentication.dto.AuthResponse;
-import com.redmath.authentication.dto.LoginAndRefreshResult;
-import com.redmath.authentication.dto.LoginRequest;
-import com.redmath.authentication.dto.RegisterRequest;
+import com.redmath.authentication.dto.*;
 import com.redmath.authentication.service.AuthService;
 import com.redmath.authentication.service.CookieService;
+import com.redmath.authentication.service.OtpService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +14,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,6 +23,7 @@ import org.springframework.security.web.csrf.CsrfToken;
 public class AuthController {
     private final AuthService authService;
     private final CookieService cookieService;
+    private final OtpService otpService;
 
     @PostMapping("/register")
     public ResponseEntity<AccountResponse> register(@Valid @RequestBody RegisterRequest request) {
@@ -34,7 +33,6 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request, @NonNull HttpServletResponse response) {
         LoginAndRefreshResult result = authService.login(request);
-//        log.info("refresh token /login: {}", result.refreshToken());
         ResponseCookie cookie = cookieService.buildRefreshCookie(result.refreshToken());
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
@@ -50,11 +48,27 @@ public class AuthController {
     public ResponseEntity<AuthResponse> refresh(@CookieValue("refresh_token") String refreshToken,
                                                 @NonNull HttpServletResponse response) {
         LoginAndRefreshResult result = authService.refresh(refreshToken);
-//        log.info("refresh token /refresh: {}", result.refreshToken());
         ResponseCookie cookie = cookieService.buildRefreshCookie(result.refreshToken());
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ResponseEntity.ok(new AuthResponse(result.accessToken(), result.userId(), result.email(), result.role()));
+    }
+
+    @PostMapping("/otp/verify")
+    public ResponseEntity<OtpVerifyResponse> verifyOtp(@RequestBody @Valid OtpVerifyRequest request) {
+        return ResponseEntity.ok(authService.verifyOtp(request));
+    }
+
+    @PostMapping("/password/change")
+    public ResponseEntity<Void> setNewPassword(@RequestBody @Valid SetNewPasswordRequest request) {
+        authService.setNewPassword(request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/otp/resend")
+    public ResponseEntity<Void> resendOtp(@RequestBody @Valid ResendOtpRequest request) {
+        otpService.resendOtp(request);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/logout")

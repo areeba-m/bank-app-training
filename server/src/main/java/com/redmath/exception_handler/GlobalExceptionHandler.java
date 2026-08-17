@@ -1,8 +1,6 @@
 package com.redmath.exception_handler;
 
-import com.redmath.authentication.exception.EmailAlreadyExistsException;
-import com.redmath.authentication.exception.EmailSendException;
-import com.redmath.authentication.exception.InvalidRefreshTokenException;
+import com.redmath.authentication.exception.*;
 import com.redmath.exception_handler.dto.ErrorResponse;
 import com.redmath.exception_handler.exception.ResourceNotFoundException;
 import com.redmath.transactions.exception.InsufficientBalanceException;
@@ -41,7 +39,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({InvalidRefreshTokenException.class,
             SelfTransferException.class,
-            MissingRequestHeaderException.class})
+            MissingRequestHeaderException.class,
+            InvalidPasswordException.class})
     public ResponseEntity<ErrorResponse> handleBadRequests(Exception ex, HttpServletRequest request) {
         log.warn("Bad request at {}: {}", request.getRequestURI(), ex.getMessage());
         ErrorResponse error = generateError(ex.getMessage(), HttpStatus.BAD_REQUEST, request);
@@ -82,6 +81,20 @@ public class GlobalExceptionHandler {
         log.error("Unable to send email {} {}", request.getMethod(), request.getRequestURI(), ex);
         ErrorResponse error = generateError(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, request);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
+    @ExceptionHandler(OtpCooldownException.class)
+    public ResponseEntity<ErrorResponse> handleOtpCooldownException(OtpCooldownException ex,
+                                                                  HttpServletRequest request) {
+        ErrorResponse error = generateError(ex.getMessage(), HttpStatus.TOO_MANY_REQUESTS, request);
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(error);
+    }
+
+    @ExceptionHandler(InvalidTokenScopeException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidTokenScopeException(InvalidTokenScopeException ex,
+                                                                  HttpServletRequest request) {
+        ErrorResponse error = generateError(ex.getMessage(), HttpStatus.UNAUTHORIZED, request);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 
     @ExceptionHandler(Exception.class)

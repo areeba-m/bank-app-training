@@ -39,7 +39,6 @@ class AdminControllerTest {
         CreateUserRequest request = new CreateUserRequest(
                 "Alice",
                 "alice@example.com",
-                "password123",
                 "Lahore"
         );
 

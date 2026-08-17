@@ -69,4 +69,8 @@ public class RefreshTokenService {
         Long count = refreshTokenRepository.deleteByToken(token);
         log.info("Deleted {} refresh tokens", count);
     }
+
+    public void deleteAllByUser(Account account){
+        refreshTokenRepository.deleteAllByUser(account);
+    }
 }

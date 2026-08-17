@@ -11,6 +11,7 @@ import com.redmath.categorization.repository.TransactionCategoryRepository;
 import com.redmath.transactions.dto.CreateTransactionRequest;
 import com.redmath.transactions.entity.Indicator;
 import com.redmath.transactions.repository.TransactionRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import tools.jackson.databind.ObjectMapper;
 
@@ -38,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
+@ActiveProfiles("test") @Slf4j
 class CategorizationIntegrationTest {
 
     @Autowired
@@ -168,20 +170,26 @@ class CategorizationIntegrationTest {
                 new BigDecimal("400"),
                 Indicator.DB
         );
+        log.info("transaction id={}, description={}", 99999, "Unusual one-off purchase");
 
-        mockMvc.perform(post("/api/v1/user/transaction")
+        MvcResult result = mockMvc.perform(post("/api/v1/user/transaction")
                         .with(userJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .header("Idempotency-Key", idempotencyKey))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andReturn();
 
-        var transaction = transactionRepository.findByAccountUserId(
-                        account.getUserId(), org.springframework.data.domain.PageRequest.of(0, 10))
-                .getContent().getFirst();
+        String createTransactionBody = result.getResponse().getContentAsString();
+        Long transactionId = objectMapper.readTree(createTransactionBody).get("id").asLong();
+        String description = objectMapper.readTree(createTransactionBody).get("description").asString();
+        log.info("transaction id={}, description={}", transactionId, description);
+//        var transaction = transactionRepository.findByAccountUserId(
+//                        account.getUserId(), org.springframework.data.domain.PageRequest.of(0, 10))
+//                .getContent().getFirst();
 
-        mockMvc.perform(put("/api/v1/user/transaction/" + transaction.getId() + "/category")
+        mockMvc.perform(put("/api/v1/user/transaction/" + transactionId + "/category")
                         .with(userJwt())
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -190,7 +198,7 @@ class CategorizationIntegrationTest {
                 .andExpect(jsonPath("$.category").value("HEALTH"))
                 .andExpect(jsonPath("$.categorySource").value("USER"));
 
-        var category = transactionCategoryRepository.findByTransactionId(transaction.getId()).orElseThrow();
+        var category = transactionCategoryRepository.findByTransactionId(transactionId).orElseThrow();
         assertEquals(Category.HEALTH, category.getCategory());
         assertEquals(CategorySource.USER, category.getCategorySource());
     }
@@ -219,6 +227,7 @@ class CategorizationIntegrationTest {
     }
 
     private void createDebitTransaction(String description, String amount) throws Exception {
+        idempotencyKey = UUID.randomUUID().toString();
         CreateTransactionRequest request = new CreateTransactionRequest(
                 description,
                 new BigDecimal(amount),

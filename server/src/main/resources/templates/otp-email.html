@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Your OTP Code</title>
+</head>
+<body>
+<h2>Hello, <span th:text="${name}">User</span>!</h2>
+<p>Your one-time login code is: <strong style="font-size: 18px; color: blue;" th:text="${otp}">000000</strong></p>
+<p>This code will expire in <span th:text="${expiryDays}">10</span> days.</p>
+</body>
+</html>

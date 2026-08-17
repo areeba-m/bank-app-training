@@ -30,21 +30,28 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                        .ignoringRequestMatchers("/api/v1/auth/login", "/api/v1/auth/register"))
+                        .ignoringRequestMatchers(
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/register",
+                                "/api/v1/auth/otp/verify",
+                                "/api/v1/auth/otp/resend",
+                                "/api/v1/auth/password/change"))
                 .sessionManagement(config -> config
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth", "/api/v1/auth/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf").permitAll()
-
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/register",
-                                "/api/v1/auth/login", "/api/v1/auth/refresh").permitAll()
-
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/v1/auth/register",
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/refresh",
+                                "/api/v1/auth/otp/verify",
+                                "/api/v1/auth/otp/resend",
+                                "/api/v1/auth/password/change"
+                        ).permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/user/**").hasRole("USER")
-
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/error").permitAll()
-
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 ->
                         oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));

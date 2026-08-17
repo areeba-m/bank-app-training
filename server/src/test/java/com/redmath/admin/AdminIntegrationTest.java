@@ -59,7 +59,7 @@ class AdminIntegrationTest {
         CreateUserRequest createRequest = new CreateUserRequest(
                 "Alice",
                 "alice@example.com",
-                "password123",
+//                "password123",
                 "Lahore"
         );
 
@@ -80,10 +80,10 @@ class AdminIntegrationTest {
         assertEquals("Alice", saved.getName());
         assertEquals(Role.USER, saved.getRole());
 
-        assertTrue(passwordEncoder.matches(
-                "password123",
-                saved.getPassword()
-        ));
+//        assertTrue(passwordEncoder.matches(
+//                "password123",
+//                saved.getPassword()
+//        ));
 
         // ---------- GET BY ID ----------
 

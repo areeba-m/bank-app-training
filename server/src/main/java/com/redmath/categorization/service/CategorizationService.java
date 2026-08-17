@@ -105,7 +105,7 @@ public class CategorizationService {
     public TransactionCategoryResponse overrideCategory(Long transactionId, CategoryOverrideRequest request) {
 
         Category category = parseCategoryStrict(request.category());
-
+        LOGGER.info("TRANSACTION ID in put = {}", transactionId);
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new TransactionNotFoundException(
                         "Transaction not found with id: " + transactionId));
