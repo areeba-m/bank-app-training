@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,7 +48,8 @@ class AdminControllerTest {
                 "Alice",
                 "alice@example.com",
                 "Lahore",
-                Role.USER
+                Role.USER,
+                new BigDecimal("0.0")
         );
 
         when(adminService.createUser(request)).thenReturn(response);
@@ -66,8 +68,10 @@ class AdminControllerTest {
     void getAllAccountsShouldReturnList() {
 
         List<AccountResponse> users = List.of(
-                new AccountResponse(1L, "Alice", "alice@example.com", "Lahore", Role.USER),
-                new AccountResponse(2L, "Bob", "bob@example.com", "Karachi", Role.ADMIN)
+                new AccountResponse(1L, "Alice", "alice@example.com",
+                        "Lahore", Role.USER, new BigDecimal("0.0")),
+                new AccountResponse(2L, "Bob", "bob@example.com",
+                        "Karachi", Role.ADMIN, new BigDecimal("0.0"))
         );
 
         Page<AccountResponse> userPage =
@@ -95,7 +99,8 @@ class AdminControllerTest {
                 "Alice",
                 "alice@example.com",
                 "Lahore",
-                Role.USER
+                Role.USER,
+                new BigDecimal("0.0")
         );
 
         when(adminService.getUserById(1L)).thenReturn(user);
@@ -123,7 +128,8 @@ class AdminControllerTest {
                 "Alice Updated",
                 "alice@example.com",
                 "Islamabad",
-                Role.USER
+                Role.USER,
+                new BigDecimal("0.0")
         );
 
         when(adminService.updateUser(1L, request)).thenReturn(updated);

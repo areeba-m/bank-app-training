@@ -7,6 +7,7 @@ import com.redmath.account.entity.Role;
 import com.redmath.account.repository.AccountRepository;
 import com.redmath.admin.dto.CreateUserRequest;
 import com.redmath.admin.dto.UpdateUserRequest;
+import com.redmath.transactions.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +40,14 @@ class AdminIntegrationTest {
     private AccountRepository accountRepository;
 
     @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
+        transactionRepository.deleteAll();
         accountRepository.deleteAll();
     }
 
