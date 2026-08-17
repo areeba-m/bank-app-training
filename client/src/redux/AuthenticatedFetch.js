@@ -17,6 +17,7 @@ export const authenticatedFetch = async (
   }
   if (!refreshPromise) {
     refreshPromise = dispatch(refreshToken()).finally(() => {
+      console.log("401 refresh calls");
       refreshPromise = null;
     });
   }

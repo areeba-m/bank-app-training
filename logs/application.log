@@ -168,3 +168,5 @@ org.springframework.web.bind.MissingRequestCookieException: Required cookie 'ref
 2026-08-17T12:34:33.180+05:00  WARN 21923 --- [server] [http-nio-8080-exec-3] c.r.e.GlobalExceptionHandler             : Bad request at /api/v1/auth/refresh: Invalid refresh token
 2026-08-17T12:34:45.283+05:00  WARN 21923 --- [server] [http-nio-8080-exec-6] c.r.e.GlobalExceptionHandler             : Bad request at /api/v1/auth/refresh: Invalid refresh token
 2026-08-17T12:35:13.802+05:00  INFO 21923 --- [server] [http-nio-8080-exec-4] com.redmath.admin.service.AdminService   : New account created. userId=3, email=s@bank.com, role=USER
+2026-08-17T13:03:24.471+05:00  WARN 23992 --- [server] [http-nio-8080-exec-4] c.r.e.GlobalExceptionHandler             : Bad request at /api/v1/auth/refresh: Invalid refresh token
+2026-08-17T13:04:21.344+05:00  INFO 23992 --- [server] [http-nio-8080-exec-6] com.redmath.admin.service.AdminService   : New account created. userId=3, email=s@bank.com, role=USER

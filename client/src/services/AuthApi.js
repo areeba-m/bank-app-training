@@ -4,11 +4,7 @@ import { handleApiResponse } from "./HandleApiResponse.js";
 
 export const getCsrfToken = () => {
   const cookies = document.cookie.split("; ");
-
   const csrfCookie = cookies.find((cookie) => cookie.startsWith("XSRF-TOKEN="));
-
-  console.log("ALL COOKIES:", cookies);
-  console.log("CSRF COOKIE:", csrfCookie);
 
   if (!csrfCookie) {
     return null;
@@ -16,28 +12,24 @@ export const getCsrfToken = () => {
 
   return decodeURIComponent(csrfCookie.split("=")[1]);
 };
+
 export const authApi = {
   login: async (email, password) => {
     const res = await fetch(`${API_CONFIG.BASE_URL}/auth/login`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email,
-        password,
-      }),
+      body: JSON.stringify({ email, password }),
     });
 
     const response = await handleApiResponse(res);
-    return response.json();
+    return await response.json();
   },
 
   logout: async (authContext) => {
     const res = await authenticatedFetch(
       `${API_CONFIG.BASE_URL}/auth/logout`,
-      {
-        method: "POST",
-      },
+      { method: "POST" },
       authContext,
     );
     await handleApiResponse(res);
@@ -51,21 +43,31 @@ export const authApi = {
     if (!res.ok) {
       throw new Error("Failed to initialize CSRF token");
     }
-    return await res.json();
+    return true;
   },
 
   refresh: async () => {
-    const csrfToken = getCsrfToken();
-    console.log("Sending refresh CSRF:", csrfToken);
+    // Ensure CSRF token cookie is initialized
+    let csrfToken = getCsrfToken();
+    if (!csrfToken) {
+      await authApi.initCsrf();
+      csrfToken = getCsrfToken();
+    }
+
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    if (csrfToken) {
+      headers["X-XSRF-TOKEN"] = csrfToken;
+    }
 
     const res = await fetch(`${API_CONFIG.BASE_URL}/auth/refresh`, {
       method: "POST",
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        "X-XSRF-TOKEN": csrfToken,
-      },
+      headers,
     });
+
     const response = await handleApiResponse(res);
     return response.json();
   },

@@ -86,6 +86,8 @@ const authSlice = createSlice({
 
       .addCase(loginUser.fulfilled, (state, action) => {
         state.status = "succeeded";
+        console.log("LOGIN PAYLOAD:", action.payload);
+        console.log("LOGIN ROLE:", action.payload.role);
         state.user = {
           userId: action.payload.userId,
           email: action.payload.email,
