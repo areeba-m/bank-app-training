@@ -27,3 +27,6 @@ databaseChangeLog:
               - column:
                   name: updated_at
                   valueComputed: "NOW()"
+              - column:
+                  name: password_change_required
+                  valueBoolean: false

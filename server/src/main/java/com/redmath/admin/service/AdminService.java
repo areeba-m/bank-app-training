@@ -9,55 +9,56 @@ import com.redmath.account.repository.AccountRepository;
 import com.redmath.admin.dto.CreateUserRequest;
 import com.redmath.admin.dto.UpdateUserRequest;
 import com.redmath.authentication.exception.EmailAlreadyExistsException;
+import com.redmath.authentication.service.OtpService;
 import com.redmath.balance.entity.Balance;
 import com.redmath.transactions.entity.Indicator;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 
 @Slf4j
 @Service
 @PreAuthorize("hasRole('ADMIN')")
+@RequiredArgsConstructor
 public class AdminService {
 
     private final AccountRepository userRepository;
     private final AccountMapper accountMapper;
-
-    public AdminService(AccountRepository userRepository,
-                        AccountMapper accountMapper) {
-        this.userRepository = userRepository;
-        this.accountMapper = accountMapper;
-    }
+    private final OtpService otpService;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public AccountResponse createUser(@NonNull CreateUserRequest request) {
-
         if (userRepository.existsByEmail(request.email())) {
             throw new EmailAlreadyExistsException("Unable to register with the provided details");
         }
 
         Account user = accountMapper.toEntity(request);
+        user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString())); // unusable placeholder
+        user.setPasswordChangeRequired(true);
 
         Balance balance = new Balance();
         balance.setAmount(BigDecimal.ZERO);
         balance.setDate(Instant.now());
         balance.setIndicator(Indicator.CR);
-
         balance.setAccount(user);
         user.setBalance(balance);
 
         Account savedUser = userRepository.save(user);
-        log.info("New account created. userId={}, email={}, role={}",
-                savedUser.getUserId(),savedUser.getEmail(), savedUser.getRole());
+        otpService.generateAndSendOtp(savedUser);
 
+        log.info("New account created, OTP dispatched. userId={}, email={}", savedUser.getUserId(), savedUser.getEmail());
         return accountMapper.toResponse(savedUser);
     }
 
