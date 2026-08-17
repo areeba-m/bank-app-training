@@ -8,13 +8,23 @@ export const handleApiResponse = async (response) => {
   let errorData = null;
 
   try {
-    errorData = await response.json();
+    const text = await response.text();
+
+    if (text.trim()) {
+      try {
+        errorData = JSON.parse(text);
+      } catch {
+        errorData = {
+          message: text,
+        };
+      }
+    }
   } catch (error) {
-    console.error("Failed to parse error response:", error);
+    console.error("Failed to read error response:", error);
   }
 
   throw new ApiError(
-    errorData?.message || "Something went wrong",
+    errorData?.message || `Request failed with status ${response.status}`,
     errorData?.status || response.status,
     errorData?.path || null,
     errorData?.timestamp || null,

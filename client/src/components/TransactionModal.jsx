@@ -17,13 +17,30 @@ export const TransactionModal = ({
   initialType = "DEPOSIT",
   onTypeChange,
 }) => {
-  const type = initialType;
+  const isControlled = typeof onTypeChange === "function";
+  const [internalType, setInternalType] = useState(initialType);
+  const [prevInitialType, setPrevInitialType] = useState(initialType);
+
+  if (initialType !== prevInitialType) {
+    setInternalType(initialType);
+    setPrevInitialType(initialType);
+  }
+
+  const type = isControlled ? initialType : internalType;
+
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
+
+  const handleTypeChange = (newType) => {
+    setInternalType(newType);
+    if (isControlled) {
+      onTypeChange(newType);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -122,9 +139,7 @@ export const TransactionModal = ({
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => {
-                  onTypeChange("DEPOSIT");
-                }}
+                onClick={() => handleTypeChange("DEPOSIT")}
                 className={`py-2.5 px-3 rounded-xl border font-bold text-xs flex items-center justify-center gap-2 transition-all ${
                   type === "DEPOSIT"
                     ? "bg-emerald-50 border-emerald-500 text-emerald-800 ring-2 ring-emerald-500/20"
@@ -137,7 +152,7 @@ export const TransactionModal = ({
 
               <button
                 type="button"
-                onClick={() => onTypeChange("WITHDRAW")}
+                onClick={() => handleTypeChange("WITHDRAW")}
                 className={`py-2.5 px-3 rounded-xl border font-bold text-xs flex items-center justify-center gap-2 transition-all ${
                   type === "WITHDRAW"
                     ? "bg-rose-50 border-rose-500 text-rose-800 ring-2 ring-rose-500/20"
@@ -218,7 +233,7 @@ export const TransactionModal = ({
 TransactionModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  onTypeChange: PropTypes.func.isRequired,
+  onTypeChange: PropTypes.func,
   onExecuteTransaction: PropTypes.func.isRequired,
   currentBalance: PropTypes.number,
   initialType: PropTypes.oneOf(["DEPOSIT", "WITHDRAW"]),

@@ -111,7 +111,9 @@ export const UserDashboard = () => {
     }
   };
 
-  const recentTransactions = allTransactions.slice(0, 5);
+  const recentTransactions = [...allTransactions]
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 5);
 
   if (userStatus === "loading" && !user) {
     return (

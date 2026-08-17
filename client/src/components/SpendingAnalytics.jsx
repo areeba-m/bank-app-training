@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   BarChart3,
   CalendarDays,
@@ -7,6 +8,14 @@ import {
   TrendingDown,
 } from "lucide-react";
 import PropTypes from "prop-types";
+
+import {
+  Cell,
+  Pie,
+  PieChart as RechartsPieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 
 export const SpendingAnalytics = ({
   analytics,
@@ -18,6 +27,7 @@ export const SpendingAnalytics = ({
   onToChange,
   onAnalyze,
 }) => {
+  const [showPieChart, setShowPieChart] = useState(false);
   const formatAmount = (amount) =>
     Number(amount ?? 0).toLocaleString("en-US", {
       minimumFractionDigits: 2,
@@ -37,9 +47,22 @@ export const SpendingAnalytics = ({
   const categories = analytics?.byCategory
     ? Object.entries(analytics.byCategory)
     : [];
-
+  const pieData = categories.map(([category, amount]) => ({
+    name: category.replaceAll("_", " "),
+    value: Number(amount ?? 0),
+  }));
+  const today = new Date().toISOString().split("T")[0];
   const handleAnalyze = () => {
     if (!from || !to || loading) return;
+
+    if (from > today || to > today) {
+      return;
+    }
+
+    if (from > to) {
+      return;
+    }
+
     onAnalyze(true);
   };
 
@@ -75,6 +98,7 @@ export const SpendingAnalytics = ({
                 <input
                   type="date"
                   value={from}
+                  max={today}
                   onChange={(e) => onFromChange(e.target.value)}
                   disabled={loading}
                   className="pl-8 pr-3 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-burgundy-500 focus:border-burgundy-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
@@ -93,6 +117,7 @@ export const SpendingAnalytics = ({
                 <input
                   type="date"
                   value={to}
+                  max={today}
                   onChange={(e) => onToChange(e.target.value)}
                   disabled={loading}
                   className="pl-8 pr-3 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-burgundy-500 focus:border-burgundy-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
@@ -183,12 +208,252 @@ export const SpendingAnalytics = ({
                   </p>
                 </div>
 
-                <div className="p-2.5 rounded-xl bg-slate-800 text-white">
+                <button
+                  type="button"
+                  onClick={() => setShowPieChart((prev) => !prev)}
+                  className={`p-2.5 rounded-xl text-white transition-all duration-300
+                  ${
+                    showPieChart
+                      ? "bg-gradient-to-br from-burgundy-700 to-burgundy-950 shadow-burgundy-glow scale-105"
+                      : "bg-gradient-to-br from-slate-700 to-slate-900 hover:from-burgundy-600 hover:to-burgundy-800 hover:scale-105"
+                  }`}
+                  title={showPieChart ? "Hide chart" : "Show chart"}
+                >
                   <PieChart className="w-5 h-5" />
-                </div>
+                </button>
               </div>
             </div>
           </div>
+
+          {showPieChart && (
+            <div className="rounded-3xl border border-burgundy-100 bg-gradient-to-br from-white via-burgundy-50/30 to-sand-50/50 p-6 shadow-sm">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-burgundy-600 to-burgundy-900 text-white shadow-burgundy-glow">
+                    <PieChart className="w-5 h-5" />
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-extrabold text-slate-900">
+                      Spending Distribution
+                    </h3>
+
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Visual breakdown of your spending
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowPieChart(false)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold
+                   text-slate-500 bg-white border border-slate-200
+                   hover:bg-slate-50 hover:text-slate-800 transition-all"
+                >
+                  Hide
+                </button>
+              </div>
+
+              {pieData.length === 0 ? (
+                <div className="py-12 text-center">
+                  <PieChart className="w-10 h-10 mx-auto text-slate-300 mb-3" />
+
+                  <p className="text-sm font-semibold text-slate-500">
+                    No spending data available
+                  </p>
+
+                  <p className="text-xs text-slate-400 mt-1">
+                    Try selecting a different date range.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+                  {/* Chart */}
+                  <div className="relative h-[330px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RechartsPieChart>
+                        <defs>
+                          <linearGradient
+                            id="pieGradient1"
+                            x1="0"
+                            y1="0"
+                            x2="1"
+                            y2="1"
+                          >
+                            <stop offset="0%" stopColor="#7a3158" />
+                            <stop offset="100%" stopColor="#48182f" />
+                          </linearGradient>
+
+                          <linearGradient
+                            id="pieGradient2"
+                            x1="0"
+                            y1="0"
+                            x2="1"
+                            y2="1"
+                          >
+                            <stop offset="0%" stopColor="#e7a7c4" />
+                            <stop offset="100%" stopColor="#b95f8c" />
+                          </linearGradient>
+
+                          <linearGradient
+                            id="pieGradient3"
+                            x1="0"
+                            y1="0"
+                            x2="1"
+                            y2="1"
+                          >
+                            <stop offset="0%" stopColor="#d6c2cc" />
+                            <stop offset="100%" stopColor="#927080" />
+                          </linearGradient>
+
+                          <linearGradient
+                            id="pieGradient4"
+                            x1="0"
+                            y1="0"
+                            x2="1"
+                            y2="1"
+                          >
+                            <stop offset="0%" stopColor="#f3d6a2" />
+                            <stop offset="100%" stopColor="#d49a45" />
+                          </linearGradient>
+                        </defs>
+
+                        <Pie
+                          data={pieData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={78}
+                          outerRadius={125}
+                          paddingAngle={4}
+                          cornerRadius={6}
+                          dataKey="value"
+                          nameKey="name"
+                          stroke="#ffffff"
+                          strokeWidth={3}
+                        >
+                          {pieData.map((entry, index) => (
+                            <Cell
+                              key={`cell-${entry.name}-${index}`}
+                              fill={`url(#pieGradient${(index % 4) + 1})`}
+                            />
+                          ))}
+                        </Pie>
+
+                        <Tooltip
+                          contentStyle={{
+                            borderRadius: "14px",
+                            border: "1px solid #eadde4",
+                            boxShadow: "0 10px 30px rgba(72, 24, 47, 0.12)",
+                            backgroundColor: "#ffffff",
+                            padding: "10px 14px",
+                          }}
+                          formatter={(value, name) => [
+                            `$${formatAmount(value)}`,
+                            name,
+                          ]}
+                        />
+                      </RechartsPieChart>
+                    </ResponsiveContainer>
+
+                    {/* Center of donut */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="text-center">
+                        <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400">
+                          Total
+                        </p>
+
+                        <p className="text-xl font-extrabold text-burgundy-900">
+                          ${formatAmount(analytics.totalSpending)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Category breakdown */}
+                  <div className="space-y-3">
+                    <div className="mb-4">
+                      <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                        Categories
+                      </p>
+                    </div>
+
+                    {pieData.map((item, index) => {
+                      const percentage = Number(
+                        analytics.percentageByCategory?.[
+                          categories[index]?.[0]
+                        ] ?? 0,
+                      );
+
+                      return (
+                        <div
+                          key={item.name}
+                          className="group p-3 rounded-xl bg-white/80 border border-slate-100
+                           hover:border-burgundy-200 hover:shadow-sm
+                           transition-all"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className="w-3 h-3 rounded-full shadow-sm"
+                                style={{
+                                  background:
+                                    index % 4 === 0
+                                      ? "linear-gradient(135deg, #7a3158, #48182f)"
+                                      : index % 4 === 1
+                                        ? "linear-gradient(135deg, #e7a7c4, #b95f8c)"
+                                        : index % 4 === 2
+                                          ? "linear-gradient(135deg, #d6c2cc, #927080)"
+                                          : "linear-gradient(135deg, #f3d6a2, #d49a45)",
+                                }}
+                              />
+
+                              <span className="text-xs font-bold text-slate-700">
+                                {item.name}
+                              </span>
+                            </div>
+
+                            <span className="text-xs font-bold text-burgundy-800">
+                              {percentage.toFixed(1)}%
+                            </span>
+                          </div>
+
+                          {/* Progress bar */}
+                          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all duration-700"
+                              style={{
+                                width: `${Math.min(percentage, 100)}%`,
+                                background:
+                                  index % 4 === 0
+                                    ? "linear-gradient(90deg, #7a3158, #48182f)"
+                                    : index % 4 === 1
+                                      ? "linear-gradient(90deg, #e7a7c4, #b95f8c)"
+                                      : index % 4 === 2
+                                        ? "linear-gradient(90deg, #d6c2cc, #927080)"
+                                        : "linear-gradient(90deg, #f3d6a2, #d49a45)",
+                              }}
+                            />
+                          </div>
+
+                          <div className="flex justify-between mt-1.5">
+                            <span className="text-[10px] text-slate-400">
+                              Spending
+                            </span>
+
+                            <span className="text-[10px] font-mono font-bold text-slate-600">
+                              ${formatAmount(item.value)}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="rounded-2xl border border-slate-200 overflow-hidden">
             <div className="px-4 py-3 bg-burgundy-50/70 border-b border-burgundy-100">
