@@ -327,7 +327,7 @@ export const TransactionsPage = () => {
                 <th className="py-3 px-4">Txn ID</th>
                 <th className="py-3 px-4">Date & Time</th>
                 <th className="py-3 px-4">Description</th>
-                <th className="py-3 px-4">Counter Name</th>
+                <th className="py-3 px-4">Counter Party </th>
                 <th className="py-3 px-4">Indicator</th>
                 <th className="py-3 px-4 text-right">Amount ($)</th>
               </tr>
