@@ -1,19 +1,13 @@
 package com.redmath.categorization.client;
 
-import com.google.genai.Client;
-import com.google.genai.types.GenerateContentConfig;
-import com.google.genai.types.GenerateContentResponse;
-import com.google.genai.types.HttpOptions;
-import com.google.genai.types.Schema;
 import com.redmath.categorization.client.dto.LlmCategorizationRequest;
 import com.redmath.categorization.client.dto.LlmCategorizationResponse;
 import com.redmath.categorization.entity.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Locale;
@@ -25,29 +19,25 @@ import java.util.stream.Stream;
 @EnableConfigurationProperties(LlmProperties.class)
 public class GeminiLlmClient implements LlmClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GeminiLlmClient.class);
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(GeminiLlmClient.class);
 
+    private final ChatClient chatClient;
     private final LlmProperties properties;
-    private final ObjectMapper objectMapper;
 
-    public GeminiLlmClient(LlmProperties properties, ObjectMapper objectMapper) {
+    public GeminiLlmClient(
+            ChatClient chatClient,
+            LlmProperties properties
+    ) {
+        this.chatClient = chatClient;
         this.properties = properties;
-        this.objectMapper = objectMapper;
-    }
-
-    private Client buildClient() {
-        HttpOptions httpOptions = HttpOptions.builder()
-                .timeout(properties.timeoutMillis())
-                .build();
-
-        return Client.builder()
-                .apiKey(properties.apiKey())
-                .httpOptions(httpOptions)
-                .build();
     }
 
     @Override
-    public Optional<LlmCategorizationResponse> categorize(LlmCategorizationRequest request) {
+    public Optional<LlmCategorizationResponse> categorize(
+            LlmCategorizationRequest request
+    ) {
+
         if (!properties.enabled() || isBlank(properties.apiKey())) {
             return Optional.empty();
         }
@@ -56,101 +46,209 @@ public class GeminiLlmClient implements LlmClient {
                 .map(Enum::name)
                 .toList();
 
-        String prompt = "You are a bank transaction categorizer. "
-                + "Allowed categories: " + String.join(", ", allowedCategoryNames) + ". "
-                + "If the description is too generic, numeric, or reference-like to determine "
-                + "a real category (for example a bare transaction ID or reference number), "
-                + "respond with category UNCATEGORIZED and a low confidence rather than guessing. "
-                + "Transaction - description: " + request.description()
-                + ", amount: " + request.amount()
-                + ", type: " + request.type()
-                + ", date: " + request.date();
+        String prompt = """
+                You are a bank transaction categorizer.
 
-        // Response schema is expressed as a plain JSON-shaped Map, exactly as documented
-        // in the google-genai README, rather than the typed Schema builder, since the
-        // builder's field names differ across SDK versions.
+                Allowed categories:
+                %s
 
-        Schema responseSchema = Schema.builder()
-                .type("OBJECT")
-                .properties(Map.of(
-                        "category", Schema.builder()
-                                .type("STRING")
-                                .enum_(allowedCategoryNames)
-                                .build(),
-                        "confidence", Schema.builder()
-                                .type("NUMBER")
-                                .build()
-                ))
-                .required(List.of("category", "confidence"))
-                .build();
+                Analyze the following transaction.
 
-        GenerateContentConfig config = GenerateContentConfig.builder()
-                .temperature(0.0F)
-                .candidateCount(1)
-                .responseMimeType("application/json")
-                .responseSchema(responseSchema)
-                .build();
+                Description: %s
+                Amount: %s
+                Type: %s
+                Date: %s
 
-        try (Client client = buildClient()) {
-            GenerateContentResponse response = client.models
-                    .generateContent(properties.model(), prompt, config);
-            return parseCategorizationJson(response.text());
+                Return ONLY valid JSON in exactly this format:
+
+                {
+                  "category": "CATEGORY_NAME",
+                  "confidence": 0.0
+                }
+
+                Rules:
+                - category must be one of the allowed categories.
+                - confidence must be between 0 and 1.
+                - If the description is too generic, numeric, or reference-like,
+                  return UNCATEGORIZED.
+                - Do not add markdown.
+                - Do not add explanations.
+                """
+                .formatted(
+                        String.join(", ", allowedCategoryNames),
+                        request.description(),
+                        request.amount(),
+                        request.type(),
+                        request.date()
+                );
+
+        try {
+
+            String response = chatClient.prompt()
+                    .user(prompt)
+                    .call()
+                    .content();
+
+            LOGGER.info("Gemini categorization response: {}", response);
+
+            return parseCategorizationResponse(response);
+
         } catch (RuntimeException ex) {
-            LOGGER.warn("Gemini categorization call failed, falling back to UNCATEGORIZED", ex);
+
+            LOGGER.error(
+                    "Gemini categorization call failed",
+                    ex
+            );
+
             return Optional.empty();
         }
     }
 
     @Override
-    public Optional<String> explainSpending(Map<String, Object> currentPeriod, Map<String, Object> previousPeriod) {
+    public Optional<String> explainSpending(
+            Map<String, Object> currentPeriod,
+            Map<String, Object> previousPeriod
+    ) {
+
         if (!properties.enabled() || isBlank(properties.apiKey())) {
             return Optional.empty();
         }
 
-        String prompt = "You are a helpful personal finance assistant. You will be given "
-                + "already-calculated category spending totals for the current and previous period. "
-                + "Write a short (2-4 sentence) plain-language summary of the notable changes and the "
-                + "largest spending category. Do not invent numbers - only describe the numbers given. "
-                + "Current period totals: " + currentPeriod + ". Previous period totals: " + previousPeriod;
+        String prompt = """
+                You are a helpful personal finance assistant.
 
-        GenerateContentConfig config = GenerateContentConfig.builder()
-                .temperature(0.3F)
-                .candidateCount(1)
-                .build();
+                You will receive already-calculated category spending totals
+                for the current period and previous period.
 
-        try (Client client = buildClient()){
-            GenerateContentResponse response = client.models
-                    .generateContent(properties.model(), prompt, config);
+                Write a short 2-4 sentence summary.
 
-            String text = response.text();
-            return (text == null || text.isBlank()) ? Optional.empty() : Optional.of(text.trim());
+                Rules:
+                - Describe notable changes.
+                - Mention the largest spending category.
+                - Do not invent numbers.
+                - Only use the data provided.
+
+                Current period totals:
+                %s
+
+                Previous period totals:
+                %s
+                """
+                .formatted(
+                        currentPeriod,
+                        previousPeriod
+                );
+
+        try {
+
+            String response = chatClient.prompt()
+                    .user(prompt)
+                    .call()
+                    .content();
+
+            if (response == null || response.isBlank()) {
+                return Optional.empty();
+            }
+
+            return Optional.of(response.trim());
+
         } catch (RuntimeException ex) {
-            LOGGER.warn("Gemini spending insight call failed", ex);
+
+            LOGGER.error(
+                    "Gemini spending insight call failed",
+                    ex
+            );
+
             return Optional.empty();
         }
     }
 
-    private Optional<LlmCategorizationResponse> parseCategorizationJson(String content) {
-        if (content == null || content.isBlank()) {
+    private Optional<LlmCategorizationResponse>
+    parseCategorizationResponse(String response) {
+
+        if (response == null || response.isBlank()) {
             return Optional.empty();
         }
-        try {
-            JsonNode node = objectMapper.readTree(content);
-            String categoryText = node.path("category").asString(null);
-            double confidence = node.path("confidence").asDouble(0.0);
 
-            if (categoryText == null) {
+        try {
+
+            String cleanedResponse = response
+                    .replace("```json", "")
+                    .replace("```", "")
+                    .trim();
+
+            String categoryValue = extractJsonValue(
+                    cleanedResponse,
+                    "category"
+            );
+
+            String confidenceValue = extractJsonValue(
+                    cleanedResponse,
+                    "confidence"
+            );
+
+            if (categoryValue == null || confidenceValue == null) {
+                LOGGER.warn(
+                        "Invalid categorization response: {}",
+                        response
+                );
+
                 return Optional.empty();
             }
 
-            // Validate against the allowed enum - the LLM must not be able to invent categories.
-            Category category = Category.valueOf(categoryText.trim().toUpperCase(Locale.ROOT));
+            Category category = Category.valueOf(
+                    categoryValue
+                            .trim()
+                            .toUpperCase(Locale.ROOT)
+            );
 
-            return Optional.of(new LlmCategorizationResponse(category.name(), confidence));
-        } catch (IllegalArgumentException ex) {
-            LOGGER.warn("Gemini returned a category outside the allowed enum or malformed JSON: {}", content);
+            double confidence = Double.parseDouble(
+                    confidenceValue
+            );
+
+            return Optional.of(
+                    new LlmCategorizationResponse(
+                            category.name(),
+                            confidence
+                    )
+            );
+
+        } catch (Exception ex) {
+
+            LOGGER.warn(
+                    "Failed to parse Gemini response: {}",
+                    response,
+                    ex
+            );
+
             return Optional.empty();
         }
+    }
+
+    private String extractJsonValue(
+            String json,
+            String field
+    ) {
+
+        String regex;
+
+        if ("category".equals(field)) {
+            regex = "\"category\"\\s*:\\s*\"([^\"]+)\"";
+        } else {
+            regex = "\"confidence\"\\s*:\\s*([0-9.]+)";
+        }
+
+        java.util.regex.Pattern pattern =
+                java.util.regex.Pattern.compile(regex);
+
+        java.util.regex.Matcher matcher =
+                pattern.matcher(json);
+
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+
+        return null;
     }
 
     private boolean isBlank(String value) {
