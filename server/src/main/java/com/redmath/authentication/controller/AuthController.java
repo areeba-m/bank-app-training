@@ -19,7 +19,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/auth") @Slf4j
+@RequestMapping("/api/v1/auth")
+@Slf4j
 public class AuthController {
     private final AuthService authService;
     private final CookieService cookieService;
@@ -40,8 +41,8 @@ public class AuthController {
     }
 
     @GetMapping("/csrf")
-    public CsrfToken csrf(CsrfToken csrfToken) {
-        return csrfToken;
+    public ResponseEntity<Void> getCsrfToken(CsrfToken token) {
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/refresh")

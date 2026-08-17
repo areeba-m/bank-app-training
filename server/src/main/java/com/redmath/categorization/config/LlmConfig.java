@@ -1,0 +1,17 @@
+package com.redmath.categorization.config;
+
+import com.redmath.categorization.client.LlmProperties;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@EnableConfigurationProperties(LlmProperties.class)
+public class LlmConfig {
+
+    @Bean
+    public ChatClient chatClient(ChatClient.Builder builder) {
+        return builder.build();
+    }
+}

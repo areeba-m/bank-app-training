@@ -140,19 +140,21 @@ export const TransactionsPage = () => {
     }
   };
 
-  const filtered = transactions.filter((t) => {
-    const description = t.description?.toLowerCase() || "";
-    const transactionId = String(t.id || "").toLowerCase();
-    const search = searchTerm.toLowerCase();
+  const filtered = [...transactions]
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .filter((t) => {
+      const description = t.description?.toLowerCase() || "";
+      const transactionId = String(t.id || "").toLowerCase();
+      const search = searchTerm.toLowerCase();
 
-    const matchesSearch =
-      description.includes(search) || transactionId.includes(search);
+      const matchesSearch =
+        description.includes(search) || transactionId.includes(search);
 
-    const matchesFilter =
-      filterType === "ALL" ? true : t.indicator === filterType;
+      const matchesFilter =
+        filterType === "ALL" ? true : t.indicator === filterType;
 
-    return matchesSearch && matchesFilter;
-  });
+      return matchesSearch && matchesFilter;
+    });
 
   const handleTransfer = async (transferData) => {
     try {

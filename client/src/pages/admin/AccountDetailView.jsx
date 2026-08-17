@@ -94,6 +94,9 @@ export const AccountDetailView = () => {
     }
   };
 
+  const sortedTransactions = [...transactions].sort(
+    (a, b) => new Date(b.date) - new Date(a.date),
+  );
   if (loading) {
     return (
       <div className="p-8 text-center text-slate-400 text-xs">
@@ -252,7 +255,7 @@ export const AccountDetailView = () => {
                   </td>
                 </tr>
               ) : (
-                transactions.map((t) => {
+                sortedTransactions.map((t) => {
                   const indicator = t.dbCrIndicator ?? t.indicator;
 
                   return (
