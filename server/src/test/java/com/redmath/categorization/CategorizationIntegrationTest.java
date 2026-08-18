@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,11 +29,17 @@ import tools.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -117,19 +124,20 @@ class CategorizationIntegrationTest {
                 .andExpect(status().isOk());
 
         var transaction = transactionRepository.findByAccountUserId(
-                        account.getUserId(), org.springframework.data.domain.PageRequest.of(0, 10))
+                        account.getUserId(), PageRequest.of(0, 10))
                 .getContent().getFirst();
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+            var category = transactionCategoryRepository.findByTransactionId(transaction.getId()).orElseThrow();
 
-        var category = transactionCategoryRepository.findByTransactionId(transaction.getId()).orElseThrow();
+            assertEquals(Category.ENTERTAINMENT, category.getCategory());
+            assertEquals(CategorySource.RULE, category.getCategorySource());
 
-        assertEquals(Category.ENTERTAINMENT, category.getCategory());
-        assertEquals(CategorySource.RULE, category.getCategorySource());
-
-        mockMvc.perform(get("/api/v1/user/transaction/" + transaction.getId() + "/category")
-                        .with(userJwt()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.category").value("ENTERTAINMENT"))
-                .andExpect(jsonPath("$.categorySource").value("RULE"));
+            mockMvc.perform(get("/api/v1/user/transaction/" + transaction.getId() + "/category")
+                            .with(userJwt()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.category").value("ENTERTAINMENT"))
+                    .andExpect(jsonPath("$.categorySource").value("RULE"));
+        });
     }
 
     @Test
@@ -149,15 +157,17 @@ class CategorizationIntegrationTest {
                         .header("Idempotency-Key", idempotencyKey))
                 .andExpect(status().isOk());
 
-        var transaction = transactionRepository.findByAccountUserId(
-                        account.getUserId(), org.springframework.data.domain.PageRequest.of(0, 10))
-                .getContent().getFirst();
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+            var page = transactionRepository.findByAccountUserId(
+                    account.getUserId(), PageRequest.of(0, 10));
 
-        var category = transactionCategoryRepository.findByTransactionId(transaction.getId()).orElseThrow();
+            assertFalse(page.getContent().isEmpty());
+            var transaction = page.getContent().getFirst();
 
-        // LLM is disabled by default in test config, so the fallback path must be UNCATEGORIZED,
-        // never an invented guess.
-        assertEquals(Category.UNCATEGORIZED, category.getCategory());
+            var categoryOpt = transactionCategoryRepository.findByTransactionId(transaction.getId());
+            assertTrue(categoryOpt.isPresent());
+            assertEquals(Category.UNCATEGORIZED, categoryOpt.get().getCategory());
+        });
     }
 
     @Test
