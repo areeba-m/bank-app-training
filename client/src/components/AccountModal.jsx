@@ -1,14 +1,5 @@
 import { useState } from "react";
-import {
-  CheckCircle2,
-  Eye,
-  EyeOff,
-  Lock,
-  Mail,
-  MapPin,
-  User,
-  X,
-} from "lucide-react";
+import { CheckCircle2, Mail, MapPin, User, X } from "lucide-react";
 import PropTypes from "prop-types";
 
 export const AccountModal = ({
@@ -20,7 +11,6 @@ export const AccountModal = ({
   const isEdit = !!accountToEdit;
 
   const emptyForm = {
-    password: "",
     name: "",
     email: "",
     address: "",
@@ -29,7 +19,6 @@ export const AccountModal = ({
   const [formData, setFormData] = useState(() => {
     if (accountToEdit) {
       return {
-        password: "",
         name: accountToEdit.name || "",
         email: accountToEdit.email || "",
         address: accountToEdit.address || "",
@@ -41,7 +30,6 @@ export const AccountModal = ({
 
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
   if (!isOpen) {
     return null;
@@ -61,11 +49,6 @@ export const AccountModal = ({
       return;
     }
 
-    if (!isEdit && !formData.password.trim()) {
-      setError("Password is required for new account creation.");
-      return;
-    }
-
     setSubmitting(true);
 
     try {
@@ -81,7 +64,6 @@ export const AccountModal = ({
   const handleClose = () => {
     setFormData(emptyForm);
     setError("");
-    setShowPassword(false);
     onClose();
   };
 
@@ -192,50 +174,6 @@ export const AccountModal = ({
               />
 
               <Mail className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-              {isEdit ? "Password" : "Password *"}
-            </label>
-
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="new-account-password"
-                autoComplete="new-password"
-                disabled={isEdit}
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    password: e.target.value,
-                  }))
-                }
-                className="w-full pl-9 pr-10 py-2 text-sm border rounded-xl disabled:bg-slate-100 disabled:text-slate-500"
-                required={!isEdit}
-                placeholder={
-                  isEdit ? "Password cannot be changed here" : "Enter password"
-                }
-              />
-
-              <Lock className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-
-              {!isEdit && (
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
-                </button>
-              )}
             </div>
           </div>
 

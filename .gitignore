@@ -2,3 +2,4 @@
 logs/
 server/src/main/resources/application-dev.yaml
 logs
+.env
