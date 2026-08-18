@@ -5,8 +5,9 @@ import com.redmath.categorization.service.CategorizationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * Reacts to transaction creation by categorizing the new transaction. Kept as a
@@ -22,7 +23,8 @@ public class TransactionCategorizationListener {
 
     private final CategorizationService categorizationService;
 
-    @EventListener
+    @Async  // ADD THIS LINE
+    @TransactionalEventListener
     public void onTransactionCreated(TransactionCreatedEvent event) {
         try {
             categorizationService.categorizeIfNeeded(event.getTransactionId());
