@@ -11,7 +11,6 @@ import com.redmath.categorization.repository.TransactionCategoryRepository;
 import com.redmath.transactions.dto.CreateTransactionRequest;
 import com.redmath.transactions.entity.Indicator;
 import com.redmath.transactions.repository.TransactionRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +22,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import tools.jackson.databind.ObjectMapper;
 
@@ -40,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test") @Slf4j
+@ActiveProfiles("test")
 class CategorizationIntegrationTest {
 
     @Autowired
@@ -165,40 +163,54 @@ class CategorizationIntegrationTest {
     @Test
     void shouldAllowUserToOverrideCategory() throws Exception {
 
+        idempotencyKey = UUID.randomUUID().toString();
+
         CreateTransactionRequest request = new CreateTransactionRequest(
                 "Unusual one-off purchase",
                 new BigDecimal("400"),
                 Indicator.DB
         );
-        log.info("transaction id={}, description={}", 99999, "Unusual one-off purchase");
 
-        MvcResult result = mockMvc.perform(post("/api/v1/user/transaction")
-                        .with(userJwt())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
-                        .header("Idempotency-Key", idempotencyKey))
+        String response = mockMvc.perform(
+                        post("/api/v1/user/transaction")
+                                .with(userJwt())
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                                .header("Idempotency-Key", idempotencyKey)
+                )
                 .andExpect(status().isOk())
-                .andReturn();
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
-        String createTransactionBody = result.getResponse().getContentAsString();
-        Long transactionId = objectMapper.readTree(createTransactionBody).get("id").asLong();
-        String description = objectMapper.readTree(createTransactionBody).get("description").asString();
-        log.info("transaction id={}, description={}", transactionId, description);
-//        var transaction = transactionRepository.findByAccountUserId(
-//                        account.getUserId(), org.springframework.data.domain.PageRequest.of(0, 10))
-//                .getContent().getFirst();
+        Long transactionId = objectMapper
+                .readTree(response)
+                .path("id")
+                .asLong();
 
-        mockMvc.perform(put("/api/v1/user/transaction/" + transactionId + "/category")
-                        .with(userJwt())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"category\":\"HEALTH\"}"))
+        mockMvc.perform(
+                        put(
+                                "/api/v1/user/transaction/{transactionId}/category",
+                                transactionId
+                        )
+                                .with(userJwt())
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                    {
+                                        "category": "HEALTH"
+                                    }
+                                    """)
+                )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.category").value("HEALTH"))
                 .andExpect(jsonPath("$.categorySource").value("USER"));
 
-        var category = transactionCategoryRepository.findByTransactionId(transactionId).orElseThrow();
+        var category = transactionCategoryRepository
+                .findByTransactionId(transactionId)
+                .orElseThrow();
+
         assertEquals(Category.HEALTH, category.getCategory());
         assertEquals(CategorySource.USER, category.getCategorySource());
     }
@@ -206,18 +218,17 @@ class CategorizationIntegrationTest {
     @Test
     void shouldReturnSpendingAnalysisGroupedByCategory() throws Exception {
 
-        createDebitTransaction("NETFLIX", "300");
-        createDebitTransaction("CAREEM RIDE", "700");
-        createDebitTransaction("MCDONALD'S", "1000");
+        idempotencyKey = UUID.randomUUID().toString();
+        createDebitTransaction("NETFLIX", "1500");
+        createDebitTransaction("MCDONALD'S", "500");
 
         mockMvc.perform(get("/api/v1/user/analytics/spending")
                         .with(userJwt()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.byCategory.ENTERTAINMENT").value(300))
-                .andExpect(jsonPath("$.byCategory.TRANSPORT").value(700))
-                .andExpect(jsonPath("$.byCategory.FOOD").value(1000))
+                .andExpect(jsonPath("$.byCategory.ENTERTAINMENT").value(1500))
+                .andExpect(jsonPath("$.byCategory.FOOD").value(500))
                 .andExpect(jsonPath("$.totalSpending").value(2000))
-                .andExpect(jsonPath("$.percentageByCategory.FOOD").value(50.0));
+                .andExpect(jsonPath("$.percentageByCategory.FOOD").value(25.0));
     }
 
     @Test
