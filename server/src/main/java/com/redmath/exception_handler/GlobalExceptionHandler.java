@@ -1,6 +1,11 @@
 package com.redmath.exception_handler;
 
-import com.redmath.authentication.exception.*;
+import com.redmath.authentication.exception.EmailAlreadyExistsException;
+import com.redmath.authentication.exception.EmailSendException;
+import com.redmath.authentication.exception.InvalidPasswordException;
+import com.redmath.authentication.exception.InvalidRefreshTokenException;
+import com.redmath.authentication.exception.InvalidTokenScopeException;
+import com.redmath.authentication.exception.OtpCooldownException;
 import com.redmath.exception_handler.dto.ErrorResponse;
 import com.redmath.exception_handler.exception.ResourceNotFoundException;
 import com.redmath.transactions.exception.InsufficientBalanceException;

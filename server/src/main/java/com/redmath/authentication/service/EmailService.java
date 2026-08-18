@@ -24,9 +24,9 @@ public class EmailService {
     private String frontendBaseUrl;
 
     @Async("mailExecutor")
-    public void sendOtpEmail(String to, String name, String otp, long expiryDays) {
+    public void sendOtpEmail(Long id, String to, String name, String otp, long expiryDays) {
 
-        String activationUrl = frontendBaseUrl + "/activate?email=" + URLEncoder.encode(to, StandardCharsets.UTF_8);
+        String activationUrl = frontendBaseUrl + "/activate?id=" + URLEncoder.encode(id.toString(), StandardCharsets.UTF_8);
 
         Context ctx = new Context();
         ctx.setVariable("name", name);

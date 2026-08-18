@@ -53,7 +53,7 @@ public class OtpService {
         token.setCreatedAt(Instant.now());
         otpTokenRepository.save(token);
 
-        emailService.sendOtpEmail(account.getEmail(), account.getName(), otp, expiryDays);
+        emailService.sendOtpEmail(account.getUserId(), account.getEmail(), account.getName(), otp, expiryDays);
         log.info("OTP issued for userId={}", account.getUserId());
     }
 

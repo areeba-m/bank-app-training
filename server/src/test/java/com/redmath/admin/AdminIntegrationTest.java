@@ -7,6 +7,9 @@ import com.redmath.account.entity.Role;
 import com.redmath.account.repository.AccountRepository;
 import com.redmath.admin.dto.CreateUserRequest;
 import com.redmath.admin.dto.UpdateUserRequest;
+import com.redmath.authentication.entity.OtpToken;
+import com.redmath.authentication.repository.OtpTokenRepository;
+import com.redmath.authentication.service.EmailService;
 import com.redmath.transactions.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,12 +17,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -43,13 +49,19 @@ class AdminIntegrationTest {
     private TransactionRepository transactionRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private OtpTokenRepository otpTokenRepository;
+
+    @MockitoBean
+    private EmailService emailService;
+
 
     @BeforeEach
     void setUp() {
         transactionRepository.deleteAll();
+        otpTokenRepository.deleteAll();
         accountRepository.deleteAll();
     }
+
 
     @Test
     void adminCrudFlowShouldWork() throws Exception {
@@ -59,7 +71,6 @@ class AdminIntegrationTest {
         CreateUserRequest createRequest = new CreateUserRequest(
                 "Alice",
                 "alice@example.com",
-//                "password123",
                 "Lahore"
         );
 
@@ -74,16 +85,26 @@ class AdminIntegrationTest {
                 .andExpect(jsonPath("$.address").value("Lahore"))
                 .andExpect(jsonPath("$.role").value("USER"));
 
-        Account saved =
-                accountRepository.findByEmail("alice@example.com").orElseThrow();
+        Account saved = accountRepository.findByEmail("alice@example.com").orElseThrow();
 
         assertEquals("Alice", saved.getName());
         assertEquals(Role.USER, saved.getRole());
 
-//        assertTrue(passwordEncoder.matches(
-//                "password123",
-//                saved.getPassword()
-//        ));
+        assertTrue(saved.isPasswordChangeRequired());
+        assertNotNull(saved.getPassword());
+
+        verify(emailService, timeout(2000)).sendOtpEmail(
+                anyLong(),
+                eq("alice@example.com"),
+                eq("Alice"),
+                anyString(),
+                anyLong());
+
+        OtpToken issuedToken = otpTokenRepository
+                .findTopByAccountAndUsedFalseOrderByCreatedAtDesc(saved)
+                .orElseThrow(() -> new AssertionError("Expected an OTP token to be issued on account creation"));
+        assertFalse(issuedToken.isUsed());
+        assertTrue(issuedToken.getExpiresAt().isAfter(java.time.Instant.now()));
 
         // ---------- GET BY ID ----------
 

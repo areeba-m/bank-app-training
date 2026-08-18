@@ -4,12 +4,19 @@ import com.redmath.account.dto.AccountResponse;
 import com.redmath.account.entity.Account;
 import com.redmath.account.entity.Role;
 import com.redmath.account.repository.AccountRepository;
-import com.redmath.authentication.dto.*;
+import com.redmath.authentication.dto.LoginAndRefreshResult;
+import com.redmath.authentication.dto.LoginRequest;
+import com.redmath.authentication.dto.OtpVerifyRequest;
+import com.redmath.authentication.dto.OtpVerifyResponse;
+import com.redmath.authentication.dto.RegisterRequest;
+import com.redmath.authentication.dto.SetNewPasswordRequest;
 import com.redmath.authentication.entity.RefreshToken;
 import com.redmath.authentication.exception.EmailAlreadyExistsException;
 import com.redmath.authentication.exception.InvalidPasswordException;
 import com.redmath.authentication.exception.InvalidTokenScopeException;
 import com.redmath.authentication.wrapper.AccountPrincipal;
+import com.redmath.balance.entity.Balance;
+import com.redmath.transactions.entity.Indicator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -22,6 +29,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
 
@@ -51,6 +59,13 @@ public class AuthService {
         account.setRole(Role.USER);
         account.setCreatedAt(Instant.now());
         account.setUpdatedAt(Instant.now());
+
+        Balance balance = new Balance();
+        balance.setAmount(BigDecimal.ZERO);
+        balance.setDate(Instant.now());
+        balance.setIndicator(Indicator.CR);
+        balance.setAccount(account);
+        account.setBalance(balance);
 
         Account saved = accountRepository.save(account);
         log.info("New account registered. userId={}, email={}, role={}",

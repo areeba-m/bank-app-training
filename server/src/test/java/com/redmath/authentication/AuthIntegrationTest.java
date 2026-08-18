@@ -9,6 +9,7 @@ import com.redmath.authentication.entity.RefreshToken;
 import com.redmath.authentication.repository.RefreshTokenRepository;
 import com.redmath.authentication.service.RefreshTokenService;
 import com.redmath.authentication.wrapper.AccountPrincipal;
+import com.redmath.transactions.repository.TransactionRepository;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,11 +59,15 @@ class AuthIntegrationTest {
     @Autowired
     private RefreshTokenService refreshTokenService;
 
+    @Autowired
+    private TransactionRepository transactionRepository;
+
     private static final String EMAIL = "jane.doe@example.com";
     private static final String PASSWORD = "S3curePassw0rd!";
 
     @BeforeEach
     void cleanDb() {
+        transactionRepository.deleteAll();
         refreshTokenRepository.deleteAll();
         accountRepository.deleteAll();
     }
@@ -82,6 +87,7 @@ class AuthIntegrationTest {
         RegisterRequest request = new RegisterRequest("Jane Doe", EMAIL, PASSWORD, "123 Main St");
 
         mockMvc.perform(post(BASE + "/register")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
@@ -196,7 +202,8 @@ class AuthIntegrationTest {
 
     @Test
     void refresh_withMissingCookie_returns5xx() throws Exception {
-        mockMvc.perform(post(BASE + "/refresh"))
+        mockMvc.perform(post(BASE + "/refresh")
+                        .with(csrf()))
                 .andExpect(status().is5xxServerError());
     }
 
