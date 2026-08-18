@@ -5,8 +5,6 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: none
-  profiles:
-    active: dev
   mail:
     host: ${MAIL_HOST:smtp.example.com}
     port: ${MAIL_PORT:587}
@@ -20,22 +18,14 @@ spring:
             enable: true
           connectiontimeout: 5000
           timeout: 5000
-app:
-  otp:
-    length: 6
-    expiry-days: 7
-    max-attempts: 5
-    resend-cooldown-seconds: 60
-  jwt:
-    password-reset-token-expiry-minutes: 10
-  frontend:
-    base-url: ${FRONTEND_BASE_URL:http://localhost:3000}
   ai:
     google:
       genai:
         api-key: ${GEMINI_API_KEY}
         chat:
           model: gemini-3.6-flash
+  profiles:
+    active: dev
 
 server:
   port: 8080
@@ -54,6 +44,18 @@ logging:
     #    org.springframework.security: INFO
   file:
     path: logs
+
+## custom configurations
+app:
+  otp:
+    length: 6
+    expiry-days: 7
+    max-attempts: 5
+    resend-cooldown-seconds: 60
+  jwt:
+    password-reset-token-expiry-minutes: 10
+  frontend:
+    base-url: ${FRONTEND_BASE_URL:http://localhost:3000}
 
 categorization:
   llm:

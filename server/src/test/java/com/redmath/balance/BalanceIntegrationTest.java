@@ -6,6 +6,7 @@ import com.redmath.account.repository.AccountRepository;
 import com.redmath.balance.entity.Balance;
 import com.redmath.balance.repository.BalanceRepository;
 import com.redmath.transactions.entity.Indicator;
+import com.redmath.transactions.repository.TransactionRepository;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,13 +43,16 @@ public class BalanceIntegrationTest {
     private BalanceRepository balanceRepository;
 
     @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     private Account account;
 
     @BeforeEach
     void setup() {
-
+        transactionRepository.deleteAll();
         balanceRepository.deleteAll();
         accountRepository.deleteAll();
 
