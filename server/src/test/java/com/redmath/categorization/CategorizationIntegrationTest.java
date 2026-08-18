@@ -160,95 +160,6 @@ class CategorizationIntegrationTest {
         assertEquals(Category.UNCATEGORIZED, category.getCategory());
     }
 
-//    @Test
-//    void shouldAllowUserToOverrideCategory() throws Exception {
-//
-//        idempotencyKey = UUID.randomUUID().toString();
-//        CreateTransactionRequest request = new CreateTransactionRequest(
-//                "Unusual one-off purchase",
-//                new BigDecimal("400"),
-//                Indicator.DB
-//        );
-//
-//        mockMvc.perform(post("/api/v1/user/transaction")
-//                        .with(userJwt())
-//                        .with(csrf())
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(request))
-//                        .header("Idempotency-Key", idempotencyKey))
-//                .andExpect(status().isOk());
-//
-//        var transaction = transactionRepository.findByAccountUserId(
-//                        account.getUserId(), org.springframework.data.domain.PageRequest.of(0, 10))
-//                .getContent().getFirst();
-//
-//        mockMvc.perform(put("/api/v1/user/transaction/" + transaction.getId() + "/category")
-//                        .with(userJwt())
-//                        .with(csrf())
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content("{\"category\":\"HEALTH\"}"))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.category").value("HEALTH"))
-//                .andExpect(jsonPath("$.categorySource").value("USER"));
-//
-//        var category = transactionCategoryRepository.findByTransactionId(transaction.getId()).orElseThrow();
-//        assertEquals(Category.HEALTH, category.getCategory());
-//        assertEquals(CategorySource.USER, category.getCategorySource());
-//    }
-
-//    @Test
-//    void shouldAllowUserToOverrideCategory() throws Exception {
-//
-//        idempotencyKey = UUID.randomUUID().toString();
-//
-//        CreateTransactionRequest request =
-//                new CreateTransactionRequest(
-//                        "Unusual one-off purchase",
-//                        new BigDecimal("400"),
-//                        Indicator.DB
-//                );
-//
-//        String response = mockMvc.perform(
-//                        post("/api/v1/user/transaction")
-//                                .with(userJwt())
-//                                .with(csrf())
-//                                .contentType(MediaType.APPLICATION_JSON)
-//                                .content(objectMapper.writeValueAsString(request))
-//                                .header("Idempotency-Key", idempotencyKey)
-//                )
-//                .andExpect(status().isOk())
-//                .andReturn()
-//                .getResponse()
-//                .getContentAsString();
-//
-//        Long transactionId = objectMapper
-//                .readTree(response)
-//                .path("id")
-//                .asLong();
-//
-//        mockMvc.perform(
-//                        put("/api/v1/user/transaction/{id}/category", transactionId)
-//                                .with(userJwt())
-//                                .with(csrf())
-//                                .contentType(MediaType.APPLICATION_JSON)
-//                                .content("""
-//                                    {
-//                                        "category": "HEALTH"
-//                                    }
-//                                    """)
-//                )
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.category").value("HEALTH"))
-//                .andExpect(jsonPath("$.categorySource").value("USER"));
-//
-//        var savedCategory = transactionCategoryRepository
-//                .findByTransactionId(transactionId)
-//                .orElseThrow();
-//
-//        assertEquals(Category.HEALTH, savedCategory.getCategory());
-//        assertEquals(CategorySource.USER, savedCategory.getCategorySource());
-//    }
-
     @Test
     void shouldAllowUserToOverrideCategory() throws Exception {
 
@@ -308,16 +219,16 @@ class CategorizationIntegrationTest {
     void shouldReturnSpendingAnalysisGroupedByCategory() throws Exception {
 
         idempotencyKey = UUID.randomUUID().toString();
-        createDebitTransaction("NETFLIX", "1000");
-        createDebitTransaction("MCDONALD'S", "1000");
+        createDebitTransaction("NETFLIX", "1500");
+        createDebitTransaction("MCDONALD'S", "500");
 
         mockMvc.perform(get("/api/v1/user/analytics/spending")
                         .with(userJwt()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.byCategory.ENTERTAINMENT").value(1000))
-                .andExpect(jsonPath("$.byCategory.FOOD").value(1000))
+                .andExpect(jsonPath("$.byCategory.ENTERTAINMENT").value(1500))
+                .andExpect(jsonPath("$.byCategory.FOOD").value(500))
                 .andExpect(jsonPath("$.totalSpending").value(2000))
-                .andExpect(jsonPath("$.percentageByCategory.FOOD").value(50.0));
+                .andExpect(jsonPath("$.percentageByCategory.FOOD").value(25.0));
     }
 
     @Test
