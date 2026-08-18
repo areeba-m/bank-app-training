@@ -81,7 +81,7 @@ public class AuthService {
 
     @Transactional
     public OtpVerifyResponse verifyOtp(OtpVerifyRequest request){
-        Account account = otpService.verifyOtp(request.email(), request.otp(), accountRepository);
+        Account account = otpService.verifyOtp(request.email(), request.otp());
         return new OtpVerifyResponse(jwtService.generatePasswordResetToken(account));
     }
 

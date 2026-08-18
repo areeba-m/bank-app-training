@@ -32,6 +32,7 @@ public class EmailService {
         ctx.setVariable("name", name);
         ctx.setVariable("otp", otp);
         ctx.setVariable("expiryDays", expiryDays);
+        ctx.setVariable("activationUrl", activationUrl);
         String html = templateEngine.process("otp-email", ctx);
 
         try {

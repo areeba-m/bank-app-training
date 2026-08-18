@@ -10,7 +10,7 @@ import { ProfilePage } from "./pages/user/ProfilePage";
 import { TransactionsPage } from "./pages/user/TransactionsPage";
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
 import { AccountDetailView } from "./pages/admin/AccountDetailView";
-
+import { OtpVerificationPage } from "./pages/OtpVerificationPage.jsx";
 export function AppRoutes() {
   useAuthInit();
   return (
@@ -69,6 +69,10 @@ export function AppRoutes() {
             </ProtectedRoute>
           }
         />
+          <Route
+              path="/activate"
+              element={<OtpVerificationPage />}
+          />
       </Routes>
     </div>
   );

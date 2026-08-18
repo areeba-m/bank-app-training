@@ -9,6 +9,7 @@ import com.redmath.authentication.exception.OtpCooldownException;
 import com.redmath.authentication.repository.OtpTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
@@ -57,30 +58,82 @@ public class OtpService {
     }
 
     @Transactional
-    public Account verifyOtp(String email, String otp, AccountRepository accountRepository) {
+    public Account verifyOtp(String email, String otp) {
+
+        log.info("========== OTP VERIFICATION START ==========");
+        log.info("Email received: [{}]", email);
+        log.info("OTP received: [{}]", otp);
+
         Account account = accountRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Invalid OTP or email"));
+                .orElseThrow(() -> {
+                    log.error("ACCOUNT NOT FOUND for email: [{}]", email);
+                    return new UserNotFoundException("Invalid OTP or email");
+                });
+
+        log.info(
+                "Account found: userId={}, email={}",
+                account.getUserId(),
+                account.getEmail()
+        );
 
         OtpToken token = otpTokenRepository
                 .findTopByAccountAndUsedFalseOrderByCreatedAtDesc(account)
-                .orElseThrow(() -> new BadCredentialsException("Invalid OTP or email"));
+                .orElseThrow(() -> {
+                    log.error(
+                            "NO UNUSED OTP FOUND for account userId={}",
+                            account.getUserId()
+                    );
+                    return new BadCredentialsException("Invalid OTP or email");
+                });
 
-        if (token.isUsed() || token.getExpiresAt().isBefore(Instant.now())) {
+        log.info("OTP token found");
+        log.info("Token createdAt: {}", token.getCreatedAt());
+        log.info("Token expiresAt: {}", token.getExpiresAt());
+        log.info("Token used: {}", token.isUsed());
+        log.info("Token attempts: {}", token.getAttempts());
+
+        if (token.isUsed()) {
+            log.error("OTP IS ALREADY USED");
             throw new BadCredentialsException("OTP expired or already used");
         }
+
+        if (token.getExpiresAt().isBefore(Instant.now())) {
+            log.error("OTP IS EXPIRED");
+            throw new BadCredentialsException("OTP expired or already used");
+        }
+
         if (token.getAttempts() >= maxAttempts) {
-            throw new LockedException("Too many attempts. Request a new OTP.");
+            log.error("OTP MAXIMUM ATTEMPTS REACHED");
+            throw new LockedException(
+                    "Too many attempts. Request a new OTP."
+            );
         }
 
         token.setAttempts(token.getAttempts() + 1);
 
-        if (!passwordEncoder.matches(otp, token.getOtpHash())) {
+        boolean matches = passwordEncoder.matches(
+                otp,
+                token.getOtpHash()
+        );
+
+        log.info("OTP matches stored hash: {}", matches);
+
+        if (!matches) {
             otpTokenRepository.save(token);
-            throw new BadCredentialsException("Invalid OTP or email");
+
+            log.error("OTP DOES NOT MATCH");
+
+            throw new BadCredentialsException(
+                    "Invalid OTP or email"
+            );
         }
 
         token.setUsed(true);
         otpTokenRepository.save(token);
+
+        log.info("OTP VERIFIED SUCCESSFULLY");
+        log.info("========== OTP VERIFICATION END ==========");
+
         return account;
     }
 
@@ -93,7 +146,7 @@ public class OtpService {
     }
 
     @Transactional
-    public void resendOtp(ResendOtpRequest request) {
+    public void resendOtp(@NonNull ResendOtpRequest request) {
         Account account = accountRepository.findByEmail(request.email())
                 .orElseThrow(() -> new BadCredentialsException("Invalid request"));
 

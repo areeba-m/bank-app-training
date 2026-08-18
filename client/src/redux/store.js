@@ -6,6 +6,7 @@ import adminTransactionsReducer from "./slices/AdminTransactionsSlice.js";
 import userTransactionReducer from "./slices/UserTransactionSlice.js";
 import userReducer from "./slices/UserSlice.js";
 import moneyTransferReducer from "./slices/MoneyTransferSlice.js";
+import otpVerificationReducer from "./slices/OtpVerificationSlice";
 
 export const store = configureStore({
   reducer: {
@@ -15,5 +16,6 @@ export const store = configureStore({
     userTransactions: userTransactionReducer,
     user: userReducer,
     moneyTransfer: moneyTransferReducer,
+    otpVerification: otpVerificationReducer,
   },
 });
