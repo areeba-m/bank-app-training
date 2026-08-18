@@ -94,7 +94,6 @@ class AdminIntegrationTest {
         assertNotNull(saved.getPassword());
 
         verify(emailService, timeout(2000)).sendOtpEmail(
-                anyLong(),
                 eq("alice@example.com"),
                 eq("Alice"),
                 anyString(),
