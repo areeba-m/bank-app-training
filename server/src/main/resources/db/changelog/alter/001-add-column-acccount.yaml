@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-password-change-required
+      author: areeba
+      changes:
+        - addColumn:
+            tableName: account
+            columns:
+              - column:
+                  name: password_change_required
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false

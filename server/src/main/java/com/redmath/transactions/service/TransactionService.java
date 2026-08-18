@@ -86,7 +86,10 @@ public class TransactionService
 
         log.info("User made a transaction. userId={}, transaction_id={}", account.getUserId(), saved.getId());
 
-        applicationEventPublisher.publishEvent(new TransactionCreatedEvent(this, saved.getId()));
+        if(request.getIndicator()==Indicator.DB)
+        {
+            applicationEventPublisher.publishEvent(new TransactionCreatedEvent(this, saved.getId()));
+        }
 
         return transactionMapper.toResponse(saved);
     }

@@ -4,11 +4,11 @@ import com.redmath.account.dto.AccountResponse;
 import com.redmath.account.entity.Account;
 import com.redmath.account.entity.Role;
 import com.redmath.account.repository.AccountRepository;
-import com.redmath.authentication.dto.LoginAndRefreshResult;
-import com.redmath.authentication.dto.LoginRequest;
-import com.redmath.authentication.dto.RegisterRequest;
+import com.redmath.authentication.dto.*;
 import com.redmath.authentication.entity.RefreshToken;
 import com.redmath.authentication.exception.EmailAlreadyExistsException;
+import com.redmath.authentication.exception.InvalidPasswordException;
+import com.redmath.authentication.exception.InvalidTokenScopeException;
 import com.redmath.authentication.wrapper.AccountPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
+    private final OtpService otpService;
 
     @Transactional
     public AccountResponse register(@NonNull RegisterRequest request) {
@@ -75,6 +77,40 @@ public class AuthService {
 
         Authentication authentication = createAuthentication(refreshToken.getUser());
         return buildLoginResult(authentication, refreshToken.getToken(), refreshToken.getUser());
+    }
+
+    @Transactional
+    public OtpVerifyResponse verifyOtp(OtpVerifyRequest request){
+        Account account = otpService.verifyOtp(request.email(), request.otp());
+        return new OtpVerifyResponse(jwtService.generatePasswordResetToken(account));
+    }
+
+    @Transactional
+    public void setNewPassword(SetNewPasswordRequest request) {
+        Jwt jwt = jwtService.parsePasswordResetToken(request.resetToken()); // throws if wrong scope/expired/invalid
+
+        Long userId = jwt.getClaim("userId");
+        String email = jwt.getSubject();
+
+        Account account = accountRepository.findById(userId)
+                .filter(a -> a.getEmail().equalsIgnoreCase(email))
+                .orElseThrow(() -> {
+                    log.warn("Password reset attempted for missing/mismatched account. userId={}", userId);
+                    return new InvalidTokenScopeException("Invalid reset token");
+                });
+
+        if (passwordEncoder.matches(request.newPassword(), account.getPassword())) {
+            throw new InvalidPasswordException("New password must be different from your current password");
+        }
+
+        account.setPassword(passwordEncoder.encode(request.newPassword()));
+        account.setPasswordChangeRequired(false);
+        account.setUpdatedAt(Instant.now());
+        accountRepository.save(account);
+
+        refreshTokenService.deleteAllByUser(account);
+
+        log.info("Password changed successfully via OTP reset flow. userId={}", account.getUserId());
     }
 
     @Transactional

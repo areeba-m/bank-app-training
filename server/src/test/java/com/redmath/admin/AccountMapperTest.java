@@ -26,7 +26,6 @@ class AccountMapperTest {
         return new CreateUserRequest(
                 "Alice Johnson",
                 "alice@example.com",
-                "password123",
                 "123 Maple Street"
         );
     }
@@ -43,13 +42,6 @@ class AccountMapperTest {
         assertThat(account.getName()).isEqualTo("Alice Johnson");
         assertThat(account.getEmail()).isEqualTo("alice@example.com");
         assertThat(account.getAddress()).isEqualTo("123 Maple Street");
-
-        // Verify password was encoded
-        assertThat(account.getPassword()).isNotEqualTo("password123");
-        assertThat(new BCryptPasswordEncoder().matches(
-                "password123",
-                account.getPassword()
-        )).isTrue();
     }
 
     @Test

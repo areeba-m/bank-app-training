@@ -1,0 +1,56 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-otp-token-table
+      author: areeba
+      changes:
+        - createTable:
+            tableName: otp_token
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: true
+
+              - column:
+                  name: otp_hash
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: expires_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: attempts
+                  type: int
+                  defaultValueNumeric: 0
+
+              - column:
+                  name: used
+                  type: boolean
+                  defaultValueBoolean: false
+
+              - column:
+                  name: created_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: otp_token
+            baseColumnNames: user_id
+            referencedTableName: account
+            referencedColumnNames: user_id
+            constraintName: fk_otp_account
+            onDelete: SET NULL

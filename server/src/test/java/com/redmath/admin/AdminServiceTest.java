@@ -10,6 +10,7 @@ import com.redmath.admin.dto.CreateUserRequest;
 import com.redmath.admin.dto.UpdateUserRequest;
 import com.redmath.admin.service.AdminService;
 import com.redmath.authentication.exception.EmailAlreadyExistsException;
+import com.redmath.authentication.service.OtpService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +21,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +41,12 @@ class AdminServiceTest {
     @Mock
     private AccountMapper accountMapper;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private OtpService otpService;
+
     @InjectMocks
     private AdminService adminService;
 
@@ -51,7 +60,7 @@ class AdminServiceTest {
         validCreateRequest = new CreateUserRequest(
                 "Alice Johnson",
                 "alice@example.com",
-                "password123",
+//                "password123",
                 "123 Maple Street"
         );
 
@@ -73,7 +82,8 @@ class AdminServiceTest {
                 "Alice Johnson",
                 "alice@example.com",
                 "123 Maple Street",
-                Role.USER
+                Role.USER,
+                new BigDecimal("0.00")
         );
     }
 
@@ -86,6 +96,7 @@ class AdminServiceTest {
         when(accountMapper.toEntity(validCreateRequest)).thenReturn(existingUser);
         when(userRepository.save(existingUser)).thenReturn(existingUser);
         when(accountMapper.toResponse(existingUser)).thenReturn(accountResponse);
+        when(passwordEncoder.encode(anyString())).thenReturn("encoded-password");
 
         // When
         AccountResponse result = adminService.createUser(validCreateRequest);
@@ -132,13 +143,15 @@ class AdminServiceTest {
                 2
         );
 
-        when(userRepository.findAll(any(Pageable.class))).thenReturn(accountPage);
+        when(userRepository.findByRole(eq(Role.USER), any(Pageable.class))).thenReturn(accountPage);
 
-        when(accountMapper.toResponse(user1)).thenReturn(
-                new AccountResponse(1L, "Alice", "alice@example.com", "Addr1", Role.USER));
+        when(accountMapper.toResponse(user1))
+                .thenReturn(new AccountResponse(1L, "Alice", "alice@example.com",
+                        "Addr1", Role.USER, new BigDecimal("0.00")));
 
-        when(accountMapper.toResponse(user2)).thenReturn(
-                new AccountResponse(2L, "Bob", "bob@example.com", "Addr2", Role.USER));
+        when(accountMapper.toResponse(user2))
+                .thenReturn(new AccountResponse(2L, "Bob", "bob@example.com",
+                        "Addr2", Role.USER, new BigDecimal("0.00")));
 
         // When
         Page<AccountResponse> result = adminService.getAllUsers(0, 10);
@@ -149,7 +162,7 @@ class AdminServiceTest {
         assertThat(result.getContent().get(1).name()).isEqualTo("Bob");
         assertThat(result.getTotalElements()).isEqualTo(2);
 
-        verify(userRepository).findAll(any(Pageable.class));
+        verify(userRepository).findByRole(eq(Role.USER), any(Pageable.class));
     }
 
     @Test
@@ -158,7 +171,7 @@ class AdminServiceTest {
         // Given
         Page<Account> emptyPage = new PageImpl<>(List.of(), PageRequest.of(0, 10), 0);
 
-        when(userRepository.findAll(PageRequest.of(0, 10))).thenReturn(emptyPage);
+        when(userRepository.findByRole(Role.USER, PageRequest.of(0, 10))).thenReturn(emptyPage);
 
         // When
         Page<AccountResponse> result = adminService.getAllUsers(0, 10);
@@ -167,7 +180,7 @@ class AdminServiceTest {
         assertThat(result).isEmpty();
         assertThat(result.getTotalElements()).isZero();
 
-        verify(userRepository).findAll(PageRequest.of(0, 10));
+        verify(userRepository).findByRole(Role.USER, PageRequest.of(0, 10));
     }
 
     // --- getUserById ---

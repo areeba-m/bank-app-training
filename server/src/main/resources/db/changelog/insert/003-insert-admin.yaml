@@ -34,3 +34,7 @@ databaseChangeLog:
               - column:
                   name: updated_at
                   valueComputed: CURRENT_TIMESTAMP
+
+              - column:
+                  name: password_change_required
+                  valueBoolean: false
