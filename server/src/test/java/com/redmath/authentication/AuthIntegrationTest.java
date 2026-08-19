@@ -170,7 +170,7 @@ class AuthIntegrationTest {
     void register_withDuplicateEmail_returns4xx()
             throws Exception {
 
-        registerUser(EMAIL, PASSWORD);
+        registerUser();
 
         RegisterRequest request = new RegisterRequest(
                 "Another User",
@@ -220,7 +220,7 @@ class AuthIntegrationTest {
     void login_withValidCredentials_returnsTokens()
             throws Exception {
 
-        registerUser(EMAIL, PASSWORD);
+        registerUser();
 
         LoginRequest request = new LoginRequest(
                 EMAIL,
@@ -263,7 +263,7 @@ class AuthIntegrationTest {
     void login_withWrongPassword_returns401()
             throws Exception {
 
-        registerUser(EMAIL, PASSWORD);
+        registerUser();
 
         LoginRequest request = new LoginRequest(
                 EMAIL,
@@ -305,7 +305,7 @@ class AuthIntegrationTest {
     void refresh_withValidToken_rotatesRefreshToken()
             throws Exception {
 
-        registerUser(EMAIL, PASSWORD);
+        registerUser();
 
         Cookie oldCookie = getRefreshCookie();
 
@@ -345,7 +345,7 @@ class AuthIntegrationTest {
     void refresh_withOldTokenAfterRotation_returnsBadRequest()
             throws Exception {
 
-        registerUser(EMAIL, PASSWORD);
+        registerUser();
 
         Cookie oldCookie = getRefreshCookie();
 
@@ -434,7 +434,7 @@ class AuthIntegrationTest {
     void verifyOtp_withValidOtp_returnsPasswordResetToken()
             throws Exception {
 
-        Account account = registerUser(EMAIL, PASSWORD);
+        Account account = registerUser();
 
         String otp = generateAndCaptureOtp(account);
 
@@ -475,7 +475,7 @@ class AuthIntegrationTest {
     void verifyOtp_withExpiredOtp_returnsUnauthorized()
             throws Exception {
 
-        Account account = registerUser(EMAIL, PASSWORD);
+        Account account = registerUser();
 
         String otp = "123456";
 
@@ -518,7 +518,7 @@ class AuthIntegrationTest {
     void verifyOtp_cannotReuseAlreadyUsedOtp()
             throws Exception {
 
-        Account account = registerUser(EMAIL, PASSWORD);
+        Account account = registerUser();
 
         String otp = generateAndCaptureOtp(account);
 
@@ -552,7 +552,7 @@ class AuthIntegrationTest {
     void resendOtp_generatesNewOtpAndInvalidatesOldOtp()
             throws Exception {
 
-        Account account = registerUser(EMAIL, PASSWORD);
+        Account account = registerUser();
 
         // Create the first OTP
         generateAndCaptureOtp(account);
@@ -622,7 +622,7 @@ class AuthIntegrationTest {
     void changePassword_withValidResetToken_changesPassword()
             throws Exception {
 
-        Account account = registerUser(EMAIL, PASSWORD);
+        Account account = registerUser();
 
         Map<String, Object> loginResult = loginAndGetResult();
 
@@ -637,7 +637,7 @@ class AuthIntegrationTest {
         String otp = generateAndCaptureOtp(account);
 
         String resetToken =
-                verifyOtpAndGetResetToken(EMAIL, otp);
+                verifyOtpAndGetResetToken(otp);
 
         SetNewPasswordRequest request =
                 new SetNewPasswordRequest(
@@ -703,12 +703,12 @@ class AuthIntegrationTest {
     void changePassword_withSamePassword_returnsBadRequest()
             throws Exception {
 
-        Account account = registerUser(EMAIL, PASSWORD);
+        Account account = registerUser();
 
         String otp = generateAndCaptureOtp(account);
 
         String resetToken =
-                verifyOtpAndGetResetToken(EMAIL, otp);
+                verifyOtpAndGetResetToken(otp);
 
         SetNewPasswordRequest request =
                 new SetNewPasswordRequest(
@@ -738,7 +738,7 @@ class AuthIntegrationTest {
     void changePassword_withInvalidResetToken_doesNotChangePassword()
             throws Exception {
 
-        registerUser(EMAIL, PASSWORD);
+        registerUser();
 
         Account beforeChange = accountRepository
                 .findByEmail(EMAIL)
@@ -790,7 +790,7 @@ class AuthIntegrationTest {
     void logout_deletesRefreshTokenAndClearsCookie()
             throws Exception {
 
-        registerUser(EMAIL, PASSWORD);
+        registerUser();
 
         Map<String, Object> loginResult =
                 loginAndGetResult();
@@ -835,7 +835,7 @@ class AuthIntegrationTest {
     void logout_withoutRefreshToken_returnsNoContent()
             throws Exception {
 
-        Account account = registerUser(EMAIL, PASSWORD);
+        Account account = registerUser();
 
         AccountPrincipal principal =
                 new AccountPrincipal(account);
@@ -869,15 +869,13 @@ class AuthIntegrationTest {
     // ===============================================================
 
     private Account registerUser(
-            String email,
-            String password
-    ) throws Exception {
+            ) throws Exception {
 
         RegisterRequest request =
                 new RegisterRequest(
                         "Jane Doe",
-                        email,
-                        password,
+                        AuthIntegrationTest.EMAIL,
+                        AuthIntegrationTest.PASSWORD,
                         "123 Main St"
                 );
 
@@ -888,7 +886,7 @@ class AuthIntegrationTest {
                 .andExpect(status().isCreated());
 
         return accountRepository
-                .findByEmail(email)
+                .findByEmail(AuthIntegrationTest.EMAIL)
                 .orElseThrow();
     }
 
@@ -988,7 +986,6 @@ class AuthIntegrationTest {
     }
 
     private String verifyOtpAndGetResetToken(
-            String email,
             String otp
     ) throws Exception {
 
@@ -997,7 +994,7 @@ class AuthIntegrationTest {
                     "email": "%s",
                     "otp": "%s"
                 }
-                """.formatted(email, otp);
+                """.formatted(AuthIntegrationTest.EMAIL, otp);
 
         MvcResult result =
                 mockMvc.perform(post(BASE + "/otp/verify")
