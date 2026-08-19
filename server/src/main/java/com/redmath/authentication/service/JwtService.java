@@ -39,7 +39,7 @@ public class JwtService {
                 .issuer("self")
                 .subject(authentication.getName())
                 .issuedAt(now)
-                .expiresAt(now.plus(1, ChronoUnit.SECONDS))
+                .expiresAt(now.plus(15, ChronoUnit.MINUTES))
                 .claim("userId", userId)
                 .claim("roles", roles)
                 .build();

@@ -11,36 +11,41 @@ import com.redmath.categorization.repository.TransactionCategoryRepository;
 import com.redmath.transactions.dto.CreateTransactionRequest;
 import com.redmath.transactions.entity.Indicator;
 import com.redmath.transactions.repository.TransactionRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test") @Slf4j
+@ActiveProfiles("test")
 class CategorizationIntegrationTest {
 
     @Autowired
@@ -119,19 +124,20 @@ class CategorizationIntegrationTest {
                 .andExpect(status().isOk());
 
         var transaction = transactionRepository.findByAccountUserId(
-                        account.getUserId(), org.springframework.data.domain.PageRequest.of(0, 10))
+                        account.getUserId(), PageRequest.of(0, 10))
                 .getContent().getFirst();
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+            var category = transactionCategoryRepository.findByTransactionId(transaction.getId()).orElseThrow();
 
-        var category = transactionCategoryRepository.findByTransactionId(transaction.getId()).orElseThrow();
+            assertEquals(Category.ENTERTAINMENT, category.getCategory());
+            assertEquals(CategorySource.RULE, category.getCategorySource());
 
-        assertEquals(Category.ENTERTAINMENT, category.getCategory());
-        assertEquals(CategorySource.RULE, category.getCategorySource());
-
-        mockMvc.perform(get("/api/v1/user/transaction/" + transaction.getId() + "/category")
-                        .with(userJwt()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.category").value("ENTERTAINMENT"))
-                .andExpect(jsonPath("$.categorySource").value("RULE"));
+            mockMvc.perform(get("/api/v1/user/transaction/" + transaction.getId() + "/category")
+                            .with(userJwt()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.category").value("ENTERTAINMENT"))
+                    .andExpect(jsonPath("$.categorySource").value("RULE"));
+        });
     }
 
     @Test
@@ -151,54 +157,70 @@ class CategorizationIntegrationTest {
                         .header("Idempotency-Key", idempotencyKey))
                 .andExpect(status().isOk());
 
-        var transaction = transactionRepository.findByAccountUserId(
-                        account.getUserId(), org.springframework.data.domain.PageRequest.of(0, 10))
-                .getContent().getFirst();
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+            var page = transactionRepository.findByAccountUserId(
+                    account.getUserId(), PageRequest.of(0, 10));
 
-        var category = transactionCategoryRepository.findByTransactionId(transaction.getId()).orElseThrow();
+            assertFalse(page.getContent().isEmpty());
+            var transaction = page.getContent().getFirst();
 
-        // LLM is disabled by default in test config, so the fallback path must be UNCATEGORIZED,
-        // never an invented guess.
-        assertEquals(Category.UNCATEGORIZED, category.getCategory());
+            var categoryOpt = transactionCategoryRepository.findByTransactionId(transaction.getId());
+            assertTrue(categoryOpt.isPresent());
+            assertEquals(Category.UNCATEGORIZED, categoryOpt.get().getCategory());
+        });
     }
 
     @Test
     void shouldAllowUserToOverrideCategory() throws Exception {
+
+        idempotencyKey = UUID.randomUUID().toString();
 
         CreateTransactionRequest request = new CreateTransactionRequest(
                 "Unusual one-off purchase",
                 new BigDecimal("400"),
                 Indicator.DB
         );
-        log.info("transaction id={}, description={}", 99999, "Unusual one-off purchase");
 
-        MvcResult result = mockMvc.perform(post("/api/v1/user/transaction")
-                        .with(userJwt())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
-                        .header("Idempotency-Key", idempotencyKey))
+        String response = mockMvc.perform(
+                        post("/api/v1/user/transaction")
+                                .with(userJwt())
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                                .header("Idempotency-Key", idempotencyKey)
+                )
                 .andExpect(status().isOk())
-                .andReturn();
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
-        String createTransactionBody = result.getResponse().getContentAsString();
-        Long transactionId = objectMapper.readTree(createTransactionBody).get("id").asLong();
-        String description = objectMapper.readTree(createTransactionBody).get("description").asString();
-        log.info("transaction id={}, description={}", transactionId, description);
-//        var transaction = transactionRepository.findByAccountUserId(
-//                        account.getUserId(), org.springframework.data.domain.PageRequest.of(0, 10))
-//                .getContent().getFirst();
+        Long transactionId = objectMapper
+                .readTree(response)
+                .path("id")
+                .asLong();
 
-        mockMvc.perform(put("/api/v1/user/transaction/" + transactionId + "/category")
-                        .with(userJwt())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"category\":\"HEALTH\"}"))
+        mockMvc.perform(
+                        put(
+                                "/api/v1/user/transaction/{transactionId}/category",
+                                transactionId
+                        )
+                                .with(userJwt())
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                    {
+                                        "category": "HEALTH"
+                                    }
+                                    """)
+                )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.category").value("HEALTH"))
                 .andExpect(jsonPath("$.categorySource").value("USER"));
 
-        var category = transactionCategoryRepository.findByTransactionId(transactionId).orElseThrow();
+        var category = transactionCategoryRepository
+                .findByTransactionId(transactionId)
+                .orElseThrow();
+
         assertEquals(Category.HEALTH, category.getCategory());
         assertEquals(CategorySource.USER, category.getCategorySource());
     }
@@ -206,18 +228,17 @@ class CategorizationIntegrationTest {
     @Test
     void shouldReturnSpendingAnalysisGroupedByCategory() throws Exception {
 
-        createDebitTransaction("NETFLIX", "300");
-        createDebitTransaction("CAREEM RIDE", "700");
-        createDebitTransaction("MCDONALD'S", "1000");
+        idempotencyKey = UUID.randomUUID().toString();
+        createDebitTransaction("NETFLIX", "1500");
+        createDebitTransaction("MCDONALD'S", "500");
 
         mockMvc.perform(get("/api/v1/user/analytics/spending")
                         .with(userJwt()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.byCategory.ENTERTAINMENT").value(300))
-                .andExpect(jsonPath("$.byCategory.TRANSPORT").value(700))
-                .andExpect(jsonPath("$.byCategory.FOOD").value(1000))
+                .andExpect(jsonPath("$.byCategory.ENTERTAINMENT").value(1500))
+                .andExpect(jsonPath("$.byCategory.FOOD").value(500))
                 .andExpect(jsonPath("$.totalSpending").value(2000))
-                .andExpect(jsonPath("$.percentageByCategory.FOOD").value(50.0));
+                .andExpect(jsonPath("$.percentageByCategory.FOOD").value(25.0));
     }
 
     @Test

@@ -240,7 +240,7 @@ export const TransactionsPage = () => {
             </h1>
 
             <p className="text-xs text-slate-500">
-              DATE, DESCRIPTION, AMOUNT, and DB/CR indicator
+              Find your recent transactions here
             </p>
           </div>
         </div>
