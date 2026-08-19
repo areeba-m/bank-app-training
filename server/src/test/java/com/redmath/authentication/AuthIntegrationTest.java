@@ -9,6 +9,7 @@ import com.redmath.authentication.entity.RefreshToken;
 import com.redmath.authentication.repository.RefreshTokenRepository;
 import com.redmath.authentication.service.RefreshTokenService;
 import com.redmath.authentication.wrapper.AccountPrincipal;
+import com.redmath.categorization.repository.TransactionCategoryRepository;
 import com.redmath.transactions.repository.TransactionRepository;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterEach;
@@ -62,11 +63,15 @@ class AuthIntegrationTest {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Autowired
+    private TransactionCategoryRepository categoryRepository;
+
     private static final String EMAIL = "jane.doe@example.com";
     private static final String PASSWORD = "S3curePassw0rd!";
 
     @BeforeEach
     void cleanDb() {
+        categoryRepository.deleteAll();
         transactionRepository.deleteAll();
         refreshTokenRepository.deleteAll();
         accountRepository.deleteAll();

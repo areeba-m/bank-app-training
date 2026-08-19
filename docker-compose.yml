@@ -17,7 +17,7 @@ services:
       context: ./server
     container_name: banking-backend
     environment:
-      SPRING_DATASOURCE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/banking
       SPRING_DATASOURCE_USERNAME: banking
       SPRING_DATASOURCE_PASSWORD: banking_password
     ports:
