@@ -14,4 +14,5 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Optional<Account> findByEmail(String username);
     boolean existsByEmail(String email);
     Page<Account> findByRole(Role role, Pageable pageable);
+    void deleteByRole(Role role);
 }

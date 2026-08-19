@@ -4,6 +4,7 @@ export default defineConfig({
   testDir: "./src/tests/e2e",
 
   fullyParallel: false,
+  globalTeardown: "./src/tests/e2e/global-teardown.js",
 
   use: {
     baseURL: "http://localhost:3000",
@@ -15,6 +16,9 @@ export default defineConfig({
     screenshot: "only-on-failure",
 
     video: "retain-on-failure",
+    launchOptions: {
+      slowMo: 1000,
+    },
   },
 
   webServer: {
