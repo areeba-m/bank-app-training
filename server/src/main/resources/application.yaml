@@ -54,7 +54,7 @@ app:
   jwt:
     password-reset-token-expiry-minutes: 10
   frontend:
-    base-url: ${FRONTEND_BASE_URL:http://localhost:3000}
+    base-url: ${FRONTEND_BASE_URL:https://bank-app-training-eta.vercel.app/}
 
 categorization:
   llm:
