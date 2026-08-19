@@ -106,17 +106,15 @@ export const AccountModal = ({
           className="p-6 space-y-4"
           autoComplete="off"
         >
-          {/* Error */}
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl">
               {error}
             </div>
           )}
 
-          {/* Account ID */}
           {isEdit && (
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1" htmlFor="account-id">
                 Account ID
               </label>
 
@@ -131,7 +129,7 @@ export const AccountModal = ({
           )}
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+            <label className="block text-xs font-bold text-slate-700 uppercase mb-1"htmlFor="account-name">
               Full Name *
             </label>
 
@@ -152,7 +150,7 @@ export const AccountModal = ({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+            <label className="block text-xs font-bold text-slate-700 uppercase mb-1" htmlFor="account-address" >
               Email Address *
             </label>
 

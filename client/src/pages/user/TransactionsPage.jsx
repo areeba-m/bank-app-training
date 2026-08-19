@@ -371,7 +371,7 @@ export const TransactionsPage = () => {
                           <div>{t.counterpartyEmail}</div>
                         </div>
                       ) : (
-                        "---------"
+                        "Self"
                       )}
                     </td>
 

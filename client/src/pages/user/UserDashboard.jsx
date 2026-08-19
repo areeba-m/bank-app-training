@@ -372,7 +372,7 @@ export const UserDashboard = () => {
                           <div>{t.counterpartyEmail}</div>
                         </div>
                       ) : (
-                        "---------"
+                        "Self"
                       )}
                     </td>
 
