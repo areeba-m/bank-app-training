@@ -1,0 +1,29 @@
+services:
+
+  postgres:
+    image: postgres:18
+    container_name: banking-postgres
+    environment:
+      POSTGRES_DB: banking
+      POSTGRES_USER: banking
+      POSTGRES_PASSWORD: banking_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+  backend:
+    build:
+      context: ./server
+    container_name: banking-backend
+    environment:
+      SPRING_DATASOURCE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+      SPRING_DATASOURCE_USERNAME: banking
+      SPRING_DATASOURCE_PASSWORD: banking_password
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
