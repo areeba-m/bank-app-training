@@ -73,6 +73,7 @@ export const authApi = {
 
         const headers = {
             "Content-Type": "application/json",
+            credentials: "include"
         };
 
         if (csrfToken) {
