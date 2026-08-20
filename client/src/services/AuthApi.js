@@ -1,7 +1,7 @@
 import {API_CONFIG} from "./Api.js";
 import {authenticatedFetch} from "../redux/AuthenticatedFetch.js";
 import {handleApiResponse} from "./HandleApiResponse.js";
-import {getCsrfToken, setCsrfToken} from "./CsrfToken.js";
+import {getCsrfToken} from "./CsrfToken.js";
 
 // export const getCsrfToken = () => {
 //     const cookies = document.cookie.split("; ");
@@ -13,7 +13,7 @@ import {getCsrfToken, setCsrfToken} from "./CsrfToken.js";
 //
 //     return decodeURIComponent(csrfCookie.split("=")[1]);
 // };
-
+let csrfInitPromise = null;
 export const authApi = {
     login: async (email, password) => {
         const res = await fetch(`${API_CONFIG.BASE_URL}/auth/login`, {
@@ -37,29 +37,22 @@ export const authApi = {
     },
 
     initCsrf: async () => {
-        const headers = {
-            "Content-Type": "application/json",
-            'ngrok-skip-browser-warning': 'true',
-
-        };
-        const response = await fetch(
-            `${API_CONFIG.BASE_URL}/auth/csrf`,
-            {
+        if (!csrfInitPromise) {
+            csrfInitPromise = fetch(`${API_CONFIG.BASE_URL}/auth/csrf`, {
                 method: "GET",
-                headers,
-
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error("Failed to initialize CSRF token");
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                    "ngrok-skip-browser-warning": "true",
+                },
+            }).then(res => {
+                if (!res.ok) throw new Error("Failed to initialize CSRF token");
+            }).finally(() => {
+                csrfInitPromise = null;
+            });
         }
-
-        const token = await response.text();
-        console.log("CSRF TOKEN:", token);
-        setCsrfToken(token);
+        return csrfInitPromise;
     },
-
     refresh: async () => {
         let csrfToken = getCsrfToken();
         if (!csrfToken) {
@@ -69,8 +62,6 @@ export const authApi = {
 
         const headers = {
             "Content-Type": "application/json",
-            'ngrok-skip-browser-warning': 'true',
-
         };
 
         if (csrfToken) {
