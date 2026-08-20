@@ -9,10 +9,10 @@ import java.time.Duration;
 public class CookieService {
     boolean isHttpOnly = true;
     boolean isSecure = true;
-    String sameSite = "Strict";
+    String sameSite = "none";
     String refreshPath = "/api/v1/auth/refresh";
 
-    public ResponseCookie buildRefreshCookie(String refreshToken){
+    public ResponseCookie buildRefreshCookie(String refreshToken) {
         return ResponseCookie.from("refresh_token", refreshToken)
                 .httpOnly(isHttpOnly)
                 .secure(isSecure)

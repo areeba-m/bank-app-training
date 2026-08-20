@@ -38,10 +38,19 @@ public class SecurityConfiguration {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                        .ignoringRequestMatchers("/api/v1/auth/login", "/api/v1/auth/register", "/api/test/**",
-                                "/api/v1/auth/otp/verify", "/api/v1/auth/otp/resend", "/api/v1/auth/password/change"))
+                        .csrfTokenRepository(csrfTokenRepository())
+                        .csrfTokenRequestHandler(
+                                new CsrfTokenRequestAttributeHandler()
+                        )
+                        .ignoringRequestMatchers(
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/register",
+                                "/api/test/**",
+                                "/api/v1/auth/otp/verify",
+                                "/api/v1/auth/otp/resend",
+                                "/api/v1/auth/password/change"
+                        )
+                )
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .sessionManagement(config -> config
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
