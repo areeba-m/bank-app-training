@@ -17,9 +17,19 @@ services:
       context: ./server
     container_name: banking-backend
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/banking
-      SPRING_DATASOURCE_USERNAME: banking
-      SPRING_DATASOURCE_PASSWORD: banking_password
+      APPLICATION_NAME: ${APPLICATION_NAME}
+      FRONTEND_BASE_URL: https://bank-app-training-eta.vercel.app
+      DATABASE_URL: jdbc:postgresql://postgres:5432/banking
+      DATABASE_USERNAME: banking
+      DATABASE_PASSWORD: banking_password
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_SMTP_CONNECTION_TIMEOUT: ${MAIL_SMTP_CONNECTION_TIMEOUT}
+      MAIL_SMTP_TIMEOUT: ${MAIL_SMTP_TIMEOUT}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_CHAT_MODEL: ${GEMINI_CHAT_MODEL}
     ports:
       - "8080:8080"
     depends_on:
