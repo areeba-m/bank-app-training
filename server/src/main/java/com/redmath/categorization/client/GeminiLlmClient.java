@@ -19,8 +19,7 @@ import java.util.stream.Stream;
 @EnableConfigurationProperties(LlmProperties.class)
 public class GeminiLlmClient implements LlmClient {
 
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(GeminiLlmClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeminiLlmClient.class);
 
     private final ChatClient chatClient;
     private final LlmProperties properties;
@@ -47,32 +46,29 @@ public class GeminiLlmClient implements LlmClient {
                 .toList();
 
         String prompt = """
-                You are a bank transaction categorizer.
-
-                Allowed categories:
-                %s
-
-                Analyze the following transaction.
-
-                Description: %s
-                Amount: %s
-                Type: %s
-                Date: %s
-
-                Return ONLY valid JSON in exactly this format:
-
-                {
-                  "category": "CATEGORY_NAME",
-                  "confidence": 0.0
-                }
-
-                Rules:
-                - category must be one of the allowed categories.
-                - confidence must be between 0 and 1.
-                - If the description is too generic, numeric, or reference-like,
-                  return UNCATEGORIZED.
-                - Do not add markdown.
-                - Do not add explanations.
+                You are a bank transaction categorizer.%n\
+                Allowed categories:%n\
+                %s%n\
+                %n\
+                Analyze the following transaction.%n\
+                Description: %s%n\
+                Amount: %s%n\
+                Type: %s%n\
+                Date: %s%n\
+                %n\
+                Return ONLY valid JSON in exactly this format:%n\
+                {%n\
+                  "category": "CATEGORY_NAME",%n\
+                  "confidence": 0.0%n\
+                }%n\
+                %n\
+                Rules:%n\
+                - category must be one of the allowed categories.%n\
+                - confidence must be between 0 and 1.%n\
+                - If the description is too generic, numeric, or reference-like,%n\
+                  return UNCATEGORIZED.%n\
+                - Do not add markdown.%n\
+                - Do not add explanations.%n\
                 """
                 .formatted(
                         String.join(", ", allowedCategoryNames),
@@ -115,29 +111,26 @@ public class GeminiLlmClient implements LlmClient {
         }
 
         String prompt = """
-                You are a helpful personal finance assistant.
-
-                You will receive already-calculated category spending totals
-                for the current period and previous period.
-
-                Write a short 2-4 sentence summary.
-
-                Rules:
-                - Describe notable changes.
-                - Mention the largest spending category.
-                - Do not invent numbers.
-                - Only use the data provided.
-
-                Current period totals:
-                %s
-
-                Previous period totals:
-                %s
+                You are a helpful personal finance assistant.%n\
+                %n\
+                You will receive already-calculated category spending totals%n\
+                 for the current period and previous period.%n\
+                %n\
+                Write a short 2-4 sentence summary.%n\
+                %n\
+                Rules:%n\
+                - Describe notable changes.%n\
+                - Mention the largest spending category.%n\
+                - Do not invent numbers.%n\
+                - Only use the data provided.%n\
+                %n\
+                Current period totals:%n\
+                %s%n\
+                %n\
+                Previous period totals:%n\
+                %s%n\
                 """
-                .formatted(
-                        currentPeriod,
-                        previousPeriod
-                );
+                .formatted(currentPeriod, previousPeriod);
 
         try {
 

@@ -12,3 +12,8 @@ spring:
             enable: false
           connectiontimeout: 5000
           timeout: 10000
+  datasource:
+    url: jdbc:postgresql://localhost:5432/banking
+    username: banking
+    password: banking_password
+    driver-class-name: org.postgresql.Driver

@@ -1,10 +1,16 @@
 spring:
   application:
-    name: server
+    name: ${APPLICATION_NAME}
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
   jpa:
-    open-in-view: false
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
+  liquibase:
+    enabled: true
   mail:
     host: ${MAIL_HOST:smtp.example.com}
     port: ${MAIL_PORT:587}
@@ -16,33 +22,23 @@ spring:
           auth: true
           starttls:
             enable: true
-          connectiontimeout: 5000
-          timeout: 5000
+          connectiontimeout: ${MAIL_SMTP_CONNECTION_TIMEOUT}
+          timeout: ${MAIL_SMTP_TIMEOUT}
   ai:
     google:
       genai:
         api-key: ${GEMINI_API_KEY}
         chat:
-          model: gemini-3.6-flash
-  profiles:
-    active: dev
+          model: ${GEMINI_CHAT_MODEL}
 
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 springdoc:
   api-docs:
     enabled: true
   swagger-ui:
     enabled: true
-
-logging:
-  level:
-    com.google.genai: DEBUG
-    okhttp3: INFO
-    com.redmath.categorization.client.GeminiLlmClient: DEBUG
-  file:
-    path: logs
 
 ## custom configurations
 app:

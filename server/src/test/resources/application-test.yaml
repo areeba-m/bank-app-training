@@ -1,3 +1,32 @@
+spring:
+  application:
+    name: server-test
+  datasource:
+    url: jdbc:postgresql://localhost:5432/banking
+    username: banking
+    password: banking_password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  liquibase:
+    enabled: true
+  mail:
+    host: localhost
+  ai:
+    google:
+      genai:
+        api-key: ${GEMINI_API_KEY}
+        chat:
+          model: ${GEMINI_CHAT_MODEL}
+
 logging:
   file:
     path: logs/test
+app:
+  frontend:
+    base-url: http://localhost:3000
+
+categorization:
+  llm:
+    enabled: false

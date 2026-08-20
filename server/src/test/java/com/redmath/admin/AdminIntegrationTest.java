@@ -10,6 +10,7 @@ import com.redmath.admin.dto.UpdateUserRequest;
 import com.redmath.authentication.entity.OtpToken;
 import com.redmath.authentication.repository.OtpTokenRepository;
 import com.redmath.authentication.service.EmailService;
+import com.redmath.categorization.repository.TransactionCategoryRepository;
 import com.redmath.transactions.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,9 @@ class AdminIntegrationTest {
     private TransactionRepository transactionRepository;
 
     @Autowired
+    private TransactionCategoryRepository categoryRepository;
+
+    @Autowired
     private OtpTokenRepository otpTokenRepository;
 
     @MockitoBean
@@ -57,6 +61,7 @@ class AdminIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        categoryRepository.deleteAll();
         transactionRepository.deleteAll();
         otpTokenRepository.deleteAll();
         accountRepository.deleteAll();
