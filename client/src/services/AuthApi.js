@@ -67,10 +67,8 @@ export const authApi = {
         return csrfInitPromise;
     },
     refresh: async () => {
-        let csrfToken = csrfToken;
         if (!csrfToken) {
             await authApi.initCsrf();
-            csrfToken = getCsrfToken();
         }
 
         const headers = {
@@ -78,7 +76,6 @@ export const authApi = {
         };
 
         if (csrfToken) {
-
             headers["X-XSRF-TOKEN"] = csrfToken;
         }
 
