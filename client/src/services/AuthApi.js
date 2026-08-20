@@ -1,174 +1,183 @@
-import { API_CONFIG } from "./Api.js";
-import { authenticatedFetch } from "../redux/AuthenticatedFetch.js";
-import { handleApiResponse } from "./HandleApiResponse.js";
+import {API_CONFIG} from "./Api.js";
+import {authenticatedFetch} from "../redux/AuthenticatedFetch.js";
+import {handleApiResponse} from "./HandleApiResponse.js";
+import {getCsrfToken, setCsrfToken} from "./CsrfToken.js";
 
-export const getCsrfToken = () => {
-  const cookies = document.cookie.split("; ");
-  const csrfCookie = cookies.find((cookie) => cookie.startsWith("XSRF-TOKEN="));
-
-  if (!csrfCookie) {
-    return null;
-  }
-
-  return decodeURIComponent(csrfCookie.split("=")[1]);
-};
+// export const getCsrfToken = () => {
+//     const cookies = document.cookie.split("; ");
+//     const csrfCookie = cookies.find((cookie) => cookie.startsWith("XSRF-TOKEN="));
+//
+//     if (!csrfCookie) {
+//         return null;
+//     }
+//
+//     return decodeURIComponent(csrfCookie.split("=")[1]);
+// };
 
 export const authApi = {
-  login: async (email, password) => {
-    const res = await fetch(`${API_CONFIG.BASE_URL}/auth/login`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    login: async (email, password) => {
+        const res = await fetch(`${API_CONFIG.BASE_URL}/auth/login`, {
+            method: "POST",
+            credentials: "include",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({email, password}),
+        });
 
-    const response = await handleApiResponse(res);
-    return await response.json();
-  },
+        const response = await handleApiResponse(res);
+        return await response.json();
+    },
 
-  logout: async (authContext) => {
-    const res = await authenticatedFetch(
-      `${API_CONFIG.BASE_URL}/auth/logout`,
-      { method: "POST" },
-      authContext,
-    );
-    await handleApiResponse(res);
-  },
+    logout: async (authContext) => {
+        const res = await authenticatedFetch(
+            `${API_CONFIG.BASE_URL}/auth/logout`,
+            {method: "POST"},
+            authContext,
+        );
+        await handleApiResponse(res);
+    },
 
-  initCsrf: async () => {
-    const res = await fetch(`${API_CONFIG.BASE_URL}/auth/csrf`, {
-      method: "GET",
-      credentials: "include",
-    });
-    if (!res.ok) {
-      throw new Error("Failed to initialize CSRF token");
-    }
-    return true;
-  },
+    initCsrf: async () => {
+        const response = await fetch(
+            `${API_CONFIG.BASE_URL}/api/v1/auth/csrf`,
+            {
+                method: "GET",
+                credentials: "include",
+            }
+        );
 
-  refresh: async () => {
-    let csrfToken = getCsrfToken();
-    if (!csrfToken) {
-      await authApi.initCsrf();
-      csrfToken = getCsrfToken();
-    }
+        if (!response.ok) {
+            throw new Error("Failed to initialize CSRF token");
+        }
 
-    const headers = {
-      "Content-Type": "application/json",
+        const token = await response.text();
 
-    };
+        setCsrfToken(token);
+    },
 
-    if (csrfToken) {
+    refresh: async () => {
+        let csrfToken = getCsrfToken();
+        if (!csrfToken) {
+            await authApi.initCsrf();
+            csrfToken = getCsrfToken();
+        }
 
-      headers["X-XSRF-TOKEN"] = csrfToken;
-    }
+        const headers = {
+            "Content-Type": "application/json",
 
-    const res = await fetch(`${API_CONFIG.BASE_URL}/auth/refresh`, {
-      method: "POST",
-      credentials: "include",
-      headers,
-    });
+        };
 
-    const response = await handleApiResponse(res);
-    return response.json();
-  },
+        if (csrfToken) {
 
-  verifyOtp: async ({ email, otp }) => {
-    let csrfToken = getCsrfToken();
+            headers["X-XSRF-TOKEN"] = csrfToken;
+        }
 
-    if (!csrfToken) {
-      await authApi.initCsrf();
-      csrfToken = getCsrfToken();
-    }
+        const res = await fetch(`${API_CONFIG.BASE_URL}/auth/refresh`, {
+            method: "POST",
+            credentials: "include",
+            headers,
+        });
 
-    const headers = {
-      "Content-Type": "application/json",
-    };
+        const response = await handleApiResponse(res);
+        return response.json();
+    },
 
-    if (csrfToken) {
-      headers["X-XSRF-TOKEN"] = csrfToken;
-    }
+    verifyOtp: async ({email, otp}) => {
+        let csrfToken = getCsrfToken();
 
-    const res = await fetch(
-        `${API_CONFIG.BASE_URL}/auth/otp/verify`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers,
-          body: JSON.stringify({
-            email,
-            otp,
-          }),
-        },
-    );
+        if (!csrfToken) {
+            await authApi.initCsrf();
+            csrfToken = getCsrfToken();
+            console.log(csrfToken);
+        }
 
-    const response = await handleApiResponse(res);
-    return response.json();
-  },
+        const headers = {
+            "Content-Type": "application/json",
+        };
 
-  resendOtp: async ({ email }) => {
-    let csrfToken = getCsrfToken();
+        if (csrfToken) {
+            headers["X-XSRF-TOKEN"] = csrfToken;
+        }
 
-    if (!csrfToken) {
-      await authApi.initCsrf();
-      csrfToken = getCsrfToken();
-    }
+        const res = await fetch(
+            `${API_CONFIG.BASE_URL}/auth/otp/verify`,
+            {
+                method: "POST",
+                credentials: "include",
+                headers,
+                body: JSON.stringify({
+                    email,
+                    otp,
+                }),
+            },
+        );
 
-    const headers = {
-      "Content-Type": "application/json",
-    };
+        const response = await handleApiResponse(res);
+        return response.json();
+    },
 
-    if (csrfToken) {
-      headers["X-XSRF-TOKEN"] = csrfToken;
-    }
+    resendOtp: async ({email}) => {
+        let csrfToken = getCsrfToken();
 
-    const res = await fetch(
-        `${API_CONFIG.BASE_URL}/auth/otp/resend`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers,
-          body: JSON.stringify({
-            email,
-          }),
-        },
-    );
+        if (!csrfToken) {
+            await authApi.initCsrf();
+            csrfToken = getCsrfToken();
+        }
 
-    await handleApiResponse(res);
-    return true;
-  },
+        const headers = {
+            "Content-Type": "application/json",
+        };
 
-  changePassword: async ({ resetToken, newPassword }) => {
-    let csrfToken = getCsrfToken();
+        if (csrfToken) {
+            headers["X-XSRF-TOKEN"] = csrfToken;
+        }
 
-    if (!csrfToken) {
-      await authApi.initCsrf();
-      csrfToken = getCsrfToken();
-    }
+        const res = await fetch(
+            `${API_CONFIG.BASE_URL}/auth/otp/resend`,
+            {
+                method: "POST",
+                credentials: "include",
+                headers,
+                body: JSON.stringify({
+                    email,
+                }),
+            },
+        );
 
-    const headers = {
-      "Content-Type": "application/json",
-    };
+        await handleApiResponse(res);
+        return true;
+    },
 
-    if (csrfToken) {
-      headers["X-XSRF-TOKEN"] = csrfToken;
-    }
+    changePassword: async ({resetToken, newPassword}) => {
+        let csrfToken = getCsrfToken();
 
-    const res = await fetch(
-        `${API_CONFIG.BASE_URL}/auth/password/change`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers,
-          body: JSON.stringify({
-            resetToken,
-            newPassword,
-          }),
-        },
-    );
+        if (!csrfToken) {
+            await authApi.initCsrf();
+            csrfToken = getCsrfToken();
+        }
 
-    await handleApiResponse(res);
-    return true;
-  },
+        const headers = {
+            "Content-Type": "application/json",
+        };
+
+        if (csrfToken) {
+            headers["X-XSRF-TOKEN"] = csrfToken;
+        }
+
+        const res = await fetch(
+            `${API_CONFIG.BASE_URL}/auth/password/change`,
+            {
+                method: "POST",
+                credentials: "include",
+                headers,
+                body: JSON.stringify({
+                    resetToken,
+                    newPassword,
+                }),
+            },
+        );
+
+        await handleApiResponse(res);
+        return true;
+    },
 
 };

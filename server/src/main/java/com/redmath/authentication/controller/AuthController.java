@@ -1,14 +1,7 @@
 package com.redmath.authentication.controller;
 
 import com.redmath.account.dto.AccountResponse;
-import com.redmath.authentication.dto.AuthResponse;
-import com.redmath.authentication.dto.LoginAndRefreshResult;
-import com.redmath.authentication.dto.LoginRequest;
-import com.redmath.authentication.dto.OtpVerifyRequest;
-import com.redmath.authentication.dto.OtpVerifyResponse;
-import com.redmath.authentication.dto.RegisterRequest;
-import com.redmath.authentication.dto.ResendOtpRequest;
-import com.redmath.authentication.dto.SetNewPasswordRequest;
+import com.redmath.authentication.dto.*;
 import com.redmath.authentication.service.AuthService;
 import com.redmath.authentication.service.CookieService;
 import com.redmath.authentication.service.OtpService;
@@ -22,12 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.csrf.CsrfToken;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,8 +41,8 @@ public class AuthController {
     }
 
     @GetMapping("/csrf")
-    public ResponseEntity<Void> getCsrfToken(CsrfToken token) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<String> getCsrfToken(@NonNull CsrfToken token) {
+        return ResponseEntity.ok(token.getToken());
     }
 
     @PostMapping("/refresh")
