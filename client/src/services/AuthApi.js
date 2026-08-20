@@ -37,12 +37,17 @@ export const authApi = {
     },
 
     initCsrf: async () => {
+        const headers = {
+            "Content-Type": "application/json",
+            'ngrok-skip-browser-warning': 'true',
+
+        };
         const response = await fetch(
             `${API_CONFIG.BASE_URL}/auth/csrf`,
             {
                 method: "GET",
-                credentials: "include",
-                "ngrok-skip-browser-warning": "69420"
+                headers,
+
             }
         );
 
@@ -64,6 +69,7 @@ export const authApi = {
 
         const headers = {
             "Content-Type": "application/json",
+            'ngrok-skip-browser-warning': 'true',
 
         };
 
