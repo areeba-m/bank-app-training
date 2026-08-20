@@ -49,7 +49,7 @@ export const authApi = {
                 if (!res.ok) throw new Error("Failed to initialize CSRF token");
                 const token = await res.text();
                 setCsrfToken(token);
-                console.log("csrf", res.text())
+                console.log("CSRF token:", token);
             }).finally(() => {
                 csrfInitPromise = null;
             });
