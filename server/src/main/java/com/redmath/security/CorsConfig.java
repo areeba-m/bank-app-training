@@ -21,10 +21,12 @@ public class CorsConfig {
         configuration.setAllowedOrigins(List.of(frontendBaseUrl));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of(
-                "Content-Type",
                 "Authorization",
-                "X-XSRF-TOKEN"
+                "Content-Type",
+                "X-XSRF-TOKEN",
+                "ngrok-skip-browser-warning"
         ));
+        configuration.setExposedHeaders(List.of("X-XSRF-TOKEN", "Set-Cookie"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

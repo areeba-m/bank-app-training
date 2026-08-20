@@ -42,6 +42,7 @@ export const authApi = {
             {
                 method: "GET",
                 credentials: "include",
+                "ngrok-skip-browser-warning": "69420"
             }
         );
 
@@ -50,7 +51,7 @@ export const authApi = {
         }
 
         const token = await response.text();
-
+        console.log("CSRF TOKEN:", token);
         setCsrfToken(token);
     },
 

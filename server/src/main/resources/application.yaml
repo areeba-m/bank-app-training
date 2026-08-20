@@ -54,7 +54,7 @@ app:
   jwt:
     password-reset-token-expiry-minutes: 10
   frontend:
-    base-url: ${FRONTEND_BASE_URL:https://bank-app-training-eta.vercel.app}
+    base-url: ${FRONTEND_BASE_URL:https://bank-app-training-git-feature-fix-deployed-fr-2049b8-aura-bank1.vercel.app}
 
 categorization:
   llm:
