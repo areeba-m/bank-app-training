@@ -38,6 +38,7 @@ export const authApi = {
   initCsrf: async () => {
     const res = await fetch(`${API_CONFIG.BASE_URL}/auth/csrf`, {
       method: "GET",
+      credentials: "include",
     });
     if (!res.ok) {
       throw new Error("Failed to initialize CSRF token");
@@ -54,6 +55,7 @@ export const authApi = {
 
     const headers = {
       "Content-Type": "application/json",
+
     };
 
     if (csrfToken) {
@@ -70,6 +72,7 @@ export const authApi = {
     const response = await handleApiResponse(res);
     return response.json();
   },
+
   verifyOtp: async ({ email, otp }) => {
     let csrfToken = getCsrfToken();
 
