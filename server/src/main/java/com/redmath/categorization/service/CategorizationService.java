@@ -105,7 +105,6 @@ public class CategorizationService {
     public TransactionCategoryResponse overrideCategory(Long transactionId, CategoryOverrideRequest request) {
 
         Category category = parseCategoryStrict(request.category());
-        LOGGER.info("TRANSACTION ID in put = {}", transactionId);
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new TransactionNotFoundException(
                         "Transaction not found with id: " + transactionId));
@@ -133,18 +132,28 @@ public class CategorizationService {
     }
 
     private Category parseCategorySafely(String value) {
+        if (value == null) {
+            LOGGER.warn("Received a null category, defaulting to UNCATEGORIZED");
+            return Category.UNCATEGORIZED;
+        }
+
         try {
             return Category.valueOf(value.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException | NullPointerException ex) {
+        } catch (IllegalArgumentException ex) {
             LOGGER.warn("Received an unrecognized category '{}', defaulting to UNCATEGORIZED", value);
             return Category.UNCATEGORIZED;
         }
     }
 
     private Category parseCategoryStrict(String value) {
+        if (value == null) {
+            LOGGER.warn("Strict parsing received a null category, defaulting to UNCATEGORIZED");
+            return Category.UNCATEGORIZED;
+        }
+
         try {
             return Category.valueOf(value.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException | NullPointerException ex) {
+        } catch (IllegalArgumentException ex) {
             throw new InvalidCategoryOverrideException(
                     "'" + value + "' is not a valid category. Allowed values: "
                             + List.of(Category.values()));
