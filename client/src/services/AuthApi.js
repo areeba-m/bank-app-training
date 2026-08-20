@@ -45,9 +45,10 @@ export const authApi = {
                     "Content-Type": "application/json",
                     "ngrok-skip-browser-warning": "true",
                 },
-            }).then(res => {
+            }).then(async res => {
                 if (!res.ok) throw new Error("Failed to initialize CSRF token");
-                setCsrfToken(res.text())
+                const token = await res.text();
+                setCsrfToken(token);
                 console.log("csrf", res.text())
             }).finally(() => {
                 csrfInitPromise = null;
