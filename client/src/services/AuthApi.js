@@ -57,7 +57,7 @@ export const authApi = {
         return csrfInitPromise;
     },
     refresh: async () => {
-        const csrfToken = await authApi.initCsrf();
+        const csrfToken = getCsrfToken();
         const headers = {
             "Content-Type": "application/json",
         };
