@@ -1,4 +1,9 @@
+let csrfToken = null;
+
+export const setCsrfToken = (token) => {
+    csrfToken = token;
+};
+
 export const getCsrfToken = () => {
-    const match = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]+)/);
-    return match ? decodeURIComponent(match[1]) : null;
+    return csrfToken;
 };

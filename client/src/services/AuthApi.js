@@ -14,6 +14,7 @@ import {getCsrfToken} from "./CsrfToken.js";
 //     return decodeURIComponent(csrfCookie.split("=")[1]);
 // };
 let csrfInitPromise = null;
+let csrfToken = null;
 export const authApi = {
     login: async (email, password) => {
         const res = await fetch(`${API_CONFIG.BASE_URL}/auth/login`, {
@@ -38,23 +39,35 @@ export const authApi = {
 
     initCsrf: async () => {
         if (!csrfInitPromise) {
-            csrfInitPromise = fetch(`${API_CONFIG.BASE_URL}/auth/csrf`, {
-                method: "GET",
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                    "ngrok-skip-browser-warning": "true",
+            csrfInitPromise = fetch(`${API_CONFIG.BASE_URL}/auth/csrf`,
+                {
+                    method: "GET",
+                    credentials: "include",
+                    headers: {
+                        "ngrok-skip-browser-warning": "true",
+                    },
                 },
-            }).then(res => {
-                if (!res.ok) throw new Error("Failed to initialize CSRF token");
-            }).finally(() => {
-                csrfInitPromise = null;
-            });
+            )
+                .then(async (res) => {
+                    if (!res.ok) {
+                        throw new Error(
+                            "Failed to initialize CSRF token",
+                        );
+                    }
+                    const token = await res.text();
+                    csrfToken = token;
+                    console.log("CSRF token stored:", csrfToken);
+                    return token;
+                })
+                .finally(() => {
+                    csrfInitPromise = null;
+                });
         }
+
         return csrfInitPromise;
     },
     refresh: async () => {
-        let csrfToken = getCsrfToken();
+        let csrfToken = csrfToken;
         if (!csrfToken) {
             await authApi.initCsrf();
             csrfToken = getCsrfToken();

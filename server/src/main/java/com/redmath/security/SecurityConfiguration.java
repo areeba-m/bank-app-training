@@ -94,6 +94,7 @@ public class SecurityConfiguration {
         repository.setCookieCustomizer(cookie -> cookie
                 .path("/")
                 .secure(true)
+                .partitioned(true)
                 .sameSite("None"));
 
         return repository;

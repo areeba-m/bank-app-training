@@ -19,6 +19,7 @@ public class CookieService {
                 .sameSite(sameSite)
                 .path(refreshPath)
                 .maxAge(Duration.ofDays(7))
+                .partitioned(true)
                 .build();
     }
 
