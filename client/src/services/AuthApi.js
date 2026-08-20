@@ -57,27 +57,18 @@ export const authApi = {
         return csrfInitPromise;
     },
     refresh: async () => {
-        let csrfToken = getCsrfToken();
-        if (!csrfToken) {
-            await authApi.initCsrf();
-            csrfToken = getCsrfToken();
-        }
-
+        const csrfToken = await authApi.initCsrf();
         const headers = {
             "Content-Type": "application/json",
         };
-
         if (csrfToken) {
-
             headers["X-XSRF-TOKEN"] = csrfToken;
         }
-
         const res = await fetch(`${API_CONFIG.BASE_URL}/auth/refresh`, {
             method: "POST",
             credentials: "include",
             headers,
         });
-
         const response = await handleApiResponse(res);
         return response.json();
     },
