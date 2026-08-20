@@ -1,7 +1,7 @@
 import {API_CONFIG} from "./Api.js";
 import {authenticatedFetch} from "../redux/AuthenticatedFetch.js";
 import {handleApiResponse} from "./HandleApiResponse.js";
-import {getCsrfToken} from "./CsrfToken.js";
+import {getCsrfToken, setCsrfToken} from "./CsrfToken.js";
 
 // export const getCsrfToken = () => {
 //     const cookies = document.cookie.split("; ");
@@ -55,7 +55,7 @@ export const authApi = {
                         );
                     }
                     const token = await res.text();
-                    csrfToken = token;
+                    setCsrfToken(token)
                     console.log("CSRF token stored:", csrfToken);
                     return token;
                 })
@@ -67,17 +67,16 @@ export const authApi = {
         return csrfInitPromise;
     },
     refresh: async () => {
-        if (!csrfToken) {
-            await authApi.initCsrf();
-        }
+        // if (!csrfToken) {
+        //     await authApi.initCsrf();
+        // }
 
         const headers = {
             "Content-Type": "application/json",
-            credentials: "include"
         };
 
         if (csrfToken) {
-            headers["X-XSRF-TOKEN"] = csrfToken;
+            headers["X-XSRF-TOKEN"] = getCsrfToken();
         }
 
         const res = await fetch(`${API_CONFIG.BASE_URL}/auth/refresh`, {
