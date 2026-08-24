@@ -23,7 +23,7 @@ public class Balance {
     private BigDecimal amount;
     @Enumerated(EnumType.STRING)
     private Indicator indicator;
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private Account account;
     @PrePersist

@@ -30,7 +30,11 @@ public class Account {
     private Instant createdAt;
     private Instant updatedAt;
 
-    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
+    @OneToOne(
+            mappedBy = "account",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY
+    )
     private Balance balance;
 
     @Column(name = "password_change_required", nullable = false)

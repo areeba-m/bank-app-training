@@ -312,20 +312,6 @@
 				</executions>
 			</plugin>
 
-			<plugin>
-				<groupId>org.hibernate.orm</groupId>
-				<artifactId>hibernate-maven-plugin</artifactId>
-				<version>7.2.19.Final</version>
-				<executions>
-					<execution>
-						<id>hibernate-enhance</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>enhance</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 
