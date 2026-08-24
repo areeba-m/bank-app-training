@@ -149,6 +149,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
+			<version>42.7.12</version>
 			<scope>runtime</scope>
 		</dependency>
 
@@ -310,6 +311,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 		</plugins>
 	</build>
 
