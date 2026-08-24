@@ -12,8 +12,26 @@ spring:
             enable: false
           connectiontimeout: 5000
           timeout: 10000
+  application:
+    name: server-test
   datasource:
-    url: jdbc:postgresql://localhost:5432/banking
-    username: banking
-    password: banking_password
-    driver-class-name: org.postgresql.Driver
+    url: "jdbc:h2:mem:testdb"
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  liquibase:
+    enabled: true
+
+logging:
+  file:
+    path: logs/test
+app:
+  frontend:
+    base-url: http://localhost:3000
+
+categorization:
+  llm:
+    enabled: false
