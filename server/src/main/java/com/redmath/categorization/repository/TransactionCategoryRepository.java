@@ -2,7 +2,7 @@ package com.redmath.categorization.repository;
 
 import com.redmath.categorization.entity.Category;
 import com.redmath.categorization.entity.TransactionCategory;
-import com.redmath.transactions.entity.Indicator;
+import com.redmath.enums.Indicator;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

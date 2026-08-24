@@ -1,0 +1,37 @@
+package com.redmath.account.balance.service;
+
+import com.redmath.account.entity.Account;
+import com.redmath.account.exception.UserNotFoundException;
+import com.redmath.account.repository.AccountRepository;
+import com.redmath.account.balance.dto.BalanceResponse;
+import com.redmath.account.balance.entity.Balance;
+import com.redmath.account.balance.exception.BalanceNotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class BalanceService {
+
+    private final AccountRepository accountRepository;
+
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public BalanceResponse getBalance(long userId) {
+
+        Account account = accountRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Account not found  "));
+
+        Balance balance = account.getBalance();
+        if (balance == null)
+        {
+            throw new BalanceNotFoundException("Balance not found for account");
+        }
+
+        return BalanceResponse.builder()
+                .date(balance.getDate())
+                .amount(balance.getAmount())
+                .indicator(balance.getIndicator().name())
+                .build();
+    }
+}

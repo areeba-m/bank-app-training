@@ -3,7 +3,7 @@ package com.redmath.user.service;
 import com.redmath.account.dto.AccountResponse;
 import com.redmath.account.entity.Account;
 import com.redmath.account.exception.UserNotFoundException;
-import com.redmath.account.mapper.AccountMapper;
+import com.redmath.admin.mapper.AccountMapper;
 import com.redmath.account.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

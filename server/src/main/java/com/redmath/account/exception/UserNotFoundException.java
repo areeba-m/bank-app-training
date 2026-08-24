@@ -1,6 +1,6 @@
 package com.redmath.account.exception;
 
-import com.redmath.exception_handler.exception.ResourceNotFoundException;
+import com.redmath.exception_utility.exception.ResourceNotFoundException;
 
 public class UserNotFoundException extends ResourceNotFoundException {
 

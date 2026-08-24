@@ -15,10 +15,6 @@ public record CreateUserRequest(
         @Size(max = 150)
         String email,
 
-//        @NotBlank(message = "Password is required")
-//        @Size(min = 6, max = 100)
-//        String password,
-
         @NotBlank(message = "Address is required")
         @Size(max = 250)
         String address

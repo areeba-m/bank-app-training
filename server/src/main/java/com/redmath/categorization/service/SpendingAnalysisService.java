@@ -4,7 +4,7 @@ import com.redmath.categorization.client.LlmClient;
 import com.redmath.categorization.dto.SpendingAnalysisResponse;
 import com.redmath.categorization.entity.Category;
 import com.redmath.categorization.repository.TransactionCategoryRepository;
-import com.redmath.transactions.entity.Indicator;
+import com.redmath.enums.Indicator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

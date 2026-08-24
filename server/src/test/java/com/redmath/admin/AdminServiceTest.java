@@ -4,7 +4,7 @@ import com.redmath.account.dto.AccountResponse;
 import com.redmath.account.entity.Account;
 import com.redmath.account.entity.Role;
 import com.redmath.account.exception.UserNotFoundException;
-import com.redmath.account.mapper.AccountMapper;
+import com.redmath.admin.mapper.AccountMapper;
 import com.redmath.account.repository.AccountRepository;
 import com.redmath.admin.dto.CreateUserRequest;
 import com.redmath.admin.dto.UpdateUserRequest;

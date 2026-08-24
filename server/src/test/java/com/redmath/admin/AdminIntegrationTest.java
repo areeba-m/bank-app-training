@@ -11,7 +11,7 @@ import com.redmath.authentication.entity.OtpToken;
 import com.redmath.authentication.repository.OtpTokenRepository;
 import com.redmath.authentication.service.EmailService;
 import com.redmath.categorization.repository.TransactionCategoryRepository;
-import com.redmath.transactions.repository.TransactionRepository;
+import com.redmath.transfer.transactions.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

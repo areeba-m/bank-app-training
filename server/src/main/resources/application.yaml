@@ -12,6 +12,8 @@ spring:
     open-in-view: false
   liquibase:
     enabled: true
+  bootui:
+    enabled: ON
   mail:
     host: ${MAIL_HOST:smtp.example.com}
     port: ${MAIL_PORT:587}

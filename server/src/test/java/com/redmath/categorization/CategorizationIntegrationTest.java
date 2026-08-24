@@ -3,14 +3,14 @@ package com.redmath.categorization;
 import com.redmath.account.entity.Account;
 import com.redmath.account.entity.Role;
 import com.redmath.account.repository.AccountRepository;
-import com.redmath.balance.entity.Balance;
-import com.redmath.balance.repository.BalanceRepository;
+import com.redmath.account.balance.entity.Balance;
+import com.redmath.account.balance.repository.BalanceRepository;
 import com.redmath.categorization.entity.Category;
 import com.redmath.categorization.entity.CategorySource;
 import com.redmath.categorization.repository.TransactionCategoryRepository;
-import com.redmath.transactions.dto.CreateTransactionRequest;
-import com.redmath.transactions.entity.Indicator;
-import com.redmath.transactions.repository.TransactionRepository;
+import com.redmath.transfer.transactions.dto.CreateTransactionRequest;
+import com.redmath.enums.Indicator;
+import com.redmath.transfer.transactions.repository.TransactionRepository;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -91,7 +91,7 @@ class CategorizationIntegrationTest {
         account = accountRepository.saveAndFlush(account);
 
         Balance balance = new Balance();
-        balance.setAccount(account);
+//        balance.setAccount(account);
         balance.setAmount(new BigDecimal("10000"));
         balance.setIndicator(Indicator.CR);
         balanceRepository.saveAndFlush(balance);

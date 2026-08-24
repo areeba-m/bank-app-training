@@ -1,0 +1,13 @@
+# BootUI configuration (developer-local; safe to delete).
+
+dismissedRules:
+  - HIB-MAP-018
+  - SEC-SESSION-006
+  - SEC-METHOD-001
+  - GHSA-5gvw-p9qm-jgwh::com.fasterxml.jackson.core:jackson-databind
+  - GHSA-5jmj-h7xm-6q6v::com.fasterxml.jackson.core:jackson-databind
+  - GHSA-mhm7-754m-9p8w::com.fasterxml.jackson.core:jackson-databind
+  - GHSA-rcgg-9c38-7xpx::io.opentelemetry:opentelemetry-api
+  - GHSA-rcgg-9c38-7xpx::io.opentelemetry:opentelemetry-extension-trace-propagators
+  - GHSA-qv9r-c865-cp47::org.apache.logging.log4j:log4j-api
+  - GHSA-5gvw-p9qm-jgwh::tools.jackson.core:jackson-databind

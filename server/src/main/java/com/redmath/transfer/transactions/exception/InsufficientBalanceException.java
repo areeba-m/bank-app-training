@@ -1,0 +1,7 @@
+package com.redmath.transfer.transactions.exception;
+
+public class InsufficientBalanceException extends RuntimeException {
+    public InsufficientBalanceException(String message) {
+        super(message);
+    }
+}

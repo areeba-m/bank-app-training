@@ -74,7 +74,7 @@
     <logger name="com.redmath.admin">
         <appender-ref ref="APPLICATION"/>
     </logger>
-    <logger name="com.redmath.exception_handler">
+    <logger name="com.redmath.exception_utility">
         <appender-ref ref="APPLICATION"/>
     </logger>
 

@@ -2,9 +2,9 @@ package com.redmath;
 
 import com.redmath.account.entity.Role;
 import com.redmath.account.repository.AccountRepository;
-import com.redmath.balance.repository.BalanceRepository;
+import com.redmath.account.balance.repository.BalanceRepository;
 import com.redmath.categorization.repository.TransactionCategoryRepository;
-import com.redmath.transactions.repository.TransactionRepository;
+import com.redmath.transfer.transactions.repository.TransactionRepository;
 import com.redmath.transfer.repository.TransferRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

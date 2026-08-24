@@ -3,11 +3,10 @@ package com.redmath.admin;
 import com.redmath.account.dto.AccountResponse;
 import com.redmath.account.entity.Account;
 import com.redmath.account.entity.Role;
-import com.redmath.account.mapper.AccountMapper;
+import com.redmath.admin.mapper.AccountMapper;
 import com.redmath.admin.dto.CreateUserRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.Instant;
 
@@ -19,7 +18,7 @@ class AccountMapperTest {
 
     @BeforeEach
     void setUp() {
-        accountMapper = new AccountMapper(new BCryptPasswordEncoder());
+        accountMapper = new AccountMapper();
     }
 
     private CreateUserRequest validRequest() {

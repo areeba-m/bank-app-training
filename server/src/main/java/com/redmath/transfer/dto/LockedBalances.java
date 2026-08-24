@@ -1,6 +1,6 @@
 package com.redmath.transfer.dto;
 
-import com.redmath.balance.entity.Balance;
+import com.redmath.account.balance.entity.Balance;
 
 public record LockedBalances(
         Balance sender,

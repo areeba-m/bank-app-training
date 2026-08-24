@@ -1,6 +1,6 @@
 package com.redmath.categorization.listener;
 
-import com.redmath.categorization.event.TransactionCreatedEvent;
+import com.redmath.transfer.transactions.event.TransactionCreatedEvent;
 import com.redmath.categorization.service.CategorizationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
