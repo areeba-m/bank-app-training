@@ -62,7 +62,7 @@ app:
   jwt:
     password-reset-token-expiry-minutes: 10
   frontend:
-    base-url: ${FRONTEND_BASE_URL:https://bank-app-training-eta.vercel.app/}
+    base-url: ${FRONTEND_BASE_URL:http://localhost:3000}
 
 categorization:
   llm:
@@ -70,3 +70,6 @@ categorization:
     api-key: ${GEMINI_API_KEY}
     model: ${CATEGORIZATION_LLM_MODEL:gemini-3.6-flash}
     timeout-millis: ${CATEGORIZATION_LLM_TIMEOUT_MS:5000}
+
+bootui:
+  enabled: ON
