@@ -40,7 +40,7 @@ public class Transaction {
     String counterpartyName;
     String counterpartyEmail;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "transfer_id")
     @OnDelete(action = OnDeleteAction.RESTRICT)
     private Transfer transfer;

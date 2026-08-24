@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-foreign-key-indexes.yaml
+      author: areeba
+
+      changes:
+        # 1. Index for balance table (user_id)
+        - createIndex:
+            tableName: balance
+            indexName: idx_balance_user_id
+            columns:
+              - column:
+                  name: user_id
+
+        # 2. Index for otp_token table (user_id)
+        - createIndex:
+            tableName: otp_token
+            indexName: idx_otp_token_user_id
+            columns:
+              - column:
+                  name: user_id
+
+        # 3. Index for transactions table (counterparty_account_id)
+        - createIndex:
+            tableName: transactions
+            indexName: idx_transactions_counterparty_account_id
+            columns:
+              - column:
+                  name: counterparty_account_id
+
+        # 4. Index for transactions table (transfer_id)
+        - createIndex:
+            tableName: transactions
+            indexName: idx_transactions_transfer_id
+            columns:
+              - column:
+                  name: transfer_id
+
+        # 5. Index for transfers table (receiver_account_id)
+        - createIndex:
+            tableName: transfers
+            indexName: idx_transfers_receiver_account_id
+            columns:
+              - column:
+                  name: receiver_account_id

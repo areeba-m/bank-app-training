@@ -23,5 +23,7 @@ databaseChangeLog:
       file: db/changelog/insert/003-insert-admin.yaml
   - include:
       file: db/changelog/insert/transactions/001-insert-user-transactions.yaml
+  - include:
+     file: db/changelog/create-index/001-create-foreign-key-indexes.yaml
 
 

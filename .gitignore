@@ -3,3 +3,5 @@ logs/
 server/src/main/resources/application-dev.yaml
 logs
 .env
+bank.env
+bank-dev.env
