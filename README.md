@@ -102,6 +102,8 @@ docker compose down -v
 
 ## Aura Bank UI
 
+<img width="1854" height="929" alt="00-home" src="https://github.com/user-attachments/assets/6ab9544b-c267-46cb-942d-4151e2b43ddf" />
+
 <img width="1854" height="929" alt="01-login" src="https://github.com/user-attachments/assets/3581d8b8-6031-4c27-a66a-d405a9cfb640" />
 
 <img width="1854" height="929" alt="02-admin-dashboard" src="https://github.com/user-attachments/assets/f988e832-5565-4f13-bee1-4d5391a0ce47" />
